@@ -28,7 +28,5 @@ sphinx:
   extra_extensions:
     - jupyterlite_sphinx
   config:
-    myst_title_to_header: true
     html_theme_options:
-      # 先關閉下載鈕，等頁面確認是有效 notebook 再打開
       use_download_button: false
