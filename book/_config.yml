@@ -21,7 +21,7 @@ html:
   use_edit_page_button: false
 
 launch_buttons:
-  thebe: true
+  thebe: false
   binderhub_url: https://mybinder.org
 
 sphinx:
