@@ -3,7 +3,7 @@ title: Local
 thebe: false
 ---
 
-# 本機 LLM 翻譯
+# Local LLM 翻譯
 
 ```{raw} html
 <style>

@@ -8,6 +8,6 @@ chapters:
   - file: pages/app_api
     title: ChatGPT API 翻譯
   - file: pages/app_local
-    title: 本機 LLM 翻譯
+    title: Local LLM 翻譯
   - file: pages/ods_view
     title: 字典詞庫推薦
