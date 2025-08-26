@@ -157,7 +157,7 @@ title: API
     <div class="ts-field">
         <label class="ts-label" for="limitN">處理筆數上限</label>
         <div class="ts-input ts-inline">
-        <input type="number" id="limitN" value="200" min="1" style="max-width:220px;">
+        <input type="number" id="limitN" value="0" min="1" style="max-width:220px;">
         <span id="countInfo" class="ts-hint"> / 0</span>
         </div>
     </div>
@@ -299,6 +299,7 @@ const pyodide = await loadPyodide();
   tsFile.addEventListener('change', handleTsChange);
   limitN.addEventListener('input', clampLimit);
 })();
+
 const $msg = document.getElementById("ts-ui-msg");
 try {
   await pyodide.runPythonAsync(String.raw`
@@ -648,7 +649,7 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
 # ===== 主流程（加入即時對照與進度）=====
 async def run_translation_pipeline_async(api_key:str, base_url:str, model:str,
                                          ts_text:str, glossary_pairs:List[Tuple[str,str]],
-                                         batch_size:int=32, limit_n:int=200) -> bytes:
+                                         batch_size:int=32, limit_n:int=0) -> bytes:
     doctype = _read_doctype(ts_text)
     root = ET.fromstring(ts_text)
     messages = root.findall(".//message")
