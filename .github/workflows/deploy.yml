@@ -22,6 +22,8 @@ jobs:
           python -m pip install -U pip
           pip install -U jupyter-book jupyterlite-sphinx jupyterlite-pyodide-kernel
           # pip install "jupyterlite-sphinx==0.20.*" "jupyterlite-pyodide-kernel==0.6.*"
+      - name: Clean book
+        run: jupyter-book clean book --all
       - name: Build book
         run: jupyter-book build book
       - name: Disable Jekyll

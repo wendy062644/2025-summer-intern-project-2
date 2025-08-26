@@ -1,5 +1,6 @@
 jupyter-book
 matplotlib
 numpy
+sphinx-replite
 jupyterlite-sphinx
 jupyterlite-pyodide-kernel
