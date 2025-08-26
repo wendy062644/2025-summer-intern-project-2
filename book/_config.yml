@@ -20,10 +20,6 @@ html:
   use_issues_button: false
   use_edit_page_button: false
 
-launch_buttons:
-  thebe: false
-  binderhub_url: https://mybinder.org
-
 sphinx:
   extra_extensions:
     - jupyterlite_sphinx

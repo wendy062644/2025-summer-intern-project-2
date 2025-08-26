@@ -1,11 +1,10 @@
 ---
-title: App
-thebe: false
+title: API
 ---
 
-# App
+# ChatGPT API 翻譯
 
-<!-- ===== 外層 UI（你原本的結構） ===== -->
+<!-- ===== 外層 UI ===== -->
 <div id="ts-ui" style="font-family: system-ui; line-height:1.35; margin: 8px 0 16px;">
   <div style="margin-bottom:.5rem;">
     <label>API Key：
@@ -24,6 +23,7 @@ thebe: false
       </select>
     </label>
   </div>
+
   <div style="margin-bottom:.5rem;">
     <label>Batch：
       <input type="number" id="batch" value="32" min="1" max="64">
@@ -31,7 +31,9 @@ thebe: false
     <label style="margin-left:12px;">處理筆數上限：
       <input type="number" id="limitN" value="200" min="1">
     </label>
+    <span id="countInfo" style="margin-left:8px; color:#555; font-size:0.9rem;"></span>
   </div>
+
   <div style="margin-bottom:.5rem;">
     <label>.ts 檔（上傳）：
       <input type="file" id="tsFile" accept=".ts">
@@ -41,7 +43,32 @@ thebe: false
     </label>
     <button id="run-btn" style="margin-left:12px;">執行翻譯</button>
   </div>
-  <div id="ts-ui-msg" style="color:#555; font-size: 0.95rem;"></div>
+
+  <!-- 進度條 -->
+  <div id="ts-progress-wrap" style="display:none; margin: 12px 0;">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <progress id="ts-progress" value="0" max="100" style="width: 280px;"></progress>
+      <span id="ts-progress-label" style="font-variant-numeric: tabular-nums;">0 / 0</span>
+    </div>
+  </div>
+
+  <!-- 對照表 -->
+  <div id="compare-box" style="display:none; border:1px solid #ddd; border-radius:8px; padding:8px 12px; margin-top:8px;">
+    <div style="font-size:0.95rem;color:#333;margin-bottom:4px;">翻譯對照（即時刷新）</div>
+    <div style="max-height: 360px; overflow:auto;">
+      <table style="width:100%; border-collapse: collapse; font-size:0.95rem;">
+        <thead>
+          <tr>
+            <th style="text-align:left; border-bottom:1px solid #eee; padding:4px; width:50%;">原文</th>
+            <th style="text-align:left; border-bottom:1px solid #eee; padding:4px; width:50%;">譯文</th>
+          </tr>
+        </thead>
+        <tbody id="compare-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="ts-ui-msg" style="color:#555; font-size: 0.95rem; margin-top:8px;"></div>
 </div>
 
 <!-- ===== Pyodide ===== -->
@@ -59,15 +86,62 @@ from js import document
 from pyodide.http import pyfetch
 from pyodide.ffi import create_proxy
 
-# ===== UI 訊息列 =====
+# ===== UI：訊息列 =====
 def _set_ui_msg(msg_html: str):
     document.getElementById("ts-ui-msg").innerHTML = msg_html
 
+# ===== UI：進度條 & 對照表 =====
+def _progress_setup(total:int):
+    wrap = document.getElementById("ts-progress-wrap")
+    bar = document.getElementById("ts-progress")
+    lab = document.getElementById("ts-progress-label")
+    wrap.style.display = "block"
+    bar.value = 0
+    bar.max = max(1, total)
+    lab.innerText = f"0 / {total}"
+
+def _progress_tick(done:int, total:int):
+    bar = document.getElementById("ts-progress")
+    lab = document.getElementById("ts-progress-label")
+    bar.value = done
+    lab.innerText = f"{done} / {total}"
+
+def _compare_reset():
+    box = document.getElementById("compare-box")
+    box.style.display = "block"
+    tbody = document.getElementById("compare-tbody")
+    # 清空舊列
+    while tbody.firstChild:
+        tbody.removeChild(tbody.firstChild)
+
+def _compare_add(src_text:str, zh_text:str):
+    box = document.getElementById("compare-box")
+    box.style.display = "block"
+    tbody = document.getElementById("compare-tbody")
+    tr = document.createElement("tr")
+
+    def _td(txt):
+        td = document.createElement("td")
+        td.style.padding = "4px"
+        td.style.borderBottom = "1px solid #eee"
+        td.textContent = txt  # 用 textContent 避免 HTML 注入
+        return td
+
+    tr.appendChild(_td(src_text or ""))
+    tr.appendChild(_td(zh_text or ""))
+    tbody.appendChild(tr)
+
+    # 自動滾動到表格底部
+    try:
+        # compare-box 的第 2 個子元素是帶滾動的 div
+        scroller = box.children.item(1)
+        if scroller:
+            scroller.scrollTop = scroller.scrollHeight
+    except Exception:
+        pass
+
 # ===== 讀取上傳檔 =====
 async def read_glossaries_from_file_input(input_id: str) -> List[Tuple[str,str]]:
-    """
-    從 <input type="file" multiple> 讀取多個 CSV/ODS，合併去重（以英文為 key）。
-    """
     files = document.getElementById(input_id).files
     if not files or files.length == 0:
         return []
@@ -87,7 +161,6 @@ async def read_glossaries_from_file_input(input_id: str) -> List[Tuple[str,str]]
         except Exception as e:
             print(f"[glossary] 讀取 {f.name} 失敗：{e}")
 
-    # 依英文去重（保留第一筆）
     seen, dedup = set(), []
     for en, zh in pairs_all:
         if en not in seen:
@@ -138,18 +211,19 @@ def _et_ready(s:str)->str:
     except Exception: return s
 
 def needs_translation(en_text: Optional[str]) -> bool:
-    if not en_text or not en_text.strip(): return False
-    if re.fullmatch(r"[\\s\\d\\W%{}]+", en_text): return False
+    if not en_text or not en_text.strip():
+        return False
+    if re.fullmatch(r"[\s\d\W%{}]+", en_text):
+        return False
     return True
 
-# ===== LCS 詞庫匹配（改為不依賴 pandas）=====
-_SEP_RE = re.compile(r"[\s/_\-.]+")
+# ===== LCS 詞庫匹配（不依賴 pandas）=====
+_SEP_RE = re.compile(r"[-\s/_.\\]+")
 def soft_norm(s:str)->str: return _SEP_RE.sub(" ", s.lower()).strip()
 _TOKEN_RE = re.compile(r"[A-Za-z0-9]+(?:[\\/_.-][A-Za-z0-9]+)*")
 
 class LCSMatcher:
     def __init__(self, pairs: List[Tuple[str,str]], min_token_len:int=4, min_lcs_len:int=4):
-        # 預處理
         rows = []
         for en, zh in pairs:
             en = (en or "").strip(); zh = (zh or "").strip()
@@ -160,7 +234,6 @@ class LCSMatcher:
         self.rows = rows
         self.min_token_len = min_token_len
         self.min_lcs_len = min_lcs_len
-        # 句子優先：soft 索引
         self.soft_index = {}
         self.max_soft_len = 1
         for r in rows:
@@ -218,7 +291,7 @@ class LCSMatcher:
                     if len(glossary)>=limit: break
         return glossary
 
-# ===== 讀 CSV / ODS（瀏覽器版）=====
+# ===== 讀 CSV / ODS =====
 def load_glossary_csv_text(csv_text: Optional[str]) -> List[Tuple[str,str]]:
     if not csv_text:
         return []
@@ -242,7 +315,6 @@ def load_glossary_csv_text(csv_text: Optional[str]) -> List[Tuple[str,str]]:
     return pairs
 
 def load_glossary_ods_bytes(ods_bytes: bytes)->List[Tuple[str,str]]:
-    # 輕量解析 ODS/content.xml
     with zipfile.ZipFile(io.BytesIO(ods_bytes)) as z:
         xml = z.read("content.xml")
     ns = {
@@ -279,10 +351,9 @@ def load_glossary_ods_bytes(ods_bytes: bytes)->List[Tuple[str,str]]:
             pairs.append((en, zh)); seen.add(en)
     return pairs
 
-# ===== OpenAI Chat Completions（pyfetch；批次）=====
+# ===== OpenAI Chat Completions（批次）=====
 async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:str,
                                               masked_texts:List[str], glossaries:List[Dict[str,str]]):
-    # 準備 items
     items=[]
     for i,(t,g) in enumerate(zip(masked_texts, glossaries)):
         items.append({"id": i, "text": t, "glossary": [f"{en} -> {zh}" for en, zh in g.items()]})
@@ -293,10 +364,9 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
     • 不要解釋；
     • 不要改動任何 HTML 標籤或 HTML 實體；
     • 只輸出與輸入等長、同序的結果。"""
-    user_prompt = "請逐一翻譯 items。只需回傳 function 參數，不要輸出其他文字。\n" + \
+    user_prompt = "請逐一翻譯 items。只需回傳 function 參數，不要輸出其他文字。\\n" + \
               "items = " + json.dumps(items, ensure_ascii=False)
 
-    # 用 tools 定義明確 schema：必須回傳 translations: string[]
     tools = [{
       "type": "function",
       "function": {
@@ -336,7 +406,6 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
     if resp.status >= 400:
         raise RuntimeError(f"API Error {resp.status}: {data}")
 
-    # 讀取 tool call 的 arguments（是純 JSON）
     msg = data["choices"][0]["message"]
     tcalls = msg.get("tool_calls") or []
     if not tcalls:
@@ -353,7 +422,7 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
 
     return arr
 
-# ===== 主流程（與你原本的一致，只是改成瀏覽器 I/O）=====
+# ===== 主流程（加入即時對照與進度）=====
 async def run_translation_pipeline_async(api_key:str, base_url:str, model:str,
                                          ts_text:str, glossary_pairs:List[Tuple[str,str]],
                                          batch_size:int=32, limit_n:int=200) -> bytes:
@@ -375,6 +444,10 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model:str,
     if total==0:
         return ET.tostring(root, encoding="utf-8")
 
+    # 初始化 UI
+    _compare_reset()
+    _progress_setup(total)
+
     for start in range(0, total, batch_size):
         batch = tasks[start:start+batch_size]
         glossaries=[]; masked_texts=[]; maps=[]
@@ -387,12 +460,12 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model:str,
         try:
             zh_list = await call_chat_completions_batch_pyfetch(api_key, base_url, model, masked_texts, glossaries)
         except Exception as e:
-            # 退回逐筆（簡化：逐筆仍用同一 API 端點，但一次送一筆）
             zh_list=[]
             for masked, g in zip(masked_texts, glossaries):
                 one = await call_chat_completions_batch_pyfetch(api_key, base_url, model, [masked], [g])
                 zh_list.append(one[0])
 
+        # 寫回 XML，並即時輸出「原文／譯文」對照與進度
         for (m, src_text, is_num), zh_raw, mp in zip(batch, zh_list, maps):
             trans = m.find("translation")
             if trans is None:
@@ -407,7 +480,12 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model:str,
             else:
                 trans.text = zh
             if "type" in trans.attrib: trans.attrib.pop("type", None)
+
+            # 即時對照（翻譯前 / 翻譯後）
+            _compare_add(src_text, zh)
+
             finished += 1
+            _progress_tick(finished, total)
 
         _set_ui_msg(f"處理進度：{finished}/{total}")
 
@@ -436,8 +514,6 @@ async def _on_click(evt=None):
         if not ts_text:
             _set_ui_msg("<span style='color:#b00'>請上傳 .ts 檔</span>"); return
 
-        # 讀 glossary（CSV/ODS 皆可）
-        pairs=[]
         pairs = await read_glossaries_from_file_input("glsFile")
 
         _set_ui_msg("⏳ 連線中…")
@@ -447,7 +523,6 @@ async def _on_click(evt=None):
             batch_size=batch, limit_n=limitN
         )
 
-        # 輸出檔名
         out_name = "qgis_zh-Hant.ts"
         ts_files = document.getElementById("tsFile").files
         if ts_files and ts_files.length>0:

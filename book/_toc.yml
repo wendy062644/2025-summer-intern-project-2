@@ -1,6 +1,8 @@
 format: jb-book
 root: intro
 chapters:
-  - file: pages/app
-    title: 軟體介紹
+  - file: pages/app_api
+    title: ChatGPT API 翻譯
+  - file: pages/app_local
+    title: 本地 LLM 翻譯
   - file: notebooks
