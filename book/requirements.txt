@@ -4,3 +4,5 @@ numpy
 sphinx-replite
 jupyterlite-sphinx
 jupyterlite-pyodide-kernel
+pandas
+odfpy
