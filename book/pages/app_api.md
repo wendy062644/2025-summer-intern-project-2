@@ -5,62 +5,210 @@ title: API
 # ChatGPT API 翻譯
 
 <!-- ===== 外層 UI ===== -->
-<div id="ts-ui" style="font-family: system-ui; line-height:1.35; margin: 8px 0 16px;">
-  <div style="margin-bottom:.5rem;">
-    <label>API Key：
-      <input type="password" id="apiKey" placeholder="sk-..." style="width:320px">
-    </label>
-    <label style="margin-left:12px;">Base URL：
-      <input type="text" id="baseUrl" value="https://api.openai.com/v1" style="width:360px">
-    </label>
-    <label style="margin-left:12px;">Model：
-      <select id="modelSel" style="width:220px">
-        <option value="gpt-4.1-mini" selected>gpt-4.1-mini（便宜）</option>
-        <option value="gpt-4.1">gpt-4.1</option>
-        <option value="gpt-4o-mini">gpt-4o-mini</option>
-        <option value="gpt-4o">gpt-4o</option>
-        <option value="o4-mini">o4-mini（推理）</option>
-      </select>
-    </label>
-  </div>
+<style>
+  /* —— 全部樣式只限制在 #ts-ui，並且用 --ts-* 變數，避免和主題衝突 —— */
+  #ts-ui{
+    --ts-gap: 12px;
+    --ts-pad: 14px;
+    --ts-radius: 12px;
+    --ts-border: #e5e7eb;
+    --ts-bg: #fff;
+    --ts-muted: #6b7280;
+    --ts-text: #111827;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    line-height: 1.35; margin: 8px 0 16px; color: var(--ts-text);
+  }
+  @media (prefers-color-scheme: dark){
+    #ts-ui{
+      --ts-border: #2b2f36;
+      --ts-bg: #111418;
+      --ts-muted: #9aa3af;
+      --ts-text: #e5e7eb;
+    }
+  }
+  #ts-ui *, #ts-ui *::before, #ts-ui *::after{ box-sizing: border-box; }
+  #ts-ui .ts-card{
+    border:1px solid var(--ts-border); background:var(--ts-bg);
+    border-radius: var(--ts-radius); padding:16px; box-shadow:0 1px 2px rgba(0,0,0,.04);
+  }
+  #ts-ui .ts-title{ font-size:1.05rem; font-weight:600; margin:2px 0 10px; }
+  #ts-ui .ts-grid{
+    display:grid; grid-template-columns: 160px 1fr; gap:10px 14px; align-items:center;
+  }
+  #ts-ui .ts-label{ color:var(--ts-muted); font-size:.95rem; white-space:nowrap; }
+  #ts-ui .ts-input > input,
+  #ts-ui .ts-input > select{
+    width:100%; padding:8px 10px; border:1px solid var(--ts-border);
+    border-radius:10px; background:transparent; font-size:.95rem;
+  }
+  #ts-ui .ts-input input[type="file"]{ padding:6px; }
+  #ts-ui .ts-inline{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  #ts-ui .ts-hint{ color:var(--ts-muted); font-size:.9rem; }
+  #ts-ui .ts-toolbar{ margin-top:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  #ts-ui .ts-btn-primary{
+    appearance:none; border:1px solid var(--ts-border);
+    background:#111827; color:#fff; border-radius:10px; padding:8px 14px; font-weight:600; cursor:pointer;
+  }
+  @media (prefers-color-scheme: dark){ #ts-ui .ts-btn-primary{ background:#e5e7eb; color:#111418; } }
+  #ts-ui .ts-btn-primary:hover{ filter:brightness(0.95); }
+  #ts-ui .ts-divider{ height:1px; background:var(--ts-border); margin:12px 0; border:0; }
 
-  <div style="margin-bottom:.5rem;">
-    <label>Batch：
-      <input type="number" id="batch" value="32" min="1" max="64">
-    </label>
-    <label style="margin-left:12px;">處理筆數上限：
-      <input type="number" id="limitN" value="200" min="1">
-    </label>
-    <span id="countInfo" style="margin-left:8px; color:#555; font-size:0.9rem;"></span>
-  </div>
+  /* 附屬區塊（ID 不變，但樣式仍只在 #ts-ui 作用） */
+  #ts-ui #ts-progress-wrap{ margin:12px 0; }
+  #ts-ui #compare-box{
+    border:1px solid var(--ts-border); border-radius:12px; padding:8px 12px; margin-top:8px; background:var(--ts-bg);
+  }
+  #ts-ui #compare-box table{ width:100%; border-collapse:collapse; font-size:.95rem; }
+  #ts-ui #compare-box th, #ts-ui #compare-box td{ padding:6px 6px; border-bottom:1px solid var(--ts-border); text-align:left; }
+  #ts-ui #compare-box thead th{ font-weight:600; }
+  #ts-ui #ts-ui-msg{ color:var(--ts-muted); font-size:.95rem; margin-top:8px; }
 
-  <div style="margin-bottom:.5rem;">
-    <label>.ts 檔（上傳）：
-      <input type="file" id="tsFile" accept=".ts">
-    </label>
-    <label style="margin-left:12px;">glossary（CSV/ODS；欄：en,zh 或 英文名稱,中文名稱）：
-      <input type="file" id="glsFile" accept=".csv,.ods" multiple>
-    </label>
-    <button id="run-btn" style="margin-left:12px;">執行翻譯</button>
-  </div>
+  /* 手機版：單欄 */
+  @media (max-width: 640px){
+    #ts-ui .ts-grid{ grid-template-columns: 1fr; }
+    #ts-ui .ts-label{ margin-top:6px; }
+  }
 
-  <!-- 進度條 -->
-  <div id="ts-progress-wrap" style="display:none; margin: 12px 0;">
-    <div style="display:flex; align-items:center; gap:8px;">
-      <progress id="ts-progress" value="0" max="100" style="width: 280px;"></progress>
+  #ts-ui .ts-row-2{
+    display: grid;
+    grid-template-columns: var(--ts-col1, 1fr) var(--ts-col2, 1fr);
+    gap: 10px 14px;
+    align-items: center;
+  }
+  #ts-ui .ts-6-4{ --ts-col1: 6fr; --ts-col2: 4fr; }
+  #ts-ui .ts-4-6{ --ts-col1: 4fr; --ts-col2: 6fr; }
+
+  /* 每一欄的欄位（標籤在上、輸入在下） */
+  #ts-ui .ts-field{
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  #ts-ui .ts-field .ts-label{ margin: 0; }
+
+  /* 手機版改為單欄堆疊 */
+  @media (max-width: 640px){
+    #ts-ui .ts-row-2{ grid-template-columns: 1fr; }
+  }
+
+  #ts-ui .ts-row-3{
+    display: grid;
+    grid-template-columns: var(--ts-col1, 1fr) var(--ts-col2, 1fr) var(--ts-col3, 1fr);
+    gap: 10px 14px;
+    align-items: center;
+  }
+  #ts-ui .ts-3-4-3{ --ts-col1: 3fr; --ts-col2: 4fr; --ts-col3: 3fr; }
+
+    /* 手機版改為單欄 */
+  @media (max-width: 640px){
+    #ts-ui .ts-row-3{ grid-template-columns: 1fr; }
+  }
+  #ts-ui .left-col{ grid-column: 1 / 3; }
+  
+  @media (max-width:640px){
+    #ts-ui{
+      grid-template-columns: 1fr; /* 單欄 */
+    }
+    #ts-ui .left-col,
+    #ts-ui .right-col{
+      grid-column: 1 / -1; /* 滿版 */
+    }
+  }
+</style>
+
+<div id="ts-ui">
+  <div class="ts-card">
+    <div class="ts-title">API 設定</div>
+    <div class="ts-field" style="margin-bottom:10px;">
+      <label class="ts-label" for="apiKey">API Key</label>
+      <div class="ts-input">
+        <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
+      </div>
+    </div>
+    <div class="ts-row-2 ts-6-4" style="margin-top:10px;">
+      <div class="ts-field">
+        <label class="ts-label" for="baseUrl">Base URL</label>
+        <div class="ts-input">
+          <input type="text" id="baseUrl" value="https://api.openai.com/v1">
+        </div>
+      </div>
+      <div class="ts-field">
+        <label class="ts-label" for="modelSel">Model</label>
+        <div class="ts-input">
+          <select id="modelSel">
+            <option value="gpt-4.1-mini" selected>gpt-4.1-mini（便宜）</option>
+            <option value="gpt-4.1">gpt-4.1</option>
+            <option value="gpt-4o-mini">gpt-4o-mini</option>
+            <option value="gpt-4o">gpt-4o</option>
+            <option value="o4-mini">o4-mini（推理）</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <hr class="ts-divider">
+    <div class="ts-title">處理參數</div>
+    <div class="ts-row-3 ts-3-4-3">
+    <!-- 左：Batch (3) -->
+    <div class="ts-field">
+        <label class="ts-label" for="batch">Batch</label>
+        <div class="ts-input">
+        <input type="number" id="batch" value="32" min="1" max="64">
+        </div>
+    </div>
+    <!-- 中：處理筆數上限 (3) -->
+    <div class="ts-field">
+        <label class="ts-label" for="limitN">處理筆數上限</label>
+        <div class="ts-input ts-inline">
+        <input type="number" id="limitN" value="200" min="1" style="max-width:220px;">
+        <span id="countInfo" class="ts-hint"> / 0</span>
+        </div>
+    </div>
+    <!-- 右：.ts 檔（上傳） (4) -->
+    <div class="ts-field">
+        <label class="ts-label" for="tsFile">.ts 檔（上傳）</label>
+        <div class="ts-input">
+        <input type="file" id="tsFile" accept=".ts">
+        </div>
+    </div>
+    </div>
+    <hr class="ts-divider">
+    <div class="ts-title">輸入檔案</div>
+    <div class="ts-row-2" style="--ts-col1: 7fr; --ts-col2: 3fr;">
+    <!-- 左：檔案上傳 -->
+    <div class="ts-field">
+        <label class="ts-label" for="glsFile">glossary（CSV / ODS）</label>
+        <div class="ts-input">
+        <input type="file" id="glsFile" accept=".csv,.ods" multiple>
+        </div>
+    </div>
+    <!-- 右：執行翻譯（滿寬按鈕） -->
+    <div class="ts-field">
+        <label class="ts-label" style="visibility:hidden;">執行翻譯</label>
+        <div class="ts-input">
+        <button id="run-btn" class="ts-btn-primary" style="width:100%;">執行翻譯</button>
+        </div>
+    </div>
+    <!-- 底下補一行提示：對齊右欄 -->
+    <div class="ts-hint right-col" style="margin-top:6px;">
+        欄位：<code>en, zh</code> 或 <code>英文名稱, 中文名稱</code>
+    </div>
+    </div>
+
+  <!-- 進度條（ID 保持不變） -->
+  <div id="ts-progress-wrap" style="display:none;">
+    <div class="ts-inline">
+      <progress id="ts-progress" value="0" max="100" style="width:100%;"></progress>
       <span id="ts-progress-label" style="font-variant-numeric: tabular-nums;">0 / 0</span>
     </div>
   </div>
 
-  <!-- 對照表 -->
-  <div id="compare-box" style="display:none; border:1px solid #ddd; border-radius:8px; padding:8px 12px; margin-top:8px;">
-    <div style="font-size:0.95rem;color:#333;margin-bottom:4px;">翻譯對照（即時刷新）</div>
+  <!-- 對照表（ID 保持不變） -->
+  <div id="compare-box" style="display:none;">
+    <div style="font-size:0.95rem;color:var(--ts-text);margin-bottom:4px;">翻譯對照（即時刷新）</div>
     <div style="max-height: 360px; overflow:auto;">
-      <table style="width:100%; border-collapse: collapse; font-size:0.95rem;">
+      <table>
         <thead>
           <tr>
-            <th style="text-align:left; border-bottom:1px solid #eee; padding:4px; width:50%;">原文</th>
-            <th style="text-align:left; border-bottom:1px solid #eee; padding:4px; width:50%;">譯文</th>
+            <th style="width:50%;">原文</th>
+            <th style="width:50%;">譯文</th>
           </tr>
         </thead>
         <tbody id="compare-tbody"></tbody>
@@ -68,14 +216,89 @@ title: API
     </div>
   </div>
 
-  <div id="ts-ui-msg" style="color:#555; font-size: 0.95rem; margin-top:8px;"></div>
+  <div id="ts-ui-msg"></div>
 </div>
 
 <!-- ===== Pyodide ===== -->
 <script type="module">
 import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.mjs";
 const pyodide = await loadPyodide();
+(function setupTsCounter(){
+  const tsFile   = document.getElementById('tsFile');
+  const limitN   = document.getElementById('limitN');
+  const countInfo= document.getElementById('countInfo');
 
+  countInfo.textContent = ' / 0';
+
+  function needsTranslationJS(text){
+    if (!text) return false;
+    const t = String(text).trim();
+    if (!t) return false;
+    // 近似 Python: 僅有空白/數字/非字元/%/{} 視為不需翻
+    if (/^[\s\d\W%{}]+$/u.test(t)) return false;
+    return true;
+  }
+
+  async function handleTsChange(){
+    const file = tsFile.files && tsFile.files[0];
+    if (!file){ countInfo.textContent = ' / 0'; limitN.removeAttribute('max'); return; }
+    try{
+      const txt = await file.text();
+      let total = 0;
+
+      // 優先用 DOMParser 解析 XML
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(txt, 'application/xml');
+      const hasErr = xmlDoc.getElementsByTagName('parsererror').length > 0;
+
+      if (!hasErr){
+        const sources = xmlDoc.getElementsByTagName('source');
+        for (let i = 0; i < sources.length; i++){
+          const s = sources[i].textContent || '';
+          if (needsTranslationJS(s)) total++;
+        }
+      } else {
+        // 後備：正規表達抓 <source>…</source>
+        const matches = txt.match(/<source>([\s\S]*?)<\/source>/g) || [];
+        for (const m of matches){
+          const inner = m.replace(/^<source>|<\/source>$/g, '');
+          if (needsTranslationJS(inner)) total++;
+        }
+      }
+
+      // 更新 UI
+      if (total > 0){
+        limitN.value = total;          // 將處理筆數上限設為總數
+        limitN.max   = String(total);  // 避免超過
+        if (Number(limitN.value) < 1) limitN.value = 1;
+        countInfo.textContent = ` / ${total}`;
+      } else {
+        countInfo.textContent = ' / 0';
+        limitN.removeAttribute('max');
+      }
+    } catch(e){
+      console.error(e);
+      countInfo.textContent = ' / 0';
+      limitN.removeAttribute('max');
+    }
+  }
+
+  // 若使用者手動改數字，限制不超過總數 & 不小於 1
+  function clampLimit(){
+    const max = Number(limitN.max || '0');
+    let v = Number(limitN.value || '0');
+    if (max){
+      if (v > max) v = max;
+      if (v < 1) v = 1;
+      limitN.value = v;
+    } else if (v < 1){
+      limitN.value = 1;
+    }
+  }
+
+  tsFile.addEventListener('change', handleTsChange);
+  limitN.addEventListener('input', clampLimit);
+})();
 const $msg = document.getElementById("ts-ui-msg");
 try {
   await pyodide.runPythonAsync(String.raw`
@@ -525,10 +748,6 @@ async def _on_click(evt=None):
 
         out_name = "qgis_zh-Hant.ts"
         ts_files = document.getElementById("tsFile").files
-        if ts_files and ts_files.length>0:
-            nm = ts_files.item(0).name
-            if nm.lower().endswith(".ts"):
-                out_name = re.sub(r"\\.ts$", "", nm) + "_zh-Hant.ts"
 
         link = _build_download_link(out_name, xml_bytes)
         _set_ui_msg(link + "　<span style='color:#0a0'>完成！</span>")
