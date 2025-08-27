@@ -19,11 +19,11 @@ kernelspec:
 
 本頁會讀取並預覽下列兩個檔案（每個工作表顯示前 10 列），同時提供直接下載連結：
 
-- **file1.ods**  
-  {download}`下載 file1.ods <../assets/sites/file1.ods>`  
+- **地理學名詞-測繪學名詞.ods**  
+  {download}`下載 地理學名詞-測繪學名詞.ods <../assets/sites/地理學名詞-測繪學名詞.ods>`  
 
-- **file2.ods**  
-  {download}`下載 file2.ods <../assets/sites/file2.ods>`  
+- **地理學名詞-GIS名詞.ods**  
+  {download}`下載 地理學名詞-GIS名詞.ods <../assets/sites/地理學名詞-GIS名詞.ods>`  
 
 > ⚠️ 注意  
 > - 若你在 ` _config.yml ` 將 `execute_notebooks` 設為 `"off"`，本頁的預覽程式碼在建置時不會被執行。  
@@ -62,7 +62,7 @@ def preview_ods(path: str, max_rows: int = 10):
         except Exception as e:
             display(Markdown(f"- 無法讀取工作表 `{s}`：`{e}`"))
 
-for p in ("../assets/sites/file1.ods", "../assets/sites/file2.ods"):
+for p in ("../assets/sites/地理學名詞-測繪學名詞.ods", "../assets/sites/地理學名詞-GIS名詞.ods"):
     p = Path(p)
     if not p.exists():
         display(Markdown(f"**找不到檔案**：`{p}`（目前工作目錄：`{Path.cwd()}`）"))

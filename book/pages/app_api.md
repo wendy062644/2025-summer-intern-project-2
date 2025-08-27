@@ -223,6 +223,9 @@ title: API
 <script type="module">
 import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.mjs";
 const pyodide = await loadPyodide();
+
+await pyodide.loadPackage("micropip");
+
 (function setupTsCounter(){
   const tsFile   = document.getElementById('tsFile');
   const limitN   = document.getElementById('limitN');
@@ -309,6 +312,53 @@ from xml.etree import ElementTree as ET
 from js import document
 from pyodide.http import pyfetch
 from pyodide.ffi import create_proxy
+
+from typing import Optional
+
+try:
+    from opencc import OpenCC
+except ModuleNotFoundError:
+    import micropip
+    # 指定版本較穩
+    await micropip.install("opencc-python-reimplemented==0.1.7")
+    from opencc import OpenCC
+
+_OPENCC = OpenCC("s2twp")  # 簡→繁（台灣用語）
+
+_TW_PROTECT_TERMS = [
+    "演算法",
+]
+
+def to_zh_tw(s: Optional[str]) -> str:
+    if not s:
+        return ""
+    text = s
+
+    placeholders = {}
+    for i, term in enumerate(_TW_PROTECT_TERMS):
+        key = f"⟦TWTERM{i}⟧"  # 不與你原本 ⟦MASKn⟧ 衝突
+        placeholders[key] = term
+        text = text.replace(term, key)
+
+    try:
+        text = _OPENCC.convert(text)
+    except Exception:
+        pass
+
+    for key, term in placeholders.items():
+        text = text.replace(key, term)
+
+    return text
+
+_COORD_RE = re.compile(r"坐標")
+
+def normalize_zh(s: Optional[str]) -> str:
+    if not s:
+        return ""
+    try:
+        return _COORD_RE.sub("座標", s)
+    except Exception:
+        return s
 
 # ===== UI：訊息列 =====
 def _set_ui_msg(msg_html: str):
@@ -534,6 +584,7 @@ def load_glossary_csv_text(csv_text: Optional[str]) -> List[Tuple[str,str]]:
         en = (row.get(col_en) or "").strip()
         zh = (row.get(col_zh) or "").strip()
         if en and zh and en not in seen:
+            zh = normalize_zh(to_zh_tw(zh))
             pairs.append((en, zh))
             seen.add(en)
     return pairs
@@ -572,6 +623,7 @@ def load_glossary_ods_bytes(ods_bytes: bytes)->List[Tuple[str,str]]:
         en = cell_text(cells[idx_en]).strip()
         zh = cell_text(cells[idx_zh]).strip()
         if en and zh and en not in seen:
+            zh = normalize_zh(to_zh_tw(zh))
             pairs.append((en, zh)); seen.add(en)
     return pairs
 
@@ -695,6 +747,7 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model:str,
             if trans is None:
                 trans = ET.SubElement(m, "translation")
             zh = _et_ready(_unmask_text(zh_raw, mp))
+            zh = normalize_zh(to_zh_tw(zh))
             if is_num:
                 forms = trans.findall("numerusform")
                 if not forms:
