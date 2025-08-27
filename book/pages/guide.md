@@ -66,10 +66,12 @@ title: 操作頁面
 
 ---
 
-## 套用到 QGIS 中
-1. 將 `.ts` 檔案轉成二進位的 `.qm` 檔
+## 套用至 QGIS 中
+1. 安裝所需 library
+   - sudo apt-get install qttools5-dev-tools
+2. 將 `.ts` 檔案轉成二進位的 `.qm` 檔
    - lrelease qgis_zh-Hant.ts
-2. 將 `qgis_zh-Hant.qm` 檔放進 `QGIS 3.40.8\apps\qgis-ltr\i18n` 資料夾中
+3. 將 `qgis_zh-Hant.qm` 檔放進 `QGIS 3.40.8\apps\qgis-ltr\i18n` 資料夾中
 
 
 ## 參數對照（重點）
