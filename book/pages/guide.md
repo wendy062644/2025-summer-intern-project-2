@@ -105,7 +105,7 @@ A：頁面會把 **Config cell** 插在 Notebook 最前面；你可用「**預�
 
 ---
 
-## 速查：三步驟摘要（Online GPT）
+## 懶人包：三步驟摘要（Online GPT）
 
 1) 上傳 `.ts`（與可選的 Glossary），介面會自動統計**可翻譯句數**。  
 2) 設定 `API Key / Base URL / Model` 與 `Batch / 處理筆數上限`。  
@@ -113,7 +113,7 @@ A：頁面會把 **Config cell** 插在 Notebook 最前面；你可用「**預�
 
 ---
 
-## 速查：三步驟摘要（Local LLM）
+## 懶人包：三步驟摘要（Local LLM）
 
 1) 在頁面設定 **檔名/模型/參數**。  
 2) 點 **下載新的 .ipynb**（可先用 **預覽 Config cell** 檢查）。  
