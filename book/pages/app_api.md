@@ -715,7 +715,7 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model:str,
 
     xml_bytes = ET.tostring(root, encoding="utf-8")
     head = b'<?xml version="1.0" encoding="utf-8"?>'
-    if doctype: xml_bytes = head + ("\\n"+doctype+"\\n").encode("utf-8") + xml_bytes
+    if doctype: xml_bytes = head + (doctype).encode("utf-8") + xml_bytes
     else: xml_bytes = head + b"\\n" + xml_bytes
     return xml_bytes
 
