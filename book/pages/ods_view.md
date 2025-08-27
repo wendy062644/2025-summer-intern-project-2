@@ -25,10 +25,9 @@ kernelspec:
 - **地理學名詞-GIS名詞.ods**  
   {download}`下載 地理學名詞-GIS名詞.ods <../assets/sites/地理學名詞-GIS名詞.ods>`  
 
-> ⚠️ 注意  
-> - 若你在 ` _config.yml ` 將 `execute_notebooks` 設為 `"off"`，本頁的預覽程式碼在建置時不會被執行。  
->   可在頁面右上角啟用 **Thebe**（或把本頁前言 `thebe: true` 保留），於瀏覽器中即時執行下方程式碼以載入預覽。  
-> - 需要安裝 `pandas` 與 `odfpy` 才能讀取 ODS：`pip install pandas odfpy`
+> 補充
+> -  ` 地理學名詞-測繪學名詞.ods ` 與 `地理學名詞-GIS名詞.ods` 皆出自 [樂詞網下載專區](https://terms.naer.edu.tw/download/)
+> - 若想將不同領域的英文翻譯成中文，只需上傳該領域的中英對照表至 glossary 即可
 
 ---
 
