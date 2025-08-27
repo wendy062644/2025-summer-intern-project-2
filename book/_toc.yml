@@ -11,3 +11,5 @@ chapters:
     title: Local LLM 翻譯
   - file: pages/ods_view
     title: 字典詞庫推薦
+  - file: pages/download
+    title: 下載翻譯檔
