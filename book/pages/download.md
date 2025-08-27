@@ -4,7 +4,8 @@ title: QGIS 翻譯檔下載
 
 # QGIS 翻譯檔下載（TS / QM）
 
-> 將 `qgis_3.XX_zh-Hant.qm` 放進 `QGIS 3.XX.X\apps\qgis-ltr\i18n` 前，需將檔名改為 `qgis_zh-Hant.qm` 才可被讀取
+> 將 `qgis_3.XX_zh-Hant.qm` 放進 `QGIS 3.XX.X\apps\qgis-ltr\i18n` 前
+> 需將檔名改為 `qgis_zh-Hant.qm` 才可被讀取
 
 
 以下提供不同版本的 **`.ts` 原始翻譯檔** 與 **`.qm` 編譯檔** 下載：
