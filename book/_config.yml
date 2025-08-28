@@ -1,6 +1,6 @@
 # Book settings
-title: My sample book
-author: The Jupyter Book Community
+title: 基於詞彙表檢索的軟體介面翻譯工具 - 以 QGIS 為例
+author: Leo
 logo: logo.png
 
 bibtex_bibfiles:
