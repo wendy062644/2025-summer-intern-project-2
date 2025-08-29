@@ -34,6 +34,9 @@ thebe: false
   .nbui button{ color:#111827; }
 
   @media (prefers-color-scheme: dark){
+    .nbui label{ color:#f0f1f3; }
+    .nbui .section h3{ color:#f5f6f7; }
+    .nbui .muted{ color:#c7ced8; }
     .nbui .card{ background:#111418; border-color:#2b2f36; color:#e5e7eb; }
     .nbui button{ background:#111418; border-color:#2b2f36; color:#e5e7eb; }
     .nbui button:hover{ background:#0b0f14; }
@@ -42,6 +45,9 @@ thebe: false
       background:#0b0f14; border-color:#2b2f36; color:#e5e7eb;
     }
   }
+  html[data-theme="dark"] .nbui label{ color:#f0f1f3; }
+  html[data-theme="dark"] .nbui .section h3{ color:#f5f6f7; }
+  html[data-theme="dark"] .nbui .muted{ color:#c7ced8; }
   html[data-theme="dark"] .nbui .card{ background:#111418; border-color:#2b2f36; color:#e5e7eb; }
   html[data-theme="dark"] .nbui button{ background:#111418; border-color:#2b2f36; color:#e5e7eb; }
   html[data-theme="dark"] .nbui button:hover{ background:#0b0f14; }
