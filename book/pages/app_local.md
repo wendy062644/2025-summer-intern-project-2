@@ -34,14 +34,14 @@ thebe: false
 
 <div class="nbui" id="nbui">
   <div class="card">
-    <!-- 檔案 / 輸入輸出（固定 3 欄） -->
+    <!-- 檔案 / 輸入輸出 -->
     <div class="section">
       <h3>檔案與輸入 / 輸出</h3>
       <div class="grid-3-fixed">
         <label>輸入檔名
           <input id="inputFile" type="text" placeholder="qgis_en.ts">
         </label>
-        <label>輸出檔名（不含副檔名）
+        <label>輸出檔名（不需副檔名）
           <input id="fname" type="text" value="qgis_zh-Hant">
         </label>
         <label>字典資料夾位置（ODS_DIR）
@@ -50,7 +50,7 @@ thebe: false
       </div>
     </div>
 
-    <!-- 模型設定（主 / 備）與 API -->
+    <!-- 模型設定 與 API -->
     <div class="section">
       <h3>模型設定</h3>
       <div class="grid-2">
@@ -93,7 +93,7 @@ thebe: false
 
   <div class="card">
     <div class="btn-row">
-      <button id="btn-download">下載新的 .ipynb</button>
+      <button id="btn-download">下載 .ipynb 檔</button>
       <button id="btn-preview">預覽 Config cell</button>
     </div>
     <pre id="preview" class="preview muted"></pre>
@@ -102,7 +102,6 @@ thebe: false
 
 <script>
 (async function(){
-  // 嘗試從幾個常見位置載入底 notebook（JSON）
   async function loadBaseNotebook(){
     const candidates = [
       '../sites/Untitled11.ipynb',
@@ -113,7 +112,7 @@ thebe: false
         if (r.ok) return await r.json();
       }catch(e){}
     }
-    throw new Error('找不到 Untitled11.ipynb，請把檔案放在與此頁同資料夾或 _static/ 下，或修改程式中的 candidates 路徑。');
+    throw new Error('找不到 Untitled11.ipynb，請把檔案放在與此頁同資料夾或 assets/sites/ 下，或修改程式中的 candidates 路徑。');
   }
 
   // 小工具
@@ -180,7 +179,7 @@ thebe: false
       previewEl.setAttribute('aria-hidden', 'true');
       previewBtn.setAttribute('aria-expanded', 'false');
     } else {
-      // 展開前先更新內容
+      // 展開
       const cfg = buildConfigCell();
       previewEl.textContent = cfg.source.join("");
       previewEl.style.display = 'block';
