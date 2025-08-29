@@ -30,6 +30,27 @@ thebe: false
   .nbui .section{display:block;margin:6px 0 2px}
   .nbui .section h3{margin:.25rem 0 .25rem;font-size:15px;color:#374151;font-weight:600}
   .nbui .btn-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+
+  .nbui button{ color:#111827; }
+
+  @media (prefers-color-scheme: dark){
+    .nbui .card{ background:#111418; border-color:#2b2f36; color:#e5e7eb; }
+    .nbui button{ background:#111418; border-color:#2b2f36; color:#e5e7eb; }
+    .nbui button:hover{ background:#0b0f14; }
+    .nbui pre.preview{ background:#0b0f14; border-color:#2b2f36; color:#e5e7eb; }
+    .nbui input[type="text"], .nbui input[type="number"], .nbui select{
+      background:#0b0f14; border-color:#2b2f36; color:#e5e7eb;
+    }
+  }
+  html[data-theme="dark"] .nbui .card{ background:#111418; border-color:#2b2f36; color:#e5e7eb; }
+  html[data-theme="dark"] .nbui button{ background:#111418; border-color:#2b2f36; color:#e5e7eb; }
+  html[data-theme="dark"] .nbui button:hover{ background:#0b0f14; }
+  html[data-theme="dark"] .nbui pre.preview{ background:#0b0f14; border-color:#2b2f36; color:#e5e7eb; }
+  html[data-theme="dark"] .nbui input[type="text"],
+  html[data-theme="dark"] .nbui input[type="number"],
+  html[data-theme="dark"] .nbui select{
+    background:#0b0f14; border-color:#2b2f36; color:#e5e7eb;
+  }
 </style>
 
 <div class="nbui" id="nbui">

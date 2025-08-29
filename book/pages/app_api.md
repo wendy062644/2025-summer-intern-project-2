@@ -113,8 +113,6 @@ title: API
     }
   }
 
-  .nbui button{ color:#111827; }
-
   @media (prefers-color-scheme: dark){
     .nbui .card{ background:#111418; border-color:#2b2f36; color:#e5e7eb; }
     .nbui button{ background:#111418; border-color:#2b2f36; color:#e5e7eb; }
