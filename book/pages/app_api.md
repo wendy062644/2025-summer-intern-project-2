@@ -112,6 +112,27 @@ title: API
       grid-column: 1 / -1; /* 滿版 */
     }
   }
+
+  .nbui button{ color:#111827; }
+
+  @media (prefers-color-scheme: dark){
+    .nbui .card{ background:#111418; border-color:#2b2f36; color:#e5e7eb; }
+    .nbui button{ background:#111418; border-color:#2b2f36; color:#e5e7eb; }
+    .nbui button:hover{ background:#0b0f14; }
+    .nbui pre.preview{ background:#0b0f14; border-color:#2b2f36; color:#e5e7eb; }
+    .nbui input[type="text"], .nbui input[type="number"], .nbui select{
+      background:#0b0f14; border-color:#2b2f36; color:#e5e7eb;
+    }
+  }
+  html[data-theme="dark"] .nbui .card{ background:#111418; border-color:#2b2f36; color:#e5e7eb; }
+  html[data-theme="dark"] .nbui button{ background:#111418; border-color:#2b2f36; color:#e5e7eb; }
+  html[data-theme="dark"] .nbui button:hover{ background:#0b0f14; }
+  html[data-theme="dark"] .nbui pre.preview{ background:#0b0f14; border-color:#2b2f36; color:#e5e7eb; }
+  html[data-theme="dark"] .nbui input[type="text"],
+  html[data-theme="dark"] .nbui input[type="number"],
+  html[data-theme="dark"] .nbui select{
+    background:#0b0f14; border-color:#2b2f36; color:#e5e7eb;
+  }
 </style>
 
 <div id="ts-ui">

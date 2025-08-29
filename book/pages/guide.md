@@ -26,7 +26,7 @@ title: 操作頁面
 
 ---
 
-## A. Online GPT（API）流程（建議先試用）
+## A. Online GPT（API）流程
 
 1. **載入檔案**  
    - 上傳 **`.ts` 檔**。  
