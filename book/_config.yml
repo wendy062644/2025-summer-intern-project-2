@@ -21,7 +21,7 @@ sphinx:
   extra_extensions:
     - jupyterlite_sphinx
   config:
-    copyright: "© 2025 Yu-Lin Chen"
+    copyright: "2025 Yu-Lin Chen"
     html_extra_path: ["assets"]
     html_theme_options:
       use_download_button: false
