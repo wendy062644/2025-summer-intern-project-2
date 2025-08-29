@@ -114,22 +114,115 @@ title: API
   }
 
   @media (prefers-color-scheme: dark){
-    .nbui .card{ background:#111418; border-color:#2b2f36; color:#e5e7eb; }
-    .nbui button{ background:#111418; border-color:#2b2f36; color:#e5e7eb; }
-    .nbui button:hover{ background:#0b0f14; }
-    .nbui pre.preview{ background:#0b0f14; border-color:#2b2f36; color:#e5e7eb; }
-    .nbui input[type="text"], .nbui input[type="number"], .nbui select{
-      background:#0b0f14; border-color:#2b2f36; color:#e5e7eb;
+    #ts-ui{
+      --ts-bg: #0f1115;
+      --ts-surface: #111418;
+      --ts-surface-2: #0b0f14;
+      --ts-input-bg: #0b0f14;
+      --ts-border: #2b2f36;
+      --ts-text: #e7eaf0;
+      --ts-muted: #a6afbd;
+      --ts-link: #8ab4ff;
+      --ts-code-bg: #0b0f14;
+      --ts-code-fg: #e7eaf0;
+      --ts-accent: #3b82f6;   /* 主要強調色：按鈕、progress */
+      --ts-on-accent: #0b0f14;
+      --ts-focus: 0 0 0 2px rgba(59,130,246,.35);
+      --ts-progress-bg: #1a1f29;
+      --ts-table-head-bg: #121621;
     }
   }
-  html[data-theme="dark"] .nbui .card{ background:#111418; border-color:#2b2f36; color:#e5e7eb; }
-  html[data-theme="dark"] .nbui button{ background:#111418; border-color:#2b2f36; color:#e5e7eb; }
-  html[data-theme="dark"] .nbui button:hover{ background:#0b0f14; }
-  html[data-theme="dark"] .nbui pre.preview{ background:#0b0f14; border-color:#2b2f36; color:#e5e7eb; }
-  html[data-theme="dark"] .nbui input[type="text"],
-  html[data-theme="dark"] .nbui input[type="number"],
-  html[data-theme="dark"] .nbui select{
-    background:#0b0f14; border-color:#2b2f36; color:#e5e7eb;
+  html[data-theme="dark"] #ts-ui{
+    --ts-bg: #0f1115;
+    --ts-surface: #111418;
+    --ts-surface-2: #0b0f14;
+    --ts-input-bg: #0b0f14;
+    --ts-border: #2b2f36;
+    --ts-text: #e7eaf0;
+    --ts-muted: #a6afbd;
+    --ts-link: #8ab4ff;
+    --ts-code-bg: #0b0f14;
+    --ts-code-fg: #e7eaf0;
+    --ts-accent: #3b82f6;
+    --ts-on-accent: #0b0f14;
+    --ts-focus: 0 0 0 2px rgba(59,130,246,.35);
+    --ts-progress-bg: #1a1f29;
+    --ts-table-head-bg: #121621;
+  }
+
+  /* ===== Components inherit tokens ===== */
+  #ts-ui .ts-card{
+    background: var(--ts-surface);
+    border-color: var(--ts-border);
+    color: var(--ts-text);
+  }
+
+  #ts-ui .ts-label{ color: var(--ts-muted); }
+  #ts-ui .ts-hint{ color: var(--ts-muted); }
+
+  #ts-ui .ts-input > input,
+  #ts-ui .ts-input > select{
+    background: var(--ts-input-bg);
+    color: var(--ts-text);
+    border-color: var(--ts-border);
+  }
+  #ts-ui .ts-input > input::placeholder{ color: var(--ts-muted); }
+  #ts-ui .ts-input > input:focus,
+  #ts-ui .ts-input > select:focus{
+    outline: none;
+    box-shadow: var(--ts-focus);
+    border-color: color-mix(in oklab, var(--ts-accent) 60%, var(--ts-border));
+  }
+
+  #ts-ui .ts-btn-primary{
+    background: var(--ts-accent);
+    color: var(--ts-on-accent);
+    border-color: transparent;
+  }
+  #ts-ui .ts-btn-primary:hover{ filter: brightness(1.06); }
+  #ts-ui .ts-btn-primary:focus{ outline: none; box-shadow: var(--ts-focus); }
+
+  /* 表格（即時對照） */
+  #ts-ui #compare-box{
+    background: var(--ts-surface);
+    border-color: var(--ts-border);
+  }
+  #ts-ui #compare-box thead th{
+    background: var(--ts-table-head-bg);
+    color: var(--ts-text);
+  }
+  #ts-ui #compare-box td,
+  #ts-ui #compare-box th{
+    border-bottom: 1px solid var(--ts-border);
+  }
+
+  /* 進度條（跨瀏覽器） */
+  #ts-ui progress{ width:100%; height: 14px; background: var(--ts-progress-bg); border-radius: 8px; overflow: hidden; }
+  #ts-ui progress::-webkit-progress-bar{ background: var(--ts-progress-bg); }
+  #ts-ui progress::-webkit-progress-value{ background: var(--ts-accent); }
+  #ts-ui progress::-moz-progress-bar{ background: var(--ts-accent); }
+
+  /* code 與連結 */
+  #ts-ui code{
+    background: var(--ts-code-bg);
+    color: var(--ts-code-fg);
+    padding: .1em .35em;
+    border-radius: .35em;
+    border: 1px solid var(--ts-border);
+  }
+  #ts-ui a{ color: var(--ts-link); text-underline-offset: 2px; }
+
+  /* 選取反白 */
+  #ts-ui ::selection{
+    background: color-mix(in oklab, var(--ts-accent) 35%, transparent);
+  }
+
+  /* 小螢幕微調（確保深色 token 同步生效） */
+  @media (max-width:640px){
+    html[data-theme="dark"] #ts-ui .ts-card,
+    #ts-ui .ts-card{
+      background: var(--ts-surface);
+    }
   }
 </style>
 
