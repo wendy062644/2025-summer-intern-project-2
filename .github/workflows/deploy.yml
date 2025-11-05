@@ -1,4 +1,5 @@
 name: Deploy Jupyter Book to Pages
+
 on:
   push:
     branches: [main]
@@ -22,16 +23,15 @@ jobs:
 
       - name: Install Jupyter Book
         run: |
-          pip install -U jupyter-book
+          python -m pip install --upgrade pip
+          pip install "jupyter-book==1.0.4.post1"
 
-      - name: Build Jupyter Book (html or dirhtml 二擇一；若你有偏好就只留其一)
+      - name: Build Jupyter Book
         run: |
-          # 常見是 html；有些教學會用 dirhtml
-          jupyter-book build book/ --builder html || true
-          jupyter-book build book/ --builder dirhtml || true
+          jupyter-book build book/
 
-      - name: Find built site
-        id: find_site
+      - name: Locate built site (html or dirhtml)
+        id: find-site
         shell: bash
         run: |
           set -e
@@ -47,12 +47,12 @@ jobs:
           exit 1
 
       - name: Disable Jekyll
-        run: |
-          touch "${{ steps.find_site.outputs.site }}/.nojekyll"
+        run: touch "${{ steps.find-site.outputs.site }}/.nojekyll"
 
-      - uses: actions/upload-pages-artifact@v3
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          path: ${{ steps.find_site.outputs.site }}
+          path: ${{ steps.find-site.outputs.site }}
 
   deploy:
     needs: build
