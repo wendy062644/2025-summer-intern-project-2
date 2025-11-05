@@ -179,7 +179,7 @@ title: API
   #ts-ui .ts-btn-primary{
     background: var(--ts-accent);
     color: var(--ts-on-accent);
-    border-color: transparent;
+    border: 1px solid var(--ts-border);
   }
   #ts-ui .ts-btn-primary:hover{ filter: brightness(1.06); }
   #ts-ui .ts-btn-primary:focus{ outline: none; box-shadow: var(--ts-focus); }
