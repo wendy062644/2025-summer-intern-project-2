@@ -824,9 +824,8 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
           ],
           "tools": tools,
           "tool_choice": {"type": "function", "function": {"name": "return_translations"}},
-          "temperature": 0.2
+          # "temperature": 0.2  # ← 移除
         }
-        # 清除混用的 key，放正確的那個
         for k in ("max_tokens", "max_completion_tokens", "max_output_tokens"):
             body.pop(k, None)
         body[chat_tokens_key] = tokens
@@ -841,12 +840,12 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
           ],
           "tools": tools,
           "tool_choice": {"type": "function", "function": {"name": "return_translations"}},
-          "temperature": 0.2
+          # "temperature": 0.2  # ← 移除
         }
         for k in ("max_tokens", "max_completion_tokens", "max_output_tokens"):
             body.pop(k, None)
         body[resp_tokens_key] = tokens
-        # （可選）推理家族可以加 reasoning 設定；不需要也能跑
+        # reasoning 設定可留可去；若之後遇到 400 再拿掉
         if m.startswith(("gpt-5", "o4", "o3")):
             body.setdefault("reasoning", {"effort": "medium"})
         return body
