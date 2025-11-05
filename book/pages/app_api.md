@@ -775,18 +775,18 @@ def load_glossary_ods_bytes(ods_bytes: bytes)->List[Tuple[str,str]]:
 # ===== OpenAI Chat Completions（批次）=====
 async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:str,
                                               masked_texts:List[str], glossaries:List[Dict[str,str]]):
-    items=[]
-    for i,(t,g) in enumerate(zip(masked_texts, glossaries)):
-        items.append({"id": i, "text": t, "glossary": [f"{en} -> {zh}" for en, zh in g.items()]})
+    # 1) 準備資料
+    items = [{"id": i, "text": t, "glossary": [f"{en} -> {zh}" for en, zh in g.items()]}
+             for i,(t,g) in enumerate(zip(masked_texts, glossaries))]
 
     system_prompt = """你是台灣 GIS 在地化譯者，將多個獨立英文片段翻為自然專業的繁體中文（台灣）。
-    規則：
-    • 保留所有 ⟦MASK數字⟧；
-    • 不要解釋；
-    • 不要改動任何 HTML 標籤或 HTML 實體；
-    • 只輸出與輸入等長、同序的結果。"""
-    user_prompt = "請逐一翻譯 items。只需回傳 function 參數，不要輸出其他文字。\\n" + \
-              "items = " + json.dumps(items, ensure_ascii=False)
+規則：
+• 保留所有 ⟦MASK數字⟧；
+• 不要解釋；
+• 不要改動任何 HTML 標籤或 HTML 實體；
+• 只輸出與輸入等長、同序的結果。"""
+    user_prompt = "請逐一翻譯 items。只需回傳 function 參數，不要輸出其他文字。\n" + \
+                  "items = " + json.dumps(items, ensure_ascii=False)
 
     tools = [{
       "type": "function",
@@ -796,10 +796,7 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
         "parameters": {
           "type": "object",
           "properties": {
-            "translations": {
-              "type": "array",
-              "items": {"type": "string"}
-            }
+            "translations": {"type": "array", "items": {"type": "string"}}
           },
           "required": ["translations"],
           "additionalProperties": False
@@ -807,54 +804,147 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
       }
     }]
 
-    body = {
-      "model": model,
-      "messages": [
-        {"role": "system", "content": system_prompt},
-        {"role": "user",   "content": user_prompt}
-      ],
-      "tools": tools,
-      "tool_choice": {"type": "function", "function": {"name": "return_translations"}},
-      "temperature": 0.2,
-    }
+    # 2) 端點與 tokens 參數選擇
+    m = (model or "").lower()
+    new_family = m.startswith(("gpt-5", "gpt-4.1", "o4", "o3"))
 
     tokens = min(4000, 220 * max(4, len(masked_texts)))
-    m = (model or "").lower()
+    # chat.completions：舊家族多用 max_tokens，新家族常要求 max_completion_tokens
+    chat_tokens_key = "max_completion_tokens" if new_family else "max_tokens"
+    # responses：一律 max_output_tokens
+    resp_tokens_key = "max_output_tokens"
 
-    use_new_family = m.startswith(("gpt-5", "gpt-4.1", "o4", "o3"))
-    tokens_key = "max_completion_tokens" if use_new_family else "max_tokens"
+    # 3) 建立 request body（兩種端點）
+    def build_chat_body():
+        body = {
+          "model": model,
+          "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user",   "content": user_prompt}
+          ],
+          "tools": tools,
+          "tool_choice": {"type": "function", "function": {"name": "return_translations"}},
+          "temperature": 0.2
+        }
+        # 清除混用的 key，放正確的那個
+        for k in ("max_tokens", "max_completion_tokens", "max_output_tokens"):
+            body.pop(k, None)
+        body[chat_tokens_key] = tokens
+        return body
 
-    for k in ("max_tokens", "max_completion_tokens", "max_output_tokens"):
-        body.pop(k, None)
-    body[tokens_key] = tokens
+    def build_responses_body():
+        body = {
+          "model": model,
+          "input": [
+            {"role": "system", "content": [{"type":"text","text": system_prompt}]},
+            {"role": "user",   "content": [{"type":"input_text","text": user_prompt}]}
+          ],
+          "tools": tools,
+          "tool_choice": {"type": "function", "function": {"name": "return_translations"}},
+          "temperature": 0.2
+        }
+        for k in ("max_tokens", "max_completion_tokens", "max_output_tokens"):
+            body.pop(k, None)
+        body[resp_tokens_key] = tokens
+        # （可選）推理家族可以加 reasoning 設定；不需要也能跑
+        if m.startswith(("gpt-5", "o4", "o3")):
+            body.setdefault("reasoning", {"effort": "medium"})
+        return body
 
-    resp = await pyfetch(base_url.rstrip("/") + "/chat/completions",
-                     method="POST",
-                     headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-                     body=json.dumps(body))
-    data = await resp.json()
-    
-    if resp.status == 400:
-        msg = (data.get("error", {}) or {}).get("message", "")
-        if "Unsupported parameter" in msg or "not supported" in msg:
-            alt = "max_output_tokens" if tokens_key != "max_output_tokens" else "max_completion_tokens"
-            body.pop(tokens_key, None)
-            body[alt] = tokens
-            resp = await pyfetch(base_url.rstrip("/") + "/chat/completions",
-                                method="POST",
-                                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-                                body=json.dumps(body))
-            data = await resp.json()
+    async def post_json(path:str, body:dict):
+        resp = await pyfetch(base_url.rstrip("/") + path,
+                             method="POST",
+                             headers={"Authorization": f"Bearer {api_key}", "Content-Type":"application/json"},
+                             body=json.dumps(body))
+        data = await resp.json()
+        return resp.status, data
 
-    if resp.status >= 400:
-        raise RuntimeError(f"API Error {resp.status}: {data}")
+    # 4) 送出（新家族先走 responses，舊家族先走 chat），必要時自動 fallback
+    tried = []
+    async def try_responses():
+        status, data = await post_json("/responses", build_responses_body())
+        tried.append(("responses", status, data))
+        # 若 400 且訊息提到參數/端點不支援，再做微調重試
+        if status == 400:
+            msg = (data.get("error", {}) or {}).get("message", "")
+            if "max_output_tokens" in msg and "Unsupported" in msg:
+                body = build_responses_body()
+                # 部分代理商可能用 max_completion_tokens
+                body.pop(resp_tokens_key, None)
+                body["max_completion_tokens"] = tokens
+                return await post_json("/responses", body)
+        return status, data
 
-    msg = data["choices"][0]["message"]
-    tcalls = msg.get("tool_calls") or []
-    if not tcalls:
-        raise ValueError("模型未呼叫 function（無法取得結構化輸出）")
+    async def try_chat():
+        status, data = await post_json("/chat/completions", build_chat_body())
+        tried.append(("chat", status, data))
+        if status == 400:
+            msg = (data.get("error", {}) or {}).get("message", "")
+            if ("Unsupported parameter" in msg or "not supported" in msg) and "max_tokens" in msg:
+                body = build_chat_body()
+                # 換另一個 tokens key 再試一次
+                if chat_tokens_key == "max_completion_tokens":
+                    body.pop("max_completion_tokens", None); body["max_tokens"] = tokens
+                else:
+                    body.pop("max_tokens", None); body["max_completion_tokens"] = tokens
+                return await post_json("/chat/completions", body)
+            if "not compatible with the chat.completions" in msg.lower():
+                # 直接建議走 responses
+                return await try_responses()
+        return status, data
 
-    args_raw = tcalls[0]["function"]["arguments"] or "{}"
+    if new_family:
+        status, data = await try_responses()
+        if status >= 400:
+            # 再回退 chat 一次
+            status2, data2 = await try_chat()
+            if status2 >= 400:
+                raise RuntimeError(f"API Error {status2}: {data2}")
+            status, data = status2, data2
+    else:
+        status, data = await try_chat()
+        if status >= 400:
+            status2, data2 = await try_responses()
+            if status2 >= 400:
+                raise RuntimeError(f"API Error {status2}: {data2}")
+            status, data = status2, data2
+
+    # 5) 解析回傳（同時支援 chat 與 responses 結構）
+    def _extract_tool_args_from_chat(obj:dict)->Optional[str]:
+        try:
+            msg = obj["choices"][0]["message"]
+            tcalls = msg.get("tool_calls") or []
+            if not tcalls: return None
+            return tcalls[0]["function"]["arguments"]
+        except Exception:
+            return None
+
+    def _deep_find_arguments(o):
+        # 在 responses 的任意巢狀處找第一個 "arguments" (string) 值
+        if isinstance(o, dict):
+            if "arguments" in o and isinstance(o["arguments"], str):
+                return o["arguments"]
+            for v in o.values():
+                r = _deep_find_arguments(v)
+                if r is not None: return r
+        elif isinstance(o, list):
+            for v in o:
+                r = _deep_find_arguments(v)
+                if r is not None: return r
+        return None
+
+    args_raw = _extract_tool_args_from_chat(data)
+    if args_raw is None and "output" in data:
+        # Responses API：從 output 裡深搜 function.arguments
+        args_raw = _deep_find_arguments(data["output"])
+    if args_raw is None:
+        # 部分 Responses 容器把 message 放在 top-level "response"
+        if "response" in data:
+            args_raw = _deep_find_arguments(data["response"])
+
+    if not args_raw:
+        raise ValueError("模型未呼叫 function（找不到結構化輸出）。\ntrace=" + json.dumps({"tried": tried}, ensure_ascii=False))
+
     parsed = json.loads(args_raw)
     arr = parsed.get("translations")
     if not (isinstance(arr, list) and all(isinstance(x, str) for x in arr)):
