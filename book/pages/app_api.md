@@ -835,17 +835,20 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
         body = {
           "model": model,
           "input": [
-            {"role": "system", "content": [{"type":"text","text": system_prompt}]},
-            {"role": "user",   "content": [{"type":"input_text","text": user_prompt}]}
+            {"role": "system", "content": [
+                {"type": "input_text", "text": system_prompt}   # ← 這裡
+            ]},
+            {"role": "user",   "content": [
+                {"type": "input_text", "text": user_prompt}     # ← 這裡本來就對
+            ]}
           ],
           "tools": tools,
           "tool_choice": {"type": "function", "function": {"name": "return_translations"}},
-          # "temperature": 0.2  # ← 移除
         }
         for k in ("max_tokens", "max_completion_tokens", "max_output_tokens"):
             body.pop(k, None)
         body[resp_tokens_key] = tokens
-        # reasoning 設定可留可去；若之後遇到 400 再拿掉
+        # reasoning 對部分模型/代理不支援，可保留；若 400 再移除
         if m.startswith(("gpt-5", "o4", "o3")):
             body.setdefault("reasoning", {"effort": "medium"})
         return body
@@ -863,14 +866,18 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
     async def try_responses():
         status, data = await post_json("/responses", build_responses_body())
         tried.append(("responses", status, data))
-        # 若 400 且訊息提到參數/端點不支援，再做微調重試
         if status == 400:
             msg = (data.get("error", {}) or {}).get("message", "")
+            # 1) tokens key 兼容（你原本就有）
             if "max_output_tokens" in msg and "Unsupported" in msg:
                 body = build_responses_body()
-                # 部分代理商可能用 max_completion_tokens
                 body.pop(resp_tokens_key, None)
                 body["max_completion_tokens"] = tokens
+                return await post_json("/responses", body)
+            # 2) reasoning 兼容（新增這段）
+            if "reasoning" in msg.lower():
+                body = build_responses_body()
+                body.pop("reasoning", None)
                 return await post_json("/responses", body)
         return status, data
 
