@@ -8,127 +8,55 @@ title: API
 <style>
   /* —— 全部樣式只限制在 #ts-ui，並且用 --ts-* 變數，避免和主題衝突 —— */
   #ts-ui{
+    /* layout */
     --ts-gap: 12px;
     --ts-pad: 14px;
     --ts-radius: 12px;
+
+    /* colors (light default) */
     --ts-border: #e5e7eb;
-    --ts-bg: #fff;
-    --ts-muted: #6b7280;
+    --ts-bg: #ffffff;
+    --ts-surface: var(--ts-bg);
+    --ts-surface-2: var(--ts-bg);
+    --ts-input-bg: #ffffff;
     --ts-text: #111827;
+    --ts-muted: #6b7280;
+    --ts-link: #2563eb;
+
+    /* accents */
+    --ts-accent: #111827;
+    --ts-on-accent: #ffffff;
+    --ts-focus: 0 0 0 2px rgba(59,130,246,.35);
+
+    /* components */
+    --ts-code-bg: #f8fafc;
+    --ts-code-fg: var(--ts-text);
+    --ts-progress-bg: #f1f5f9;
+    --ts-table-head-bg: #f8fafc;
+
+    /* controls */
+    --ts-control-h: 36px;
+
     font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", "PingFang TC", "Microsoft JhengHei", sans-serif;
-    line-height: 1.35; margin: 8px 0 16px; color: var(--ts-text);
+    line-height: 1.35;
+    margin: 8px 0 16px;
+    color: var(--ts-text);
   }
+
+  /* 深色模式：同時支援 OS 偏好 與 html[data-theme="dark"] */
   @media (prefers-color-scheme: dark){
-    #ts-ui{
+    html:not([data-theme="light"]) #ts-ui{
       --ts-border: #2b2f36;
-      --ts-bg: #111418;
-      --ts-muted: #9aa3af;
-      --ts-text: #e5e7eb;
-    }
-  }
-  #ts-ui *, #ts-ui *::before, #ts-ui *::after{ box-sizing: border-box; }
-  #ts-ui .ts-card{
-    border:1px solid var(--ts-border); background:var(--ts-bg);
-    border-radius: var(--ts-radius); padding:16px; box-shadow:0 1px 2px rgba(0,0,0,.04);
-  }
-  #ts-ui .ts-title{ font-size:1.05rem; font-weight:600; margin:2px 0 10px; }
-  #ts-ui .ts-grid{
-    display:grid; grid-template-columns: 160px 1fr; gap:10px 14px; align-items:center;
-  }
-  #ts-ui .ts-label{ color:var(--ts-muted); font-size:.95rem; white-space:nowrap; }
-  #ts-ui .ts-input input,
-  #ts-ui .ts-input select{
-    width:100%; padding:8px 10px; border:1px solid var(--ts-border);
-    border-radius:10px; background:transparent; font-size:.95rem;
-  }
-  #ts-ui .ts-input select{
-    appearance:none; -webkit-appearance:none; -moz-appearance:none;
-  }
-  #ts-ui .ts-input input[type="file"]{ padding:6px; }
-  #ts-ui .ts-inline{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-  #ts-ui .ts-hint{ color:var(--ts-muted); font-size:.9rem; }
-  #ts-ui .ts-toolbar{ margin-top:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-  #ts-ui .ts-btn-primary{
-    appearance:none; border:1px solid var(--ts-border);
-    background:#111827; color:#fff; border-radius:10px; padding:8px 14px; font-weight:600; cursor:pointer;
-  }
-  @media (prefers-color-scheme: dark){ #ts-ui .ts-btn-primary{ background:#e5e7eb; color:#111418; } }
-  #ts-ui .ts-btn-primary:hover{ filter:brightness(0.95); }
-  #ts-ui .ts-divider{ height:1px; background:var(--ts-border); margin:12px 0; border:0; }
-
-  /* 附屬區塊（ID 不變，但樣式仍只在 #ts-ui 作用） */
-  #ts-ui #ts-progress-wrap{ margin:12px 0; }
-  #ts-ui #compare-box{
-    border:1px solid var(--ts-border); border-radius:12px; padding:8px 12px; margin-top:8px; background:var(--ts-bg);
-  }
-  #ts-ui #compare-box table{ width:100%; border-collapse:collapse; font-size:.95rem; }
-  #ts-ui #compare-box th, #ts-ui #compare-box td{ padding:6px 6px; border-bottom:1px solid var(--ts-border); text-align:left; }
-  #ts-ui #compare-box thead th{ font-weight:600; }
-  #ts-ui #ts-ui-msg{ color:var(--ts-muted); font-size:.95rem; margin-top:8px; }
-
-  /* 手機版：單欄 */
-  @media (max-width: 640px){
-    #ts-ui .ts-grid{ grid-template-columns: 1fr; }
-    #ts-ui .ts-label{ margin-top:6px; }
-  }
-
-  #ts-ui .ts-row-2{
-    display: grid;
-    grid-template-columns: var(--ts-col1, 1fr) var(--ts-col2, 1fr);
-    gap: 10px 14px;
-    align-items: center;
-  }
-  #ts-ui .ts-6-4{ --ts-col1: 6fr; --ts-col2: 4fr; }
-  #ts-ui .ts-4-6{ --ts-col1: 4fr; --ts-col2: 6fr; }
-
-  /* 每一欄的欄位（標籤在上、輸入在下） */
-  #ts-ui .ts-field{
-    display: flex; flex-direction: column; gap: 6px;
-  }
-  #ts-ui .ts-field .ts-label{ margin: 0; }
-
-  /* 手機版改為單欄堆疊 */
-  @media (max-width: 640px){
-    #ts-ui .ts-row-2{ grid-template-columns: 1fr; }
-  }
-
-  #ts-ui .ts-row-3{
-    display: grid;
-    grid-template-columns: var(--ts-col1, 1fr) var(--ts-col2, 1fr) var(--ts-col3, 1fr);
-    gap: 10px 14px;
-    align-items: center;
-  }
-  #ts-ui .ts-3-4-3{ --ts-col1: 3fr; --ts-col2: 4fr; --ts-col3: 3fr; }
-
-    /* 手機版改為單欄 */
-  @media (max-width: 640px){
-    #ts-ui .ts-row-3{ grid-template-columns: 1fr; }
-  }
-  #ts-ui .left-col{ grid-column: 1 / 3; }
-  
-  @media (max-width:640px){
-    #ts-ui{
-      grid-template-columns: 1fr; /* 單欄 */
-    }
-    #ts-ui .left-col,
-    #ts-ui .right-col{
-      grid-column: 1 / -1; /* 滿版 */
-    }
-  }
-
-  @media (prefers-color-scheme: dark){
-    #ts-ui{
       --ts-bg: #0f1115;
       --ts-surface: #111418;
       --ts-surface-2: #0b0f14;
       --ts-input-bg: #0b0f14;
-      --ts-border: #2b2f36;
       --ts-text: #e7eaf0;
       --ts-muted: #a6afbd;
       --ts-link: #8ab4ff;
       --ts-code-bg: #0b0f14;
       --ts-code-fg: #e7eaf0;
-      --ts-accent: #3b82f6;   /* 主要強調色：按鈕、progress */
+      --ts-accent: #3b82f6;
       --ts-on-accent: #0b0f14;
       --ts-focus: 0 0 0 2px rgba(59,130,246,.35);
       --ts-progress-bg: #1a1f29;
@@ -136,11 +64,11 @@ title: API
     }
   }
   html[data-theme="dark"] #ts-ui{
+    --ts-border: #2b2f36;
     --ts-bg: #0f1115;
     --ts-surface: #111418;
     --ts-surface-2: #0b0f14;
     --ts-input-bg: #0b0f14;
-    --ts-border: #2b2f36;
     --ts-text: #e7eaf0;
     --ts-muted: #a6afbd;
     --ts-link: #8ab4ff;
@@ -153,51 +81,108 @@ title: API
     --ts-table-head-bg: #121621;
   }
 
-  /* ===== Components inherit tokens ===== */
+  #ts-ui *, #ts-ui *::before, #ts-ui *::after{ box-sizing: border-box; }
+
+  /* 卡片與標題 */
   #ts-ui .ts-card{
-    background: var(--ts-surface);
-    border-color: var(--ts-border);
+    border:1px solid var(--ts-border);
+    background:var(--ts-surface);
+    color:var(--ts-text);
+    border-radius: var(--ts-radius);
+    padding:16px;
+    box-shadow:0 1px 2px rgba(0,0,0,.04);
+  }
+  #ts-ui .ts-title{ font-size:1.05rem; font-weight:600; margin:2px 0 10px; }
+
+  /* grid helpers */
+  #ts-ui .ts-grid{
+    display:grid; grid-template-columns: 160px 1fr; gap:10px 14px; align-items:center;
+  }
+  #ts-ui .ts-row-2{
+    display: grid;
+    grid-template-columns: var(--ts-col1, 1fr) var(--ts-col2, 1fr);
+    gap: 10px 14px; align-items: center;
+  }
+  #ts-ui .ts-6-4{ --ts-col1: 6fr; --ts-col2: 4fr; }
+  #ts-ui .ts-4-6{ --ts-col1: 4fr; --ts-col2: 6fr; }
+  #ts-ui .ts-row-3{
+    display: grid;
+    grid-template-columns: var(--ts-col1, 1fr) var(--ts-col2, 1fr) var(--ts-col3, 1fr);
+    gap: 10px 14px; align-items: center;
+  }
+  #ts-ui .ts-3-4-3{ --ts-col1: 3fr; --ts-col2: 4fr; --ts-col3: 3fr; }
+  #ts-ui .left-col{ grid-column: 1 / 3; }
+
+  /* fields */
+  #ts-ui .ts-field{ display: flex; flex-direction: column; gap: 6px; }
+  #ts-ui .ts-label{ color: var(--ts-muted); font-size:.95rem; white-space:nowrap; margin: 0; }
+  #ts-ui .ts-inline{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+
+  /* inputs */
+  #ts-ui .ts-input input,
+  #ts-ui .ts-input select{
+    width:100%;
+    height: var(--ts-control-h);
+    line-height: calc(var(--ts-control-h) - 2px);
+    padding:8px 10px;
+    border:1px solid var(--ts-border);
+    border-radius:10px;
+    background:var(--ts-input-bg);
     color: var(--ts-text);
+    font-size:.95rem;
+  }
+  #ts-ui .ts-input input::placeholder{ color: var(--ts-muted); }
+  #ts-ui .ts-input input[type="file"]{ padding:6px; height:auto; line-height:normal; }
+
+  /* select: 移除原生外觀 + 自繪箭頭 */
+  #ts-ui .ts-input select{
+    appearance:none; -webkit-appearance:none; -moz-appearance:none;
+    padding-right: 34px; /* 給箭頭空間 */
+    background:
+      linear-gradient(45deg, transparent 50%, var(--ts-muted) 50%) right 12px center/6px 6px no-repeat,
+      linear-gradient(-45deg, transparent 50%, var(--ts-muted) 50%) right 6px center/6px 6px no-repeat,
+      linear-gradient(var(--ts-muted) 0 0) right 1.8rem center/1px 60% no-repeat,
+      var(--ts-input-bg);
   }
 
-  #ts-ui .ts-label{ color: var(--ts-muted); }
-  #ts-ui .ts-hint{ color: var(--ts-muted); }
-
-  #ts-ui .ts-input > input,
-  #ts-ui .ts-input > select{
-    background: var(--ts-input-bg);
-    color: var(--ts-text);
-    border-color: var(--ts-border);
-  }
-  #ts-ui .ts-input > input::placeholder{ color: var(--ts-muted); }
-  #ts-ui .ts-input > input:focus,
-  #ts-ui .ts-input > select:focus{
+  /* focus 統一 */
+  #ts-ui .ts-input input:focus,
+  #ts-ui .ts-input select:focus{
     outline: none;
     box-shadow: var(--ts-focus);
     border-color: color-mix(in oklab, var(--ts-accent) 60%, var(--ts-border));
   }
 
+  /* Model 選擇群組：select 及 custom 欄位一致寬高 */
+  #ts-ui #modelSel{ flex:1; min-width:220px; height: var(--ts-control-h); }
+  #ts-ui #modelCustom{
+    display:none; /* 由 JS 控制顯示 */
+    flex:1; min-width:220px; height: var(--ts-control-h);
+  }
+
+  /* buttons */
   #ts-ui .ts-btn-primary{
-    background: var(--ts-accent);
-    color: var(--ts-on-accent);
+    appearance:none; border:1px solid var(--ts-border);
+    background: var(--ts-accent); color: var(--ts-on-accent);
+    border-radius:10px; padding:8px 14px; font-weight:600; cursor:pointer;
     border-color: transparent;
   }
   #ts-ui .ts-btn-primary:hover{ filter: brightness(1.06); }
   #ts-ui .ts-btn-primary:focus{ outline: none; box-shadow: var(--ts-focus); }
 
-  /* 表格（即時對照） */
+  /* divider */
+  #ts-ui .ts-divider{ height:1px; background:var(--ts-border); margin:12px 0; border:0; }
+
+  /* 對照表（即時） */
   #ts-ui #compare-box{
-    background: var(--ts-surface);
-    border-color: var(--ts-border);
+    border:1px solid var(--ts-border); border-radius:12px; padding:8px 12px; margin-top:8px; background:var(--ts-surface);
   }
-  #ts-ui #compare-box thead th{
-    background: var(--ts-table-head-bg);
-    color: var(--ts-text);
-  }
-  #ts-ui #compare-box td,
-  #ts-ui #compare-box th{
-    border-bottom: 1px solid var(--ts-border);
-  }
+  #ts-ui #compare-box table{ width:100%; border-collapse:collapse; font-size:.95rem; }
+  #ts-ui #compare-box th, #ts-ui #compare-box td{ padding:6px 6px; border-bottom:1px solid var(--ts-border); text-align:left; }
+  #ts-ui #compare-box thead th{ font-weight:600; background: var(--ts-table-head-bg); color: var(--ts-text); }
+
+  /* 訊息列 */
+  #ts-ui #ts-ui-msg{ color:var(--ts-muted); font-size:.95rem; margin-top:8px; }
 
   /* 進度條（跨瀏覽器） */
   #ts-ui progress{ width:100%; height: 14px; background: var(--ts-progress-bg); border-radius: 8px; overflow: hidden; }
@@ -216,28 +201,28 @@ title: API
   #ts-ui a{ color: var(--ts-link); text-underline-offset: 2px; }
 
   /* 選取反白 */
-  #ts-ui ::selection{
-    background: color-mix(in oklab, var(--ts-accent) 35%, transparent);
-  }
+  #ts-ui ::selection{ background: color-mix(in oklab, var(--ts-accent) 35%, transparent); }
 
-  /* 小螢幕微調（確保深色 token 同步生效） */
-  @media (max-width:640px){
-    html[data-theme="dark"] #ts-ui .ts-card,
-    #ts-ui .ts-card{
-      background: var(--ts-surface);
-    }
+  /* RWD：手機單欄 */
+  @media (max-width: 640px){
+    #ts-ui .ts-grid{ grid-template-columns: 1fr; }
+    #ts-ui .ts-label{ margin-top:6px; }
+    #ts-ui .ts-row-2, #ts-ui .ts-row-3{ grid-template-columns: 1fr; }
+    #ts-ui .left-col, #ts-ui .right-col{ grid-column: 1 / -1; }
   }
 </style>
 
 <div id="ts-ui">
   <div class="ts-card">
     <div class="ts-title">API 設定</div>
+
     <div class="ts-field" style="margin-bottom:10px;">
       <label class="ts-label" for="apiKey">API Key</label>
       <div class="ts-input">
         <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
       </div>
     </div>
+
     <div class="ts-row-2 ts-6-4" style="margin-top:10px;">
       <div class="ts-field">
         <label class="ts-label" for="baseUrl">Base URL</label>
@@ -245,128 +230,129 @@ title: API
           <input type="text" id="baseUrl" value="https://api.openai.com/v1">
         </div>
       </div>
+
       <div class="ts-field">
-  <label class="ts-label" for="modelSel">Model</label>
-  <div class="ts-input">
-    <div class="ts-inline" style="width:100%;">
-      <select id="modelSel" style="flex:1;min-width:220px;">
-        <optgroup label="GPT-5">
-          <option value="gpt-5">gpt-5</option>
-          <option value="gpt-5-mini">gpt-5-mini</option>
-          <option value="gpt-5-nano">gpt-5-nano</option>
-        </optgroup>
-        <optgroup label="GPT-4.1">
-          <option value="gpt-4.1">gpt-4.1</option>
-          <option value="gpt-4.1-mini" selected>gpt-4.1-mini</option>
-          <option value="gpt-4.1-nano">gpt-4.1-nano</option>
-        </optgroup>
-        <optgroup label="GPT-4o">
-          <option value="gpt-4o">gpt-4o</option>
-          <option value="gpt-4o-mini">gpt-4o-mini</option>
-        </optgroup>
-        <optgroup label="Reasoning">
-          <option value="o4-mini">o4-mini</option>
-          <option value="o3-mini">o3-mini</option>
-        </optgroup>
-        <optgroup label="Legacy">
-          <option value="gpt-4-turbo">gpt-4-turbo</option>
-          <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
-        </optgroup>
-        <optgroup label="自訂">
-          <option value="__custom__">其他</option>
-        </optgroup>
-      </select>
-      <!-- 選「其他」時顯示 -->
-      <input id="modelCustom" type="text"
-             placeholder="例如：my-org/gpt-xy-2025-10-15"
-             style="display:none;flex:1;">
+        <label class="ts-label" for="modelSel">Model</label>
+        <div class="ts-input">
+          <div class="ts-inline" style="width:100%;">
+            <select id="modelSel">
+              <optgroup label="GPT-5">
+                <option value="gpt-5">gpt-5</option>
+                <option value="gpt-5-mini">gpt-5-mini</option>
+                <option value="gpt-5-nano">gpt-5-nano</option>
+              </optgroup>
+              <optgroup label="GPT-4.1">
+                <option value="gpt-4.1">gpt-4.1</option>
+                <option value="gpt-4.1-mini" selected>gpt-4.1-mini</option>
+                <option value="gpt-4.1-nano">gpt-4.1-nano</option>
+              </optgroup>
+              <optgroup label="GPT-4o">
+                <option value="gpt-4o">gpt-4o</option>
+                <option value="gpt-4o-mini">gpt-4o-mini</option>
+              </optgroup>
+              <optgroup label="Reasoning">
+                <option value="o4-mini">o4-mini</option>
+                <option value="o3-mini">o3-mini</option>
+              </optgroup>
+              <optgroup label="Legacy">
+                <option value="gpt-4-turbo">gpt-4-turbo</option>
+                <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+              </optgroup>
+              <optgroup label="自訂">
+                <option value="__custom__">其他</option>
+              </optgroup>
+            </select>
+            <input id="modelCustom" type="text" placeholder="例如：my-org/gpt-xy-2025-10-15">
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-    </div>
+
     <hr class="ts-divider">
+
     <div class="ts-title">處理參數</div>
     <div class="ts-row-3 ts-3-4-3">
-    <!-- 左：Batch (3) -->
-    <div class="ts-field">
+      <div class="ts-field">
         <label class="ts-label" for="batch">Batch</label>
         <div class="ts-input">
-        <input type="number" id="batch" value="32" min="1" max="64">
+          <input type="number" id="batch" value="32" min="1" max="64">
         </div>
-    </div>
-    <!-- 中：處理筆數上限 (3) -->
-    <div class="ts-field">
+      </div>
+
+      <div class="ts-field">
         <label class="ts-label" for="limitN">處理筆數上限</label>
         <div class="ts-input ts-inline">
-        <input type="number" id="limitN" value="0" style="max-width:220px;">
-        <span id="countInfo" class="ts-hint"> / 0</span>
+          <input type="number" id="limitN" value="0" style="max-width:220px;">
+          <span id="countInfo" class="ts-hint"> / 0</span>
         </div>
-    </div>
-    <!-- 右：.ts 檔（上傳） (4) -->
-    <div class="ts-field">
+      </div>
+
+      <div class="ts-field">
         <label class="ts-label" for="tsFile">.ts 檔（上傳）</label>
         <div class="ts-input">
-        <input type="file" id="tsFile" accept=".ts">
+          <input type="file" id="tsFile" accept=".ts">
         </div>
+      </div>
     </div>
-    </div>
+
     <hr class="ts-divider">
+
     <div class="ts-title">輸入檔案</div>
     <div class="ts-row-2" style="--ts-col1: 7fr; --ts-col2: 3fr;">
-    <!-- 左：檔案上傳 -->
-    <div class="ts-field">
+      <div class="ts-field">
         <label class="ts-label" for="glsFile">glossary（CSV / ODS）</label>
         <div class="ts-input">
-        <input type="file" id="glsFile" accept=".csv,.ods" multiple>
+          <input type="file" id="glsFile" accept=".csv,.ods" multiple>
         </div>
-    </div>
-    <!-- 右：執行翻譯（滿寬按鈕） -->
-    <div class="ts-field">
+      </div>
+
+      <div class="ts-field">
         <label class="ts-label" style="visibility:hidden;">執行翻譯</label>
         <div class="ts-input">
-        <button id="run-btn" class="ts-btn-primary" style="width:100%;">執行翻譯</button>
+          <button id="run-btn" class="ts-btn-primary" style="width:100%;">執行翻譯</button>
         </div>
-    </div>
-    <!-- 底下補一行提示：對齊右欄 -->
-    <div class="ts-hint right-col" style="margin-top:6px;">
+      </div>
+
+      <div class="ts-hint right-col" style="margin-top:6px;">
         欄位：<code>en, zh</code> 或 <code>英文名稱, 中文名稱</code>
-    </div>
+      </div>
     </div>
 
-  <!-- 進度條（ID 保持不變） -->
-  <div id="ts-progress-wrap" style="display:none;">
-    <div class="ts-inline">
-      <progress id="ts-progress" value="0" max="100" style="width:100%;"></progress>
-      <span id="ts-progress-label" style="font-variant-numeric: tabular-nums;">0 / 0</span>
+    <!-- 進度條 -->
+    <div id="ts-progress-wrap" style="display:none;">
+      <div class="ts-inline">
+        <progress id="ts-progress" value="0" max="100" style="width:100%;"></progress>
+        <span id="ts-progress-label" style="font-variant-numeric: tabular-nums;">0 / 0</span>
+      </div>
     </div>
+
+    <!-- 對照表 -->
+    <div id="compare-box" style="display:none;">
+      <div style="font-size:0.95rem;color:var(--ts-text);margin-bottom:4px;">翻譯對照（即時刷新）</div>
+      <div style="max-height: 360px; overflow:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:50%;">原文</th>
+              <th style="width:50%;">譯文</th>
+            </tr>
+          </thead>
+          <tbody id="compare-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="ts-ui-msg"></div>
   </div>
-
-  <!-- 對照表（ID 保持不變） -->
-  <div id="compare-box" style="display:none;">
-    <div style="font-size:0.95rem;color:var(--ts-text);margin-bottom:4px;">翻譯對照（即時刷新）</div>
-    <div style="max-height: 360px; overflow:auto;">
-      <table>
-        <thead>
-          <tr>
-            <th style="width:50%;">原文</th>
-            <th style="width:50%;">譯文</th>
-          </tr>
-        </thead>
-        <tbody id="compare-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <div id="ts-ui-msg"></div>
 </div>
 
 <!-- ===== Pyodide ===== -->
 <script type="module">
 import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.mjs";
 const pyodide = await loadPyodide();
-
 await pyodide.loadPackage("micropip");
 
+/* 計算 .ts 中需翻譯的筆數，綁定 limitN 上限 */
 (function setupTsCounter(){
   const tsFile   = document.getElementById('tsFile');
   const limitN   = document.getElementById('limitN');
@@ -439,6 +425,7 @@ await pyodide.loadPackage("micropip");
   limitN.addEventListener('input', clampLimit);
 })();
 
+/* 「自訂 model」切換：顯示/隱藏輸入框 */
 (function setupModelCustom(){
   const sel = document.getElementById('modelSel');
   const custom = document.getElementById('modelCustom');
@@ -450,6 +437,8 @@ await pyodide.loadPackage("micropip");
 })();
 
 const $msg = document.getElementById("ts-ui-msg");
+
+/* ========= Python 區 ========= */
 try {
   await pyodide.runPythonAsync(String.raw`
 import asyncio, json, re, io, base64, traceback, html, csv, zipfile
@@ -459,58 +448,44 @@ from js import document
 from pyodide.http import pyfetch
 from pyodide.ffi import create_proxy
 
-from typing import Optional
-
 try:
     from opencc import OpenCC
 except ModuleNotFoundError:
     import micropip
-    # 指定版本較穩
     await micropip.install("opencc-python-reimplemented==0.1.7")
     from opencc import OpenCC
 
 _OPENCC = OpenCC("s2twp")  # 簡→繁（台灣用語）
-
-_TW_PROTECT_TERMS = [
-    "演算法",
-]
+_TW_PROTECT_TERMS = ["演算法"]
+_COORD_RE = re.compile(r"坐標")
 
 def to_zh_tw(s: Optional[str]) -> str:
-    if not s:
-        return ""
+    if not s: return ""
     text = s
-
     placeholders = {}
     for i, term in enumerate(_TW_PROTECT_TERMS):
-        key = f"⟦TWTERM{i}⟧"  # 不與你原本 ⟦MASKn⟧ 衝突
+        key = f"⟦TWTERM{i}⟧"
         placeholders[key] = term
         text = text.replace(term, key)
-
     try:
         text = _OPENCC.convert(text)
     except Exception:
         pass
-
     for key, term in placeholders.items():
         text = text.replace(key, term)
-
     return text
 
-_COORD_RE = re.compile(r"坐標")
-
 def normalize_zh(s: Optional[str]) -> str:
-    if not s:
-        return ""
+    if not s: return ""
     try:
         return _COORD_RE.sub("座標", s)
     except Exception:
         return s
 
-# ===== UI：訊息列 =====
+# ===== UI：訊息 / 進度 / 對照 =====
 def _set_ui_msg(msg_html: str):
     document.getElementById("ts-ui-msg").innerHTML = msg_html
 
-# ===== UI：進度條 & 對照表 =====
 def _progress_setup(total:int):
     wrap = document.getElementById("ts-progress-wrap")
     bar = document.getElementById("ts-progress")
@@ -530,7 +505,6 @@ def _compare_reset():
     box = document.getElementById("compare-box")
     box.style.display = "block"
     tbody = document.getElementById("compare-tbody")
-    # 清空舊列
     while tbody.firstChild:
         tbody.removeChild(tbody.firstChild)
 
@@ -544,16 +518,14 @@ def _compare_add(src_text:str, zh_text:str):
         td = document.createElement("td")
         td.style.padding = "4px"
         td.style.borderBottom = "1px solid #eee"
-        td.textContent = txt  # 用 textContent 避免 HTML 注入
+        td.textContent = txt
         return td
 
     tr.appendChild(_td(src_text or ""))
     tr.appendChild(_td(zh_text or ""))
     tbody.appendChild(tr)
 
-    # 自動滾動到表格底部
     try:
-        # compare-box 的第 2 個子元素是帶滾動的 div
         scroller = box.children.item(1)
         if scroller:
             scroller.scrollTop = scroller.scrollHeight
@@ -594,22 +566,16 @@ async def _read_file_text(input_id: str)->Optional[str]:
     buf = await files.item(0).arrayBuffer()
     return bytes(buf.to_py()).decode("utf-8", "ignore")
 
-async def _read_file_bytes(input_id: str)->Optional[bytes]:
-    files = document.getElementById(input_id).files
-    if not files or files.length==0: return None
-    buf = await files.item(0).arrayBuffer()
-    return bytes(buf.to_py())
-
 def _build_download_link(filename: str, content_bytes: bytes) -> str:
     b64 = base64.b64encode(content_bytes).decode("utf-8")
     return f'<a download="{filename}" href="data:application/octet-stream;base64,{b64}">⬇️ 下載 {filename}</a>'
 
-# ===== 保留 DOCTYPE =====
+# ===== DOCTYPE =====
 def _read_doctype(xml_text: str) -> str:
     m = re.search(r'<!DOCTYPE[^>]+>', xml_text)
     return m.group(0) if m else ""
 
-# ===== 遮罩/還原（HTML/實體/%n/%1/%L1/{0} 等）=====
+# ===== 遮罩/還原（HTML & 佔位）=====
 _MASK_PAT = re.compile(
     r'(</?[A-Za-z][^>]*>|&lt;/?[A-Za-z][^&]*?&gt;|%L\d+|%\d+|%n|\{\d+\}|&(?:[A-Za-z]+|#\d+|#x[0-9A-Fa-f]+);)',
     re.IGNORECASE
@@ -631,16 +597,14 @@ def _et_ready(s:str)->str:
     except Exception: return s
 
 def needs_translation(en_text: Optional[str]) -> bool:
-    if not en_text or not en_text.strip():
-        return False
-    if re.fullmatch(r"[\s\d\W%{}]+", en_text):
-        return False
+    if not en_text or not en_text.strip(): return False
+    if re.fullmatch(r"[\\s\\d\\W%{}]+", en_text): return False
     return True
 
-# ===== LCS 詞庫匹配（不依賴 pandas）=====
-_SEP_RE = re.compile(r"[-\s/_.\\]+")
+# ===== LCS 詞庫匹配（無 pandas 依賴）=====
+_SEP_RE = re.compile(r"[-\\s/_.\\\\]+")
 def soft_norm(s:str)->str: return _SEP_RE.sub(" ", s.lower()).strip()
-_TOKEN_RE = re.compile(r"[A-Za-z0-9]+(?:[\\/_.-][A-Za-z0-9]+)*")
+_TOKEN_RE = re.compile(r"[A-Za-z0-9]+(?:[\\\\/_.-][A-Za-z0-9]+)*")
 
 class LCSMatcher:
     def __init__(self, pairs: List[Tuple[str,str]], min_token_len:int=4, min_lcs_len:int=4):
@@ -677,7 +641,7 @@ class LCSMatcher:
                     return kk, sub
             return 0,""
         for r in cand:
-            kk, sub = anchored_prefix_sub_in(t_norm, r["en_norm"])
+            kk, _ = anchored_prefix_sub_in(t_norm, r["en_norm"])
             if kk >= self.min_lcs_len:
                 res.append({"token":token,"en":r["en"],"zh":r["zh"],"lcs_len":kk})
         res.sort(key=lambda d: (-d["lcs_len"], len(d["en"])))
@@ -713,26 +677,22 @@ class LCSMatcher:
 
 # ===== 讀 CSV / ODS =====
 def load_glossary_csv_text(csv_text: Optional[str]) -> List[Tuple[str,str]]:
-    if not csv_text:
-        return []
+    if not csv_text: return []
     rdr = csv.DictReader(io.StringIO(csv_text))
-    if not rdr.fieldnames:
-        return []
+    if not rdr.fieldnames: return []
     col_en = col_zh = None
     for c in rdr.fieldnames or []:
         cc = (c or "").strip()
         if cc in ("en", "英文名稱"): col_en = c
         if cc in ("zh", "中文名稱"): col_zh = c
-    if not col_en or not col_zh:
-        return []
+    if not col_en or not col_zh: return []
     pairs, seen = [], set()
     for row in rdr:
         en = (row.get(col_en) or "").strip()
         zh = (row.get(col_zh) or "").strip()
         if en and zh and en not in seen:
             zh = normalize_zh(to_zh_tw(zh))
-            pairs.append((en, zh))
-            seen.add(en)
+            pairs.append((en, zh)); seen.add(en)
     return pairs
 
 def load_glossary_ods_bytes(ods_bytes: bytes)->List[Tuple[str,str]]:
@@ -781,13 +741,13 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
         items.append({"id": i, "text": t, "glossary": [f"{en} -> {zh}" for en, zh in g.items()]})
 
     system_prompt = """你是台灣 GIS 在地化譯者，將多個獨立英文片段翻為自然專業的繁體中文（台灣）。
-    規則：
-    • 保留所有 ⟦MASK數字⟧；
-    • 不要解釋；
-    • 不要改動任何 HTML 標籤或 HTML 實體；
-    • 只輸出與輸入等長、同序的結果。"""
-    user_prompt = "請逐一翻譯 items。只需回傳 function 參數，不要輸出其他文字。\\n" + \
-              "items = " + json.dumps(items, ensure_ascii=False)
+規則：
+• 保留所有 ⟦MASK數字⟧；
+• 不要解釋；
+• 不要改動任何 HTML 標籤或 HTML 實體；
+• 只輸出與輸入等長、同序的結果。"""
+    user_prompt = "請逐一翻譯 items。只需回傳 function 參數，不要輸出其他文字。\n" + \
+                  "items = " + json.dumps(items, ensure_ascii=False)
 
     tools = [{
       "type": "function",
@@ -844,7 +804,7 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
 
     return arr
 
-# ===== 主流程（加入即時對照與進度）=====
+# ===== 主流程（即時對照＋進度）=====
 async def run_translation_pipeline_async(api_key:str, base_url:str, model:str,
                                          ts_text:str, glossary_pairs:List[Tuple[str,str]],
                                          batch_size:int=32, limit_n:int=0) -> bytes:
@@ -853,7 +813,6 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model:str,
     messages = root.findall(".//message")
     matcher = LCSMatcher(glossary_pairs, min_token_len=4, min_lcs_len=4)
 
-    # 收集任務
     tasks=[]
     for m in messages:
         src=m.find("source")
@@ -861,13 +820,12 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model:str,
         if needs_translation(src.text):
             tasks.append((m, src.text, m.get("numerus")=="yes"))
         if limit_n > 0 and len(tasks) >= limit_n:
-          break
+            break
 
     finished=0; total=len(tasks)
     if total==0:
         return ET.tostring(root, encoding="utf-8")
 
-    # 初始化 UI
     _compare_reset()
     _progress_setup(total)
 
@@ -882,13 +840,12 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model:str,
 
         try:
             zh_list = await call_chat_completions_batch_pyfetch(api_key, base_url, model, masked_texts, glossaries)
-        except Exception as e:
+        except Exception:
             zh_list=[]
             for masked, g in zip(masked_texts, glossaries):
                 one = await call_chat_completions_batch_pyfetch(api_key, base_url, model, [masked], [g])
                 zh_list.append(one[0])
 
-        # 寫回 XML，並即時輸出「原文／譯文」對照與進度
         for (m, src_text, is_num), zh_raw, mp in zip(batch, zh_list, maps):
             trans = m.find("translation")
             if trans is None:
@@ -903,11 +860,10 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model:str,
                     f.text = zh
             else:
                 trans.text = zh
-            if "type" in trans.attrib: trans.attrib.pop("type", None)
+            if "type" in trans.attrib:
+                trans.attrib.pop("type", None)
 
-            # 即時對照（翻譯前 / 翻譯後）
             _compare_add(src_text, zh)
-
             finished += 1
             _progress_tick(finished, total)
 
@@ -915,11 +871,13 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model:str,
 
     xml_bytes = ET.tostring(root, encoding="utf-8")
     head = b'<?xml version="1.0" encoding="utf-8"?>'
-    if doctype: xml_bytes = head + (doctype).encode("utf-8") + xml_bytes
-    else: xml_bytes = head + b"\\n" + xml_bytes
+    if doctype:
+        xml_bytes = head + doctype.encode("utf-8") + xml_bytes
+    else:
+        xml_bytes = head + b"\n" + xml_bytes
     return xml_bytes
 
-# ===== 點擊事件 =====
+# ===== 事件 =====
 _BUSY=False
 async def _on_click(evt=None):
     global _BUSY
@@ -934,8 +892,7 @@ async def _on_click(evt=None):
         if model == "__custom__":
             model = document.getElementById("modelCustom").value.strip()
         if not model:
-            _set_ui_msg("<span style='color:#b00'>請選擇或輸入 model id</span>")
-            return
+            _set_ui_msg("<span style='color:#b00'>請選擇或輸入 model id</span>"); return
         batch = int(document.getElementById("batch").value or "32")
         limitN = int(document.getElementById("limitN").value or "200")
         if not api:
@@ -954,8 +911,6 @@ async def _on_click(evt=None):
         )
 
         out_name = "qgis_zh-Hant.ts"
-        ts_files = document.getElementById("tsFile").files
-
         link = _build_download_link(out_name, xml_bytes)
         _set_ui_msg(link + "　<span style='color:#0a0'>完成！</span>")
     except Exception as e:
@@ -969,6 +924,6 @@ document.getElementById("run-btn").addEventListener("click", _BTN_PROXY)
 `);
 } catch (e) {
   console.error(e);
-  $msg.innerHTML = `<span style="color:#b00">Python 載入失敗：${String(e)}</span>`;
+  $msg.innerHTML = `<span style="color:#b00">Python 載入失敗：${String(e)}}</span>`;
 }
 </script>
