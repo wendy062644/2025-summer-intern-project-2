@@ -18,8 +18,7 @@ html:
   use_edit_page_button: false
 
 sphinx:
-  extra_extensions:
-    - jupyterlite_sphinx
+  extra_extensions: []
   config:
     copyright: "2025 Yu-Lin Chen"
     html_extra_path: ["assets"]
