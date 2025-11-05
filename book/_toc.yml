@@ -3,6 +3,8 @@ root: pages/readme
 chapters:
   - file: pages/intro
     title: 軟體介紹
+  - file: pages/motivation
+    title: 研究動機
   - file: pages/guide
     title: 操作頁面
   - file: pages/app_api
@@ -13,5 +15,3 @@ chapters:
     title: 字典詞庫推薦
   - file: pages/download
     title: 下載翻譯檔
-  - file: pages/motivation
-    title: 研究動機

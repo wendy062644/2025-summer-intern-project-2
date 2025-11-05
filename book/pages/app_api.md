@@ -243,17 +243,43 @@ title: API
         </div>
       </div>
       <div class="ts-field">
-        <label class="ts-label" for="modelSel">Model</label>
-        <div class="ts-input">
-          <select id="modelSel">
-            <option value="gpt-4.1-mini" selected>gpt-4.1-mini（便宜）</option>
-            <option value="gpt-4.1">gpt-4.1</option>
-            <option value="gpt-4o-mini">gpt-4o-mini</option>
-            <option value="gpt-4o">gpt-4o</option>
-            <option value="o4-mini">o4-mini（推理）</option>
-          </select>
-        </div>
-      </div>
+  <label class="ts-label" for="modelSel">Model</label>
+  <div class="ts-input">
+    <div class="ts-inline" style="width:100%;">
+      <select id="modelSel" style="flex:1;min-width:220px;">
+        <optgroup label="GPT-5 家族">
+          <option value="gpt-5">gpt-5（旗艦）</option>
+          <option value="gpt-5-mini">gpt-5-mini（高速/省錢）</option>
+          <option value="gpt-5-nano">gpt-5-nano（最省）</option>
+        </optgroup>
+        <optgroup label="GPT-4.1 家族">
+          <option value="gpt-4.1">gpt-4.1</option>
+          <option value="gpt-4.1-mini" selected>gpt-4.1-mini（便宜）</option>
+          <option value="gpt-4.1-nano">gpt-4.1-nano</option>
+        </optgroup>
+        <optgroup label="GPT-4o 家族">
+          <option value="gpt-4o">gpt-4o</option>
+          <option value="gpt-4o-mini">gpt-4o-mini</option>
+        </optgroup>
+        <optgroup label="Reasoning">
+          <option value="o4-mini">o4-mini（推理）</option>
+          <option value="o3-mini">o3-mini（推理）</option>
+        </optgroup>
+        <optgroup label="Legacy">
+          <option value="gpt-4-turbo">gpt-4-turbo（舊版）</option>
+          <option value="gpt-3.5-turbo">gpt-3.5-turbo（舊版）</option>
+        </optgroup>
+        <optgroup label="自訂">
+          <option value="__custom__">其他（自訂 model id…）</option>
+        </optgroup>
+      </select>
+      <!-- 選「其他」時顯示 -->
+      <input id="modelCustom" type="text"
+             placeholder="例如：my-org/gpt-xy-2025-10-15"
+             style="display:none;flex:1;">
+    </div>
+  </div>
+</div>
     </div>
     <hr class="ts-divider">
     <div class="ts-title">處理參數</div>
@@ -349,7 +375,6 @@ await pyodide.loadPackage("micropip");
     if (!text) return false;
     const t = String(text).trim();
     if (!t) return false;
-    // 近似 Python: 僅有空白/數字/非字元/%/{} 視為不需翻
     if (/^[\s\d\W%{}]+$/u.test(t)) return false;
     return true;
   }
@@ -361,7 +386,6 @@ await pyodide.loadPackage("micropip");
       const txt = await file.text();
       let total = 0;
 
-      // 優先用 DOMParser 解析 XML
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(txt, 'application/xml');
       const hasErr = xmlDoc.getElementsByTagName('parsererror').length > 0;
@@ -373,7 +397,6 @@ await pyodide.loadPackage("micropip");
           if (needsTranslationJS(s)) total++;
         }
       } else {
-        // 後備：正規表達抓 <source>…</source>
         const matches = txt.match(/<source>([\s\S]*?)<\/source>/g) || [];
         for (const m of matches){
           const inner = m.replace(/^<source>|<\/source>$/g, '');
@@ -381,10 +404,9 @@ await pyodide.loadPackage("micropip");
         }
       }
 
-      // 更新 UI
       if (total > 0){
-        limitN.value = total;          // 將處理筆數上限設為總數
-        limitN.max   = String(total);  // 避免超過
+        limitN.value = total;
+        limitN.max   = String(total);
         if (Number(limitN.value) < 1) limitN.value = 1;
         countInfo.textContent = ` / ${total}`;
       } else {
@@ -398,7 +420,6 @@ await pyodide.loadPackage("micropip");
     }
   }
 
-  // 若使用者手動改數字，限制不超過總數 & 不小於 1
   function clampLimit(){
     const max = Number(limitN.max || '0');
     let v = Number(limitN.value || '0');
@@ -826,7 +847,8 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model:str,
         if src is None or src.text is None: continue
         if needs_translation(src.text):
             tasks.append((m, src.text, m.get("numerus")=="yes"))
-        if len(tasks)>=limit_n: break
+        if limit_n > 0 and len(tasks) >= limit_n:
+          break
 
     finished=0; total=len(tasks)
     if total==0:
@@ -894,7 +916,13 @@ async def _on_click(evt=None):
     try:
         api = document.getElementById("apiKey").value.strip()
         base_url = document.getElementById("baseUrl").value.strip() or "https://api.openai.com/v1"
-        model = document.getElementById("modelSel").value
+        sel = document.getElementById("modelSel")
+        model = sel.value
+        if model == "__custom__":
+            model = document.getElementById("modelCustom").value.strip()
+        if not model:
+            _set_ui_msg("<span style='color:#b00'>請選擇或輸入 model id</span>")
+            return
         batch = int(document.getElementById("batch").value or "32")
         limitN = int(document.getElementById("limitN").value or "200")
         if not api:
