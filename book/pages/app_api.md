@@ -810,19 +810,28 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
     body = {
       "model": model,
       "messages": [
-        {"role":"system","content":system_prompt},
-        {"role":"user","content":user_prompt}
+        {"role": "system", "content": system_prompt},
+        {"role": "user",   "content": user_prompt}
       ],
       "tools": tools,
       "tool_choice": {"type": "function", "function": {"name": "return_translations"}},
       "temperature": 0.2,
-      "max_tokens": min(4000, 220 * max(4, len(masked_texts))),
     }
 
+    tokens = min(4000, 220 * max(4, len(masked_texts)))
+    m = (model or "").lower()
+
+    use_new_family = m.startswith(("gpt-5", "gpt-4.1", "o4", "o3"))
+    tokens_key = "max_completion_tokens" if use_new_family else "max_tokens"
+
+    for k in ("max_tokens", "max_completion_tokens", "max_output_tokens"):
+        body.pop(k, None)
+    body[tokens_key] = tokens
+
     resp = await pyfetch(base_url.rstrip("/") + "/chat/completions",
-                         method="POST",
-                         headers={"Authorization": f"Bearer {api_key}", "Content-Type":"application/json"},
-                         body=json.dumps(body))
+                     method="POST",
+                     headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+                     body=json.dumps(body))
     data = await resp.json()
     if resp.status >= 400:
         raise RuntimeError(f"API Error {resp.status}: {data}")
