@@ -6,225 +6,169 @@ title: API
 
 <!-- ===== 外層 UI ===== -->
 <style>
-  /* —— 全部樣式只限制在 #ts-ui，並且用 --ts-* 變數，避免和主題衝突 —— */
+  /* ===== Scope & Tokens ===== */
   #ts-ui{
+    /* layout */
     --ts-gap: 12px;
     --ts-pad: 14px;
     --ts-radius: 12px;
+
+    /* light tokens */
     --ts-border: #e5e7eb;
-    --ts-bg: #fff;
-    --ts-muted: #6b7280;
+    --ts-bg: #ffffff;
+    --ts-surface: var(--ts-bg);
+    --ts-input-bg: #ffffff;
     --ts-text: #111827;
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", "PingFang TC", "Microsoft JhengHei", sans-serif;
-    line-height: 1.35; margin: 8px 0 16px; color: var(--ts-text);
-  }
-  @media (prefers-color-scheme: dark){
-    #ts-ui{
-      --ts-border: #2b2f36;
-      --ts-bg: #111418;
-      --ts-muted: #9aa3af;
-      --ts-text: #e5e7eb;
-    }
-  }
-  #ts-ui *, #ts-ui *::before, #ts-ui *::after{ box-sizing: border-box; }
-  #ts-ui .ts-card{
-    border:1px solid var(--ts-border); background:var(--ts-bg);
-    border-radius: var(--ts-radius); padding:16px; box-shadow:0 1px 2px rgba(0,0,0,.04);
-  }
-  #ts-ui .ts-title{ font-size:1.05rem; font-weight:600; margin:2px 0 10px; }
-  #ts-ui .ts-grid{
-    display:grid; grid-template-columns: 160px 1fr; gap:10px 14px; align-items:center;
-  }
-  #ts-ui .ts-label{ color:var(--ts-muted); font-size:.95rem; white-space:nowrap; }
-  #ts-ui .ts-input input,
-  #ts-ui .ts-input select{
-    width:100%; padding:8px 10px; border:1px solid var(--ts-border);
-    border-radius:10px; background:transparent; font-size:.95rem;
-  }
-  #ts-ui .ts-input select{
-    appearance:none; -webkit-appearance:none; -moz-appearance:none;
-  }
-  #ts-ui .ts-input input[type="file"]{ padding:6px; }
-  #ts-ui .ts-inline{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-  #ts-ui .ts-hint{ color:var(--ts-muted); font-size:.9rem; }
-  #ts-ui .ts-toolbar{ margin-top:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-  #ts-ui .ts-btn-primary{
-    appearance:none; border:1px solid var(--ts-border);
-    background:#111827; color:#fff; border-radius:10px; padding:8px 14px; font-weight:600; cursor:pointer;
-  }
-  @media (prefers-color-scheme: dark){ #ts-ui .ts-btn-primary{ background:#e5e7eb; color:#111418; } }
-  #ts-ui .ts-btn-primary:hover{ filter:brightness(0.95); }
-  #ts-ui .ts-divider{ height:1px; background:var(--ts-border); margin:12px 0; border:0; }
-
-  /* 附屬區塊（ID 不變，但樣式仍只在 #ts-ui 作用） */
-  #ts-ui #ts-progress-wrap{ margin:12px 0; }
-  #ts-ui #compare-box{
-    border:1px solid var(--ts-border); border-radius:12px; padding:8px 12px; margin-top:8px; background:var(--ts-bg);
-  }
-  #ts-ui #compare-box table{ width:100%; border-collapse:collapse; font-size:.95rem; }
-  #ts-ui #compare-box th, #ts-ui #compare-box td{ padding:6px 6px; border-bottom:1px solid var(--ts-border); text-align:left; }
-  #ts-ui #compare-box thead th{ font-weight:600; }
-  #ts-ui #ts-ui-msg{ color:var(--ts-muted); font-size:.95rem; margin-top:8px; }
-
-  /* 手機版：單欄 */
-  @media (max-width: 640px){
-    #ts-ui .ts-grid{ grid-template-columns: 1fr; }
-    #ts-ui .ts-label{ margin-top:6px; }
-  }
-
-  #ts-ui .ts-row-2{
-    display: grid;
-    grid-template-columns: var(--ts-col1, 1fr) var(--ts-col2, 1fr);
-    gap: 10px 14px;
-    align-items: center;
-  }
-  #ts-ui .ts-6-4{ --ts-col1: 6fr; --ts-col2: 4fr; }
-  #ts-ui .ts-4-6{ --ts-col1: 4fr; --ts-col2: 6fr; }
-
-  /* 每一欄的欄位（標籤在上、輸入在下） */
-  #ts-ui .ts-field{
-    display: flex; flex-direction: column; gap: 6px;
-  }
-  #ts-ui .ts-field .ts-label{ margin: 0; }
-
-  /* 手機版改為單欄堆疊 */
-  @media (max-width: 640px){
-    #ts-ui .ts-row-2{ grid-template-columns: 1fr; }
-  }
-
-  #ts-ui .ts-row-3{
-    display: grid;
-    grid-template-columns: var(--ts-col1, 1fr) var(--ts-col2, 1fr) var(--ts-col3, 1fr);
-    gap: 10px 14px;
-    align-items: center;
-  }
-  #ts-ui .ts-3-4-3{ --ts-col1: 3fr; --ts-col2: 4fr; --ts-col3: 3fr; }
-
-    /* 手機版改為單欄 */
-  @media (max-width: 640px){
-    #ts-ui .ts-row-3{ grid-template-columns: 1fr; }
-  }
-  #ts-ui .left-col{ grid-column: 1 / 3; }
-  
-  @media (max-width:640px){
-    #ts-ui{
-      grid-template-columns: 1fr; /* 單欄 */
-    }
-    #ts-ui .left-col,
-    #ts-ui .right-col{
-      grid-column: 1 / -1; /* 滿版 */
-    }
-  }
-
-  @media (prefers-color-scheme: dark){
-    #ts-ui{
-      --ts-bg: #0f1115;
-      --ts-surface: #111418;
-      --ts-surface-2: #0b0f14;
-      --ts-input-bg: #0b0f14;
-      --ts-border: #2b2f36;
-      --ts-text: #e7eaf0;
-      --ts-muted: #a6afbd;
-      --ts-link: #8ab4ff;
-      --ts-code-bg: #0b0f14;
-      --ts-code-fg: #e7eaf0;
-      --ts-accent: #3b82f6;   /* 主要強調色：按鈕、progress */
-      --ts-on-accent: #0b0f14;
-      --ts-focus: 0 0 0 2px rgba(59,130,246,.35);
-      --ts-progress-bg: #1a1f29;
-      --ts-table-head-bg: #121621;
-    }
-  }
-  html[data-theme="dark"] #ts-ui{
-    --ts-bg: #0f1115;
-    --ts-surface: #111418;
-    --ts-surface-2: #0b0f14;
-    --ts-input-bg: #0b0f14;
-    --ts-border: #2b2f36;
-    --ts-text: #e7eaf0;
-    --ts-muted: #a6afbd;
-    --ts-link: #8ab4ff;
-    --ts-code-bg: #0b0f14;
-    --ts-code-fg: #e7eaf0;
-    --ts-accent: #3b82f6;
-    --ts-on-accent: #0b0f14;
+    --ts-muted: #6b7280;
+    --ts-link: #2563eb;
+    --ts-code-bg: #f8fafc;
+    --ts-code-fg: var(--ts-text);
+    --ts-progress-bg: #f1f5f9;
+    --ts-table-head-bg: #f8fafc;
+    --ts-accent: #111827;            /* button / progress */
+    --ts-on-accent: #ffffff;
     --ts-focus: 0 0 0 2px rgba(59,130,246,.35);
-    --ts-progress-bg: #1a1f29;
-    --ts-table-head-bg: #121621;
-  }
 
-  /* ===== Components inherit tokens ===== */
-  #ts-ui .ts-card{
-    background: var(--ts-surface);
-    border-color: var(--ts-border);
+    /* controls */
+    --ts-control-h: 36px;
+
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    line-height: 1.35;
+    margin: 8px 0 16px;
     color: var(--ts-text);
   }
 
-  #ts-ui .ts-label{ color: var(--ts-muted); }
-  #ts-ui .ts-hint{ color: var(--ts-muted); }
-
-  #ts-ui .ts-input input,
-  #ts-ui .ts-input select{
-    background: var(--ts-input-bg);
-    color: var(--ts-text);
-    border-color: var(--ts-border);
+  /* Dark tokens（同時支援 data-theme="dark" 與 OS 深色偏好） */
+  html[data-theme="dark"] #ts-ui{ /* 明確指定 dark 主題 */
+    --ts-border:#2b2f36; --ts-bg:#0f1115; --ts-surface:#111418; --ts-input-bg:#0b0f14;
+    --ts-text:#e7eaf0; --ts-muted:#a6afbd; --ts-link:#8ab4ff;
+    --ts-code-bg:#0b0f14; --ts-code-fg:#e7eaf0;
+    --ts-accent:#3b82f6; --ts-on-accent:#0b0f14;
+    --ts-focus:0 0 0 2px rgba(59,130,246,.35);
+    --ts-progress-bg:#1a1f29; --ts-table-head-bg:#121621;
   }
-  #ts-ui .ts-input input:focus,
-  #ts-ui .ts-input select:focus{
-    outline: none;
-    box-shadow: var(--ts-focus);
-    border-color: color-mix(in oklab, var(--ts-accent) 60%, var(--ts-border));
-  }
-
-  #ts-ui .ts-btn-primary{
-    background: var(--ts-accent);
-    color: var(--ts-on-accent);
-    border-color: transparent;
-  }
-  #ts-ui .ts-btn-primary:hover{ filter: brightness(1.06); }
-  #ts-ui .ts-btn-primary:focus{ outline: none; box-shadow: var(--ts-focus); }
-
-  /* 表格（即時對照） */
-  #ts-ui #compare-box{
-    background: var(--ts-surface);
-    border-color: var(--ts-border);
-  }
-  #ts-ui #compare-box thead th{
-    background: var(--ts-table-head-bg);
-    color: var(--ts-text);
-  }
-  #ts-ui #compare-box td,
-  #ts-ui #compare-box th{
-    border-bottom: 1px solid var(--ts-border);
-  }
-
-  /* 進度條（跨瀏覽器） */
-  #ts-ui progress{ width:100%; height: 14px; background: var(--ts-progress-bg); border-radius: 8px; overflow: hidden; }
-  #ts-ui progress::-webkit-progress-bar{ background: var(--ts-progress-bg); }
-  #ts-ui progress::-webkit-progress-value{ background: var(--ts-accent); }
-  #ts-ui progress::-moz-progress-bar{ background: var(--ts-accent); }
-
-  /* code 與連結 */
-  #ts-ui code{
-    background: var(--ts-code-bg);
-    color: var(--ts-code-fg);
-    padding: .1em .35em;
-    border-radius: .35em;
-    border: 1px solid var(--ts-border);
-  }
-  #ts-ui a{ color: var(--ts-link); text-underline-offset: 2px; }
-
-  /* 選取反白 */
-  #ts-ui ::selection{
-    background: color-mix(in oklab, var(--ts-accent) 35%, transparent);
-  }
-
-  /* 小螢幕微調（確保深色 token 同步生效） */
-  @media (max-width:640px){
-    html[data-theme="dark"] #ts-ui .ts-card,
-    #ts-ui .ts-card{
-      background: var(--ts-surface);
+  @media (prefers-color-scheme: dark){
+    html:not([data-theme="light"]) #ts-ui{ /* 若未強制指定，跟隨 OS 深色 */
+      --ts-border:#2b2f36; --ts-bg:#0f1115; --ts-surface:#111418; --ts-input-bg:#0b0f14;
+      --ts-text:#e7eaf0; --ts-muted:#a6afbd; --ts-link:#8ab4ff;
+      --ts-code-bg:#0b0f14; --ts-code-fg:#e7eaf0;
+      --ts-accent:#3b82f6; --ts-on-accent:#0b0f14;
+      --ts-focus:0 0 0 2px rgba(59,130,246,.35);
+      --ts-progress-bg:#1a1f29; --ts-table-head-bg:#121621;
     }
+  }
+
+  /* ===== Base ===== */
+  #ts-ui *, #ts-ui *::before, #ts-ui *::after{ box-sizing:border-box; }
+
+  .ts-card{
+    border:1px solid var(--ts-border);
+    background:var(--ts-surface);
+    border-radius:var(--ts-radius);
+    padding:16px;
+    box-shadow:0 1px 2px rgba(0,0,0,.04);
+    color:var(--ts-text);
+  }
+  .ts-title{ font-size:1.05rem; font-weight:600; margin:2px 0 10px; }
+  .ts-divider{ height:1px; background:var(--ts-border); margin:12px 0; border:0; }
+
+  /* grid helpers */
+  .ts-grid{ display:grid; grid-template-columns:160px 1fr; gap:10px 14px; align-items:center; }
+  .ts-row-2{
+    display:grid; grid-template-columns:var(--ts-col1,1fr) var(--ts-col2,1fr);
+    gap:10px 14px; align-items:center;
+  }
+  .ts-6-4{ --ts-col1:6fr; --ts-col2:4fr; }
+  .ts-4-6{ --ts-col1:4fr; --ts-col2:6fr; }
+  .ts-row-3{
+    display:grid; grid-template-columns:var(--ts-col1,1fr) var(--ts-col2,1fr) var(--ts-col3,1fr);
+    gap:10px 14px; align-items:center;
+  }
+  .ts-3-4-3{ --ts-col1:3fr; --ts-col2:4fr; --ts-col3:3fr; }
+  .left-col{ grid-column:1 / 3; }
+
+  /* fields */
+  .ts-field{ display:flex; flex-direction:column; gap:6px; }
+  .ts-label{ color:var(--ts-muted); font-size:.95rem; white-space:nowrap; margin:0; }
+  .ts-inline{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .ts-hint{ color:var(--ts-muted); font-size:.9rem; }
+
+  /* inputs */
+  .ts-input input,
+  .ts-input select{
+    width:100%;
+    height:var(--ts-control-h);
+    line-height:calc(var(--ts-control-h) - 2px);
+    padding:8px 10px;
+    border:1px solid var(--ts-border);
+    border-radius:10px;
+    background:var(--ts-input-bg);
+    color:var(--ts-text);
+    font-size:.95rem;
+  }
+  .ts-input input::placeholder{ color:var(--ts-muted); }
+  .ts-input input[type="file"]{ padding:6px; height:auto; line-height:normal; }
+
+  /* select：統一外觀（自繪箭頭與分隔線） */
+  .ts-input select{
+    appearance:none; -webkit-appearance:none; -moz-appearance:none;
+    padding-right:2.2rem; /* 讓箭頭不壓到文字 */
+    background:
+      linear-gradient(45deg, transparent 50%, var(--ts-muted) 50%) right 12px center/6px 6px no-repeat,
+      linear-gradient(-45deg, transparent 50%, var(--ts-muted) 50%) right 6px center/6px 6px no-repeat,
+      linear-gradient(var(--ts-muted) 0 0) right 1.9rem center/1px 60% no-repeat,
+      var(--ts-input-bg);
+  }
+
+  /* focus 一致化 */
+  .ts-input input:focus,
+  .ts-input select:focus{
+    outline:none;
+    box-shadow:var(--ts-focus);
+    border-color:color-mix(in oklab, var(--ts-accent) 60%, var(--ts-border));
+  }
+
+  /* buttons */
+  .ts-btn-primary{
+    appearance:none; border:1px solid transparent;
+    background:var(--ts-accent); color:var(--ts-on-accent);
+    border-radius:10px; padding:8px 14px; font-weight:600; cursor:pointer;
+  }
+  .ts-btn-primary:hover{ filter:brightness(1.06); }
+  .ts-btn-primary:focus{ outline:none; box-shadow:var(--ts-focus); }
+
+  /* table box */
+  #compare-box{
+    border:1px solid var(--ts-border); border-radius:12px; padding:8px 12px; margin-top:8px; background:var(--ts-surface);
+  }
+  #compare-box table{ width:100%; border-collapse:collapse; font-size:.95rem; }
+  #compare-box thead th{ font-weight:600; background:var(--ts-table-head-bg); color:var(--ts-text); }
+  #compare-box th, #compare-box td{ padding:6px; border-bottom:1px solid var(--ts-border); text-align:left; }
+
+  /* progress */
+  #ts-progress-wrap{ margin:12px 0; }
+  progress{ width:100%; height:14px; background:var(--ts-progress-bg); border-radius:8px; overflow:hidden; }
+  progress::-webkit-progress-bar{ background:var(--ts-progress-bg); }
+  progress::-webkit-progress-value{ background:var(--ts-accent); }
+  progress::-moz-progress-bar{ background:var(--ts-accent); }
+
+  /* code / link / message */
+  code{
+    background:var(--ts-code-bg); color:var(--ts-code-fg);
+    padding:.1em .35em; border-radius:.35em; border:1px solid var(--ts-border);
+  }
+  a{ color:var(--ts-link); text-underline-offset:2px; }
+  #ts-ui-msg{ color:var(--ts-muted); font-size:.95rem; margin-top:8px; }
+
+  /* selection */
+  #ts-ui ::selection{ background:color-mix(in oklab, var(--ts-accent) 35%, transparent); }
+
+  /* RWD */
+  @media (max-width:640px){
+    .ts-grid{ grid-template-columns:1fr; }
+    .ts-row-2, .ts-row-3{ grid-template-columns:1fr; }
+    .left-col, .right-col{ grid-column:1 / -1; }
+    .ts-label{ margin-top:6px; }
   }
 </style>
 
