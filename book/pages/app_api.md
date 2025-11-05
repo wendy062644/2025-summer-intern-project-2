@@ -833,6 +833,19 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
                      headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
                      body=json.dumps(body))
     data = await resp.json()
+    
+    if resp.status == 400:
+        msg = (data.get("error", {}) or {}).get("message", "")
+        if "Unsupported parameter" in msg or "not supported" in msg:
+            alt = "max_output_tokens" if tokens_key != "max_output_tokens" else "max_completion_tokens"
+            body.pop(tokens_key, None)
+            body[alt] = tokens
+            resp = await pyfetch(base_url.rstrip("/") + "/chat/completions",
+                                method="POST",
+                                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+                                body=json.dumps(body))
+            data = await resp.json()
+
     if resp.status >= 400:
         raise RuntimeError(f"API Error {resp.status}: {data}")
 
