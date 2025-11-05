@@ -36,10 +36,13 @@ title: API
     display:grid; grid-template-columns: 160px 1fr; gap:10px 14px; align-items:center;
   }
   #ts-ui .ts-label{ color:var(--ts-muted); font-size:.95rem; white-space:nowrap; }
-  #ts-ui .ts-input > input,
-  #ts-ui .ts-input > select{
+  #ts-ui .ts-input input,
+  #ts-ui .ts-input select{
     width:100%; padding:8px 10px; border:1px solid var(--ts-border);
     border-radius:10px; background:transparent; font-size:.95rem;
+  }
+  #ts-ui .ts-input select{
+    appearance:none; -webkit-appearance:none; -moz-appearance:none;
   }
   #ts-ui .ts-input input[type="file"]{ padding:6px; }
   #ts-ui .ts-inline{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
@@ -247,30 +250,30 @@ title: API
   <div class="ts-input">
     <div class="ts-inline" style="width:100%;">
       <select id="modelSel" style="flex:1;min-width:220px;">
-        <optgroup label="GPT-5 家族">
-          <option value="gpt-5">gpt-5（旗艦）</option>
-          <option value="gpt-5-mini">gpt-5-mini（高速/省錢）</option>
-          <option value="gpt-5-nano">gpt-5-nano（最省）</option>
+        <optgroup label="GPT-5">
+          <option value="gpt-5">gpt-5</option>
+          <option value="gpt-5-mini">gpt-5-mini</option>
+          <option value="gpt-5-nano">gpt-5-nano</option>
         </optgroup>
-        <optgroup label="GPT-4.1 家族">
+        <optgroup label="GPT-4.1">
           <option value="gpt-4.1">gpt-4.1</option>
-          <option value="gpt-4.1-mini" selected>gpt-4.1-mini（便宜）</option>
+          <option value="gpt-4.1-mini" selected>gpt-4.1-mini</option>
           <option value="gpt-4.1-nano">gpt-4.1-nano</option>
         </optgroup>
-        <optgroup label="GPT-4o 家族">
+        <optgroup label="GPT-4o">
           <option value="gpt-4o">gpt-4o</option>
           <option value="gpt-4o-mini">gpt-4o-mini</option>
         </optgroup>
         <optgroup label="Reasoning">
-          <option value="o4-mini">o4-mini（推理）</option>
-          <option value="o3-mini">o3-mini（推理）</option>
+          <option value="o4-mini">o4-mini</option>
+          <option value="o3-mini">o3-mini</option>
         </optgroup>
         <optgroup label="Legacy">
-          <option value="gpt-4-turbo">gpt-4-turbo（舊版）</option>
-          <option value="gpt-3.5-turbo">gpt-3.5-turbo（舊版）</option>
+          <option value="gpt-4-turbo">gpt-4-turbo</option>
+          <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
         </optgroup>
         <optgroup label="自訂">
-          <option value="__custom__">其他（自訂 model id…）</option>
+          <option value="__custom__">其他</option>
         </optgroup>
       </select>
       <!-- 選「其他」時顯示 -->
@@ -295,7 +298,7 @@ title: API
     <div class="ts-field">
         <label class="ts-label" for="limitN">處理筆數上限</label>
         <div class="ts-input ts-inline">
-        <input type="number" id="limitN" value="0" min="1" style="max-width:220px;">
+        <input type="number" id="limitN" value="0" style="max-width:220px;">
         <span id="countInfo" class="ts-hint"> / 0</span>
         </div>
     </div>
@@ -425,15 +428,25 @@ await pyodide.loadPackage("micropip");
     let v = Number(limitN.value || '0');
     if (max){
       if (v > max) v = max;
-      if (v < 1) v = 1;
+      if (v < 0) v = 0;
       limitN.value = v;
-    } else if (v < 1){
-      limitN.value = 1;
+    } else if (v < 0){
+      limitN.value = 0;
     }
   }
 
   tsFile.addEventListener('change', handleTsChange);
   limitN.addEventListener('input', clampLimit);
+})();
+
+(function setupModelCustom(){
+  const sel = document.getElementById('modelSel');
+  const custom = document.getElementById('modelCustom');
+  function sync(){
+    custom.style.display = (sel.value === '__custom__') ? 'block' : 'none';
+  }
+  sel.addEventListener('change', sync);
+  sync();
 })();
 
 const $msg = document.getElementById("ts-ui-msg");
