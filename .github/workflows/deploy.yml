@@ -1,43 +1,54 @@
-name: Deploy Jupyter Book to Pages
+name: Build & Deploy Jupyter Book
+
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 jobs:
-  build:
+  build-deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
+
       - name: Install deps
         run: |
-          python -m pip install -U pip
-          pip install -U jupyter-book jupyterlite-sphinx jupyterlite-pyodide-kernel pandas odfpy opencc-python-reimplemented
-          # pip install "jupyterlite-sphinx==0.20.*" "jupyterlite-pyodide-kernel==0.6.*"
-      - name: Clean book
-        run: jupyter-book clean book --all
-      - name: Build book
-        run: jupyter-book build book
-      - name: Disable Jekyll
-        run: touch book/_build/html/.nojekyll
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: book/_build/html
+          python -m pip install --upgrade pip
+          pip install jupyter-book ghp-import
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      # 如需 dirhtml，將 html 改成 dirhtml 即可；下方會自動偵測
+      - name: Build Jupyter Book
+        run: jupyter-book build book --builder html
+
+      # 自動找出實際的輸出資料夾（book/_build/html 或 book/_build/dirhtml）
+      - name: Find built site
+        id: find_site
+        shell: bash
+        run: |
+          CANDIDATES=("book/_build/html" "book/_build/dirhtml")
+          for d in "${CANDIDATES[@]}"; do
+            if [ -f "$d/index.html" ]; then
+              echo "site=$d" >> "$GITHUB_OUTPUT"
+              echo "Found site at: $d"
+              exit 0
+            fi
+          done
+          echo "::error::No built site with index.html found under book/_build (checked html, dirhtml)."
+          exit 1
+
+      # 放置 .nojekyll 在正確的輸出資料夾
+      - name: Add .nojekyll
+        run: touch "${{ steps.find_site.outputs.site }}/.nojekyll"
+
+      # 發佈到 gh-pages（-f 代表覆蓋）
+      - name: Publish to gh-pages
+        run: ghp-import -n -p -f "${{ steps.find_site.outputs.site }}"
