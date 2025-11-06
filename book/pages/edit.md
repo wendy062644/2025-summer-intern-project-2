@@ -16,13 +16,15 @@ title: Edit
 </style>
 
 <style>
+  /* —— 全部樣式限制在 #ts-ui —— */
   #ts-ui{
     --ts-gap: 12px; --ts-pad: 14px; --ts-radius: 12px;
     --ts-border:#e5e7eb; --ts-bg:#fff; --ts-surface:#fff; --ts-surface-2:#f9fafb;
     --ts-text:#111827; --ts-muted:#6b7280; --ts-accent:#3b82f6; --ts-on-accent:#fff;
     --ts-head-bg:#f8fafc; --ts-focus:0 0 0 2px rgba(59,130,246,.35);
     font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", "PingFang TC", "Microsoft JhengHei", sans-serif;
-    line-height:1.35; color:var(--ts-text); margin:18px auto; max-width:100%; padding:0 10px;
+    line-height:1.35; color:var(--ts-text);
+    margin:18px auto; max-width:100%; width:100%; padding:0 10px;
   }
   @media (prefers-color-scheme: dark){
     #ts-ui{ --ts-border:#2b2f36; --ts-bg:#0f1115; --ts-surface:#111418; --ts-surface-2:#0b0f14; --ts-text:#e7eaf0; --ts-muted:#a6afbd; --ts-accent:#8ab4ff; --ts-on-accent:#0b0f14; --ts-head-bg:#121621; }
@@ -43,15 +45,22 @@ title: Edit
 
   /* 表格（網格）*/
   #table-wrap{ border:1px solid var(--ts-border); border-radius:12px; overflow:auto; max-height:70vh; }
-  table{ width:max-content; min-width:100%; border-collapse:separate; border-spacing:0; }
+  #ts-ui table{
+    width:100%;                     /* JS 會在 >4 欄時改為 25%×欄數 */
+    border-collapse:separate; border-spacing:0;
+    table-layout: fixed;            /* 讓 colgroup 寬度生效、平均分配 */
+  }
   thead th{ position:sticky; top:0; z-index:3; background:var(--ts-head-bg); border-bottom:1px solid var(--ts-border); padding:10px; text-align:left; font-weight:700; }
   tbody td, tbody th{ border-bottom:1px solid var(--ts-border); }
   th, td{ padding:8px 10px; vertical-align:top; }
   .sticky-left{ position:sticky; left:0; z-index:2; background:var(--ts-surface); }
-  .row-label{ width:360px; max-width:360px; }
+
+  /* 取消固定寬，交給 colgroup 控制；讓「原文」也能等比參與 */
+  .row-label{ width:auto; max-width:none; }
   .row-label .ctx{ color:var(--ts-muted); font-size:.85rem; margin-top:2px; }
 
-  .pick-cell{ min-width:280px; max-width:420px; border-left:1px solid var(--ts-border); cursor:pointer; }
+  /* 取消欄寬上限，否則等比不會生效 */
+  .pick-cell{ min-width:0; max-width:none; border-left:1px solid var(--ts-border); cursor:pointer; }
   .pick-cell.missing{ color:var(--ts-muted); font-style:italic; cursor:not-allowed; }
   .cell-box{ display:flex; gap:8px; }
   .cell-index{ color:var(--ts-muted); font-size:.85rem; min-width:1.5rem; text-align:right; }
@@ -68,7 +77,9 @@ title: Edit
   .tools{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
   .tools label{ display:flex; gap:6px; align-items:center; color:var(--ts-muted); }
 
-  @media (max-width: 860px){ .row-label{ width:260px; max-width:260px; } .pick-cell{ min-width:240px; } }
+  @media (max-width: 860px){
+    .cell-index{ display:none; }
+  }
 </style>
 
 <div id="ts-ui">
@@ -99,6 +110,8 @@ title: Edit
 
     <div id="table-wrap" style="display:none;">
       <table id="grid">
+        <!-- 用 colgroup 控制每一欄的寬度（包含原文欄） -->
+        <colgroup id="colgroup"></colgroup>
         <thead id="thead"></thead>
         <tbody id="tbody"></tbody>
       </table>
@@ -129,8 +142,10 @@ title: Edit
     const $wrap    = qs('#table-wrap');
     const $search  = qs('#searchBox');
     const $onlyDiff= qs('#onlyDiff');
+    const $grid    = qs('#grid');
+    const $colgroup= qs('#colgroup');
 
-    if(!$thead || !$tbody || !$wrap){
+    if(!$thead || !$tbody || !$wrap || !$grid || !$colgroup){
       console.error('Grid nodes not found');
       return;
     }
@@ -273,6 +288,31 @@ title: Edit
       setRowPick(tr, vi);
     }
 
+    // 依規則調整欄寬：<=4 欄平均分配；>4 欄每欄 25%，總寬 25%×欄數
+    function adjustColumnWidths(){
+      const totalCols = 1 + versions.length; // 原文 + 版本數
+      $colgroup.innerHTML = '';
+
+      if (totalCols <= 4){
+        // 平均分配填滿 100%
+        const w = (100 / totalCols).toFixed(6) + '%';
+        for(let i=0;i<totalCols;i++){
+          const col = document.createElement('col');
+          col.style.width = w;
+          $colgroup.appendChild(col);
+        }
+        $grid.style.width = '100%';
+      }else{
+        // 每欄固定 25%，表格總寬超過容器，水平可捲動
+        for(let i=0;i<totalCols;i++){
+          const col = document.createElement('col');
+          col.style.width = '25%';
+          $colgroup.appendChild(col);
+        }
+        $grid.style.width = (25 * totalCols) + '%';
+      }
+    }
+
     async function buildGrid(){
       $thead.innerHTML = ''; $tbody.innerHTML = ''; $wrap.style.display='none';
       $dl.disabled = true; $stat.textContent = '載入中…'; $msg.textContent=''; picked = new Map();
@@ -292,6 +332,7 @@ title: Edit
       baseKeys.forEach((key, idx)=>{ frag.appendChild(buildRow(idx, key)); });
       $tbody.appendChild(frag);
 
+      adjustColumnWidths();     // ★ 依欄數調整欄寬
       $wrap.style.display = '';
       $dl.disabled = false;
       $stat.textContent = `已載入 ${files.length} 檔；訊息 ${baseKeys.length}（第 1 檔為預設）`;
@@ -356,7 +397,7 @@ title: Edit
       });
 
       // 輸出 XML
-      const xmlDecl = '<?xml version="1.0" encoding="utf-8"?>\\n';
+      const xmlDecl = '<?xml version="1.0" encoding="utf-8"?>\n';
       const ser = new XMLSerializer();
       let xmlOut = ser.serializeToString(baseDoc);
       const doctype = base.doctype;
