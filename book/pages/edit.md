@@ -13,7 +13,7 @@ title: Edit
     --ts-text:#111827; --ts-muted:#6b7280; --ts-accent:#3b82f6; --ts-on-accent:#fff;
     --ts-head-bg:#f8fafc; --ts-focus:0 0 0 2px rgba(59,130,246,.35);
     font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", "PingFang TC", "Microsoft JhengHei", sans-serif;
-    line-height:1.35; color:var(--ts-text); margin:18px auto; max-width:1280px; padding:0 10px;
+    line-height:1.35; color:var(--ts-text); margin:18px auto; max-width:100%; padding:0 10px;
   }
   @media (prefers-color-scheme: dark){
     #ts-ui{ --ts-border:#2b2f36; --ts-bg:#0f1115; --ts-surface:#111418; --ts-surface-2:#0b0f14; --ts-text:#e7eaf0; --ts-muted:#a6afbd; --ts-accent:#8ab4ff; --ts-on-accent:#0b0f14; --ts-head-bg:#121621; }
