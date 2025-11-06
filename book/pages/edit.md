@@ -3,131 +3,132 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TS 多版本合併選擇介面</title>
+  <title>TS 多版本合併選擇介面（網格點選版）</title>
   <style>
-    /* —— 全部樣式只限制在 #ts-ui（延續你原本的 design tokens）—— */
+    /* —— 全部樣式限制在 #ts-ui —— */
     #ts-ui{
       --ts-gap: 12px; --ts-pad: 14px; --ts-radius: 12px;
-      --ts-border: #e5e7eb; --ts-bg: #fff; --ts-muted: #6b7280; --ts-text: #111827;
-      --ts-surface: #fff; --ts-surface-2: #f9fafb; --ts-accent: #3b82f6; --ts-on-accent: #fff;
-      --ts-link: #2563eb; --ts-progress-bg:#eef2f7; --ts-table-head-bg:#f8fafc; --ts-focus: 0 0 0 2px rgba(59,130,246,.35);
+      --ts-border:#e5e7eb; --ts-bg:#fff; --ts-surface:#fff; --ts-surface-2:#f9fafb;
+      --ts-text:#111827; --ts-muted:#6b7280; --ts-accent:#3b82f6; --ts-on-accent:#fff;
+      --ts-head-bg:#f8fafc; --ts-focus:0 0 0 2px rgba(59,130,246,.35);
       font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", "PingFang TC", "Microsoft JhengHei", sans-serif;
-      line-height: 1.35; color: var(--ts-text); margin: 18px auto; max-width: 1100px; padding: 0 10px;
+      line-height:1.35; color:var(--ts-text); margin:18px auto; max-width:1280px; padding:0 10px;
     }
     @media (prefers-color-scheme: dark){
-      #ts-ui{ --ts-border:#2b2f36; --ts-bg:#0f1115; --ts-surface:#111418; --ts-surface-2:#0b0f14; --ts-text:#e7eaf0; --ts-muted:#a6afbd; --ts-link:#8ab4ff; --ts-progress-bg:#1a1f29; --ts-table-head-bg:#121621; --ts-on-accent:#0b0f14; }
+      #ts-ui{ --ts-border:#2b2f36; --ts-bg:#0f1115; --ts-surface:#111418; --ts-surface-2:#0b0f14; --ts-text:#e7eaf0; --ts-muted:#a6afbd; --ts-accent:#8ab4ff; --ts-on-accent:#0b0f14; --ts-head-bg:#121621; }
     }
-    #ts-ui *, #ts-ui *::before, #ts-ui *::after{ box-sizing: border-box; }
-    #ts-ui .ts-card{ border:1px solid var(--ts-border); background:var(--ts-surface); border-radius: var(--ts-radius); padding:16px; box-shadow:0 1px 2px rgba(0,0,0,.04); }
-    #ts-ui .ts-title{ font-size:1.05rem; font-weight:700; margin:2px 0 10px; }
-    #ts-ui .ts-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:10px 14px; align-items:center; }
-    #ts-ui .ts-field{ display:flex; flex-direction:column; gap:6px; }
-    #ts-ui .ts-label{ color:var(--ts-muted); font-size:.95rem; }
-    #ts-ui .ts-hint{ color:var(--ts-muted); font-size:.9rem; }
-    #ts-ui .ts-input input{ width:100%; padding:8px 10px; border:1px solid var(--ts-border); border-radius:10px; background:transparent; font-size:.95rem; color:var(--ts-text); }
-    #ts-ui .ts-input input:focus{ outline:none; box-shadow: var(--ts-focus); border-color: color-mix(in oklab, var(--ts-accent) 60%, var(--ts-border)); }
-    #ts-ui .ts-btn{ appearance:none; border:1px solid var(--ts-border); background:var(--ts-accent); color:var(--ts-on-accent); border-radius:10px; padding:8px 14px; font-weight:600; cursor:pointer; }
-    #ts-ui .ts-btn:hover{ filter:brightness(1.06); }
-    #ts-ui .ts-btn:disabled{ opacity: .55; cursor:not-allowed; }
-    #ts-ui .ts-inline{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-    #ts-ui .ts-divider{ height:1px; background:var(--ts-border); margin:12px 0; border:0; }
+    #ts-ui *, #ts-ui *::before, #ts-ui *::after{ box-sizing:border-box; }
+    .ts-card{ border:1px solid var(--ts-border); background:var(--ts-surface); border-radius:var(--ts-radius); padding:16px; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+    .ts-title{ font-weight:800; font-size:1.1rem; margin:2px 0 10px; }
+    .ts-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+    .ts-field{ display:flex; flex-direction:column; gap:6px; }
+    .ts-label{ color:var(--ts-muted); font-size:.95rem; }
+    .ts-input input{ width:100%; padding:8px 10px; border:1px solid var(--ts-border); border-radius:10px; background:transparent; color:var(--ts-text); }
+    .ts-input input:focus{ outline:none; box-shadow:var(--ts-focus); border-color:color-mix(in oklab, var(--ts-accent) 60%, var(--ts-border)); }
+    .ts-btn{ appearance:none; border:1px solid var(--ts-border); background:var(--ts-accent); color:var(--ts-on-accent); border-radius:10px; padding:8px 14px; font-weight:700; cursor:pointer; }
+    .ts-btn:disabled{ opacity:.55; cursor:not-allowed; }
+    .toolbar{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:8px; }
+    .kpi{ color:var(--ts-muted); font-variant-numeric:tabular-nums; }
+    .ts-divider{ height:1px; background:var(--ts-border); border:0; margin:12px 0; }
 
-    /* 表格 */
-    #table-wrap{ border:1px solid var(--ts-border); border-radius:12px; overflow:hidden; background:var(--ts-surface); }
-    #merge-table{ width:100%; border-collapse:collapse; font-size:.95rem; }
-    #merge-table thead th{ background:var(--ts-table-head-bg); position:sticky; top:0; z-index:1; }
-    #merge-table th, #merge-table td{ padding:8px 10px; border-bottom:1px solid var(--ts-border); text-align:left; vertical-align:top; }
-    .src-cell{ width:40%; }
+    /* 表格（網格）*/
+    #table-wrap{ border:1px solid var(--ts-border); border-radius:12px; overflow:auto; max-height:70vh; }
+    table{ width:max-content; min-width:100%; border-collapse:separate; border-spacing:0; }
+    thead th{ position:sticky; top:0; z-index:3; background:var(--ts-head-bg); border-bottom:1px solid var(--ts-border); padding:10px; text-align:left; font-weight:700; }
+    tbody td, tbody th{ border-bottom:1px solid var(--ts-border); }
+    th, td{ padding:8px 10px; vertical-align:top; }
+    .sticky-left{ position:sticky; left:0; z-index:2; background:var(--ts-surface); }
+    .row-label{ width:360px; max-width:360px; }
+    .row-label .ctx{ color:var(--ts-muted); font-size:.85rem; margin-top:2px; }
 
-    /* 選項清單（條列） */
-    .choice-list{ display:flex; flex-direction:column; gap:8px; }
-    .choice-item{ display:flex; align-items:flex-start; gap:10px; padding:8px; border:1px solid var(--ts-border); border-radius:10px; background:var(--ts-surface-2); }
-    .choice-item[disabled]{ opacity:.6; }
-    .choice-item label{ display:block; cursor:pointer; }
-    .filename{ font-size:.85rem; color:var(--ts-muted); }
-    .trans-snippet{ white-space:pre-wrap; word-break:break-word; }
+    .pick-cell{ min-width:280px; max-width:420px; border-left:1px solid var(--ts-border); cursor:pointer; }
+    .pick-cell.missing{ color:var(--ts-muted); font-style:italic; cursor:not-allowed; }
+    .cell-box{ display:flex; gap:8px; }
+    .cell-index{ color:var(--ts-muted); font-size:.85rem; min-width:1.5rem; text-align:right; }
+    .cell-content{ white-space:pre-wrap; word-break:break-word; }
 
-    /* 工具列 */
-    .toolbar{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:8px; }
-    .kpi{ font-variant-numeric: tabular-nums; color:var(--ts-muted); }
+    /* 被選取的格子 */
+    .pick-cell.selected{ outline:2px solid color-mix(in oklab, var(--ts-accent) 70%, #0000); outline-offset:-2px; background:color-mix(in oklab, var(--ts-accent) 14%, var(--ts-surface)); }
 
-    @media (max-width: 720px){ .src-cell{ width:auto; } }
+    /* 表頭第一欄（原文）*/
+    .head-left{ position:sticky; left:0; z-index:4; background:var(--ts-head-bg); }
+    .head-col{ white-space:nowrap; }
+
+    /* 小工具列 */
+    .tools{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .tools label{ display:flex; gap:6px; align-items:center; color:var(--ts-muted); }
+
+    @media (max-width: 860px){ .row-label{ width:260px; max-width:260px; } .pick-cell{ min-width:240px; } }
   </style>
 </head>
 <body>
 <div id="ts-ui">
   <div class="ts-card">
-    <div class="ts-title">TS 多版本合併選擇</div>
+    <div class="ts-title">TS 多版本合併選擇（點格選取）</div>
     <div class="ts-grid">
       <div class="ts-field">
-        <label for="tsFiles" class="ts-label">.ts 檔（可多選；第一個為「底稿／預設」）</label>
+        <label for="tsFiles" class="ts-label">.ts 檔（可多選；第 1 檔為預設）</label>
         <div class="ts-input"><input id="tsFiles" type="file" accept=".ts" multiple></div>
       </div>
       <div class="ts-field">
-        <label class="ts-label" for="searchBox">關鍵字過濾（原文/譯文）</label>
-        <div class="ts-input"><input id="searchBox" type="text" placeholder="輸入關鍵字以過濾條目"></div>
+        <label for="searchBox" class="ts-label">關鍵字過濾（原文/譯文）</label>
+        <div class="ts-input"><input id="searchBox" type="text" placeholder="輸入關鍵字"></div>
+      </div>
+      <div class="ts-field">
+        <label class="ts-label">輸出</label>
+        <div class="tools">
+          <button class="ts-btn" id="buildBtn">生成表格</button>
+          <button class="ts-btn" id="downloadBtn" disabled>下載合併檔</button>
+          <label><input type="checkbox" id="onlyDiff"> 只顯示與第 1 欄不同</label>
+        </div>
       </div>
     </div>
 
-    <div class="toolbar">
-      <button class="ts-btn" id="buildBtn">生成表格</button>
-      <button class="ts-btn" id="downloadBtn" disabled>下載合併檔</button>
-      <span class="kpi" id="stat">尚未載入</span>
-    </div>
+    <div class="toolbar"><span class="kpi" id="stat">尚未載入</span></div>
 
     <hr class="ts-divider"/>
 
-    <div id="table-wrap" style="display:none; max-height: 65vh; overflow:auto;">
-      <table id="merge-table" aria-label="多版本合併表">
-        <thead>
-          <tr>
-            <th class="src-cell">原文（context / source）</th>
-            <th>選擇版本（顯示各版譯文；預設選第一個檔案）</th>
-          </tr>
-        </thead>
+    <div id="table-wrap" style="display:none;">
+      <table id="grid">
+        <thead id="thead"></thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
 
-    <div class="ts-hint" style="margin-top:8px;">
-      使用說明：選擇多個 .ts 檔後按「生成表格」，每一列為一個訊息。預設選第一個檔案的譯文；可改勾其他版本。按「下載合併檔」輸出 .ts，內容以被勾選版本的 &lt;translation&gt; 為主（未勾選仍採第一個檔案）。
+    <div class="ts-label" style="margin-top:10px;">
+      使用說明：上傳 n 個 .ts → 生成表格。行（y 軸）是一個訊息；列（x 軸）是各檔的譯文。點選任一「格」即表示此訊息採用該檔的翻譯；預設全為第 1 欄。按「下載合併檔」輸出 merged.ts。
     </div>
   </div>
-
-  <div id="msg" style="margin-top:10px; color:var(--ts-muted);"></div>
+  <div id="msg" style="margin-top:8px; color:var(--ts-muted);"></div>
 </div>
 
 <script>
 (function(){
-  const $ = (s) => document.querySelector(s);
-  const $tbody = $('#tbody');
-  const $wrap  = $('#table-wrap');
-  const $build = $('#buildBtn');
-  const $dl    = $('#downloadBtn');
-  const $stat  = $('#stat');
-  const $msg   = $('#msg');
+  const $ = (s)=>document.querySelector(s);
   const $files = $('#tsFiles');
-  const $search= $('#searchBox');
+  const $build = $('#buildBtn');
+  const $dl = $('#downloadBtn');
+  const $stat = $('#stat');
+  const $msg = $('#msg');
+  const $thead = $('#thead');
+  const $tbody = $('#tbody');
+  const $wrap = $('#table-wrap');
+  const $search = $('#searchBox');
+  const $onlyDiff = $('#onlyDiff');
 
-  /**
-   * Util: 讀取檔案文字
-   */
+  // 狀態
+  let versions = [];   // [{name, doc, doctype, map, meta}]
+  let base = null;     // versions[0]
+  let baseKeys = [];   // 以第一檔為底稿的 key 列表
+  let picked = new Map(); // key -> vi（選中的版本 index），預設 0
+
+  // 工具函數
   function readFileText(file){
-    return new Promise((resolve,reject)=>{ const fr = new FileReader(); fr.onload=()=>resolve(String(fr.result||'')); fr.onerror=()=>reject(fr.error); fr.readAsText(file, 'utf-8'); });
+    return new Promise((resolve,reject)=>{ const fr = new FileReader(); fr.onload=()=>resolve(String(fr.result||'')); fr.onerror=()=>reject(fr.error); fr.readAsText(file,'utf-8'); });
   }
+  function readDoctype(xmlText){ const m = xmlText.match(/<!DOCTYPE[^>]+>/); return m?m[0]:''; }
+  function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;' }[c])); }
 
-  /**
-   * Util: 取 DOCTYPE（保留原檔資訊）
-   */
-  function readDoctype(xmlText){
-    const m = xmlText.match(/<!DOCTYPE[^>]+>/);
-    return m ? m[0] : '';
-  }
-
-  /**
-   * 解析 .ts：回傳 {doc, doctype, map: key->message, meta: key->{context, source}}
-   * key = contextName + "\u241F" + sourceText
-   */
   function parseTS(xmlText){
     const doctype = readDoctype(xmlText);
     const parser = new DOMParser();
@@ -153,168 +154,151 @@
     return { doc: xml, doctype, map, meta };
   }
 
-  /**
-   * 取得顯示用譯文摘要（含 numerus）
-   */
-  function getTranslationPreview(messageEl){
-    if(!messageEl) return '(無此訊息)';
+  function getTransPreview(messageEl){
+    if(!messageEl) return '';
     const trans = messageEl.getElementsByTagName('translation')[0];
-    if(!trans) return '(無 translation)';
+    if(!trans) return '';
     const forms = trans.getElementsByTagName('numerusform');
-    if(forms && forms.length){
-      const parts = [];
-      for(let i=0;i<forms.length;i++){ parts.push(forms[i].textContent || ''); }
-      return parts.join(' | ');
-    }
+    if(forms && forms.length){ const parts=[]; for(let i=0;i<forms.length;i++){ parts.push(forms[i].textContent||''); } return parts.join(' | '); }
     return trans.textContent || '';
   }
 
-  /**
-   * 將 baseDoc 中對應訊息的 <translation> 以 srcDoc 的同節點取代（深拷貝）
-   */
   function replaceTranslation(baseDoc, baseMsg, srcMsg){
     if(!baseMsg || !srcMsg) return;
     const baseTrans = baseMsg.getElementsByTagName('translation')[0];
     const srcTrans  = srcMsg.getElementsByTagName('translation')[0];
-    if(!srcTrans) return; // 沒有就不動
+    if(!srcTrans) return;
     const imported = baseDoc.importNode(srcTrans, true);
-    if(baseTrans){ baseMsg.replaceChild(imported, baseTrans); }
-    else{ baseMsg.appendChild(imported); }
+    if(baseTrans){ baseMsg.replaceChild(imported, baseTrans); } else { baseMsg.appendChild(imported); }
   }
 
-  /**
-   * 建立一列（條列型選單）
-   */
-  function buildRow(rowIdx, key, metaBase, versions){
+  function buildHeader(files){
+    $thead.innerHTML = '';
     const tr = document.createElement('tr');
+    const th0 = document.createElement('th');
+    th0.className = 'head-left';
+    th0.textContent = '原文（context / source）';
+    tr.appendChild(th0);
+    files.forEach((f, i)=>{
+      const th = document.createElement('th');
+      th.className = 'head-col';
+      th.textContent = `${i+1}. ${f.name || `v${i+1}`}`;
+      tr.appendChild(th);
+    });
+    $thead.appendChild(tr);
+  }
 
-    const tdSrc = document.createElement('td');
-    tdSrc.className = 'src-cell';
-    const ctxName = metaBase.context || '(no-context)';
-    const src = metaBase.source || '';
-    tdSrc.innerHTML = `<div style="font-weight:600;">${escapeHtml(src)}</div><div class="ts-hint">${escapeHtml(ctxName)}</div>`;
+  function buildRow(rowIdx, key){
+    const tr = document.createElement('tr');
+    tr.dataset.key = key;
 
-    const tdPick = document.createElement('td');
-    const list = document.createElement('div');
-    list.className = 'choice-list';
+    // 左側 row label：原文 + context
+    const tdLabel = document.createElement('th');
+    tdLabel.className = 'row-label sticky-left';
+    const metaBase = base.meta.get(key) || {context:'', source:''};
+    tdLabel.innerHTML = `<div style="font-weight:700;">${escapeHtml(metaBase.source)}</div><div class="ctx">${escapeHtml(metaBase.context)}</div>`;
+    tr.appendChild(tdLabel);
 
+    // 每個版本的翻譯 cell
     versions.forEach((v, vi)=>{
-      const wrap = document.createElement('div');
-      wrap.className = 'choice-item';
-
-      const labelId = `pick-${rowIdx}-${vi}`;
-      const radio = document.createElement('input');
-      radio.type = 'radio';
-      radio.name = `pick-${rowIdx}`; // 每列互斥
-      radio.id = labelId;
-      radio.value = String(vi);
-      if(vi === 0) radio.checked = true; // 預設第一個
-
+      const td = document.createElement('td');
+      td.className = 'pick-cell';
+      td.tabIndex = 0; // 可鍵盤聚焦
+      td.role = 'button';
+      td.dataset.vi = String(vi);
       const msg = v.map.get(key);
-      const has = !!msg;
-      if(!has){
-        radio.disabled = true;
-        wrap.setAttribute('disabled','');
+      if(!msg){
+        td.classList.add('missing');
+        td.innerHTML = '<div class="cell-content">（此檔無此訊息）</div>';
+      } else {
+        const preview = escapeHtml(getTransPreview(msg)) || '<i>（空白）</i>';
+        td.innerHTML = `<div class="cell-box"><div class="cell-index">${vi+1}</div><div class="cell-content">${preview}</div></div>`;
       }
-
-      const label = document.createElement('label');
-      label.htmlFor = labelId;
-      const fname = escapeHtml(v.name || `v${vi+1}`);
-      const snippet = has ? escapeHtml(getTranslationPreview(msg)) : '（此檔無此訊息）';
-      label.innerHTML = `<div class="filename">${vi+1}. ${fname}</div><div class="trans-snippet">${snippet || '<i>（空白）</i>'}</div>`;
-
-      wrap.appendChild(radio);
-      wrap.appendChild(label);
-      list.appendChild(wrap);
+      td.addEventListener('click', ()=> selectCell(tr, td));
+      td.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); selectCell(tr, td);} });
+      tr.appendChild(td);
     });
 
-    tdPick.appendChild(list);
-
-    tr.appendChild(tdSrc);
-    tr.appendChild(tdPick);
-    tr.dataset.key = key;
+    // 預設選第 1 欄
+    setRowPick(tr, 0);
     return tr;
   }
 
-  function escapeHtml(s){
-    return String(s||'').replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;' }[c]));
+  function setRowPick(tr, vi){
+    const key = tr.dataset.key;
+    picked.set(key, vi);
+    const cells = Array.from(tr.querySelectorAll('.pick-cell'));
+    cells.forEach(td=> td.classList.remove('selected'));
+    const target = cells[vi];
+    if(target && !target.classList.contains('missing')) target.classList.add('selected');
   }
 
-  /**
-   * 狀態
-   */
-  let versions = []; // [{name, doc, doctype, map, meta}]
-  let base = null;   // versions[0]
-  let baseKeys = []; // 只用第一個檔案作為底稿的 key 列表
+  function selectCell(tr, td){
+    if(td.classList.contains('missing')) return;
+    const vi = Number(td.dataset.vi||'0');
+    setRowPick(tr, vi);
+  }
 
-  /**
-   * 生成表格
-   */
-  async function buildTable(){
-    $tbody.innerHTML = '';
-    $wrap.style.display = 'none';
-    $dl.disabled = true; $stat.textContent = '載入中…'; $msg.textContent='';
+  async function buildGrid(){
+    $thead.innerHTML = ''; $tbody.innerHTML = ''; $wrap.style.display='none';
+    $dl.disabled = true; $stat.textContent = '載入中…'; $msg.textContent=''; picked = new Map();
 
     const files = Array.from($files.files || []);
     if(files.length < 1){ $stat.textContent = '請選擇至少 1 個 .ts 檔'; return; }
 
-    // 讀所有檔
+    // 讀檔
     const texts = await Promise.all(files.map(readFileText));
     versions = texts.map((txt, i)=>({ ...parseTS(txt), name: files[i].name || `v${i+1}` }));
-
     base = versions[0];
-    // 以第一個檔案的訊息作為輸出底稿
     baseKeys = Array.from(base.map.keys());
 
-    // 建表
-    baseKeys.forEach((key, idx)=>{
-      const metaBase = base.meta.get(key) || {context:'', source:''};
-      const tr = buildRow(idx, key, metaBase, versions);
-      $tbody.appendChild(tr);
-    });
+    buildHeader(files);
+
+    const frag = document.createDocumentFragment();
+    baseKeys.forEach((key, idx)=>{ frag.appendChild(buildRow(idx, key)); });
+    $tbody.appendChild(frag);
 
     $wrap.style.display = '';
     $dl.disabled = false;
-    $stat.textContent = `已載入 ${files.length} 檔；條目數 ${baseKeys.length}（以第 1 檔為底稿）`;
+    $stat.textContent = `已載入 ${files.length} 檔；訊息 ${baseKeys.length}（第 1 檔為預設）`;
     applyFilter();
   }
 
-  /**
-   * 依關鍵字過濾（原文/譯文）
-   */
   function applyFilter(){
-    const q = ($search.value || '').trim().toLowerCase();
-    if(!q){ Array.from($tbody.children).forEach(tr=>tr.style.display=''); return; }
-    const terms = q.split(/\s+/).filter(Boolean);
+    const q = ($search.value||'').trim().toLowerCase();
+    const terms = q ? q.split(/\s+/).filter(Boolean) : [];
+    const onlyDiff = $onlyDiff.checked;
 
     Array.from($tbody.children).forEach(tr=>{
       const key = tr.dataset.key;
       let text = '';
-      const metaBase = base.meta.get(key) || {context:'',source:''};
+      const metaBase = base.meta.get(key) || {context:'', source:''};
       text += (metaBase.source||'') + ' ' + (metaBase.context||'');
-      // 各版譯文也檢索
-      versions.forEach(v=>{
-        const m = v.map.get(key);
-        text += ' ' + (m ? getTranslationPreview(m) : '');
-      });
-      const lc = text.toLowerCase();
-      const hit = terms.every(t=> lc.includes(t));
-      tr.style.display = hit ? '' : 'none';
+      versions.forEach(v=>{ const m=v.map.get(key); text += ' ' + (m? getTransPreview(m):''); });
+
+      const match = !terms.length || terms.every(t => text.toLowerCase().includes(t));
+
+      let diff = true;
+      if(onlyDiff){
+        // 與第 1 欄不同才顯示
+        const baseText = getTransPreview(versions[0].map.get(key));
+        diff = versions.slice(1).some(v=> getTransPreview(v.map.get(key)) !== baseText);
+      }
+
+      tr.style.display = (match && (!onlyDiff || diff)) ? '' : 'none';
     });
   }
 
-  /**
-   * 下載合併檔（以第一個檔案為基礎，逐列取用選中的 <translation>）
-   */
   function downloadMerged(){
-    if(!base){ return; }
+    if(!base) return;
     const baseDoc = base.doc.cloneNode(true);
 
-    Array.from($tbody.children).forEach((tr, idx)=>{
-      if(tr.style.display==='none') return; // 過濾不影響輸出，但可視需求忽略隱藏列
-      const key = tr.dataset.key;
-      const baseMsg = base.map.get(key); // in original
-      // 找到 baseDoc 中對應的 message（需重新尋找，不能用原節點引用）
+    // 對每個 base key，依 picked 選取，替換 translation
+    baseKeys.forEach(key=>{
+      const vi = picked.get(key) ?? 0;
+      const srcMsg = (versions[vi] && versions[vi].map.get(key)) ? versions[vi].map.get(key) : base.map.get(key);
+
+      // 定位 baseDoc 內對應 message
       const ctxName = base.meta.get(key)?.context || '';
       const srcText = base.meta.get(key)?.source || '';
       const ctxNodes = baseDoc.getElementsByTagName('context');
@@ -331,22 +315,15 @@
           if(st === srcText){ targetMsg = ms[j]; break; }
         }
       }
-      if(!targetMsg) return;
-
-      // 取選到的版本 index
-      const picked = tr.querySelector(`input[name="pick-${idx}"]:checked`);
-      const vi = picked ? Number(picked.value) : 0;
-      const srcMsg = versions[vi] && versions[vi].map.get(key) ? versions[vi].map.get(key) : baseMsg;
-      replaceTranslation(baseDoc, targetMsg, srcMsg);
+      if(targetMsg){ replaceTranslation(baseDoc, targetMsg, srcMsg); }
     });
 
-    // 序列化
+    // 輸出 XML
     const xmlDecl = '<?xml version="1.0" encoding="utf-8"?>\n';
     const ser = new XMLSerializer();
     let xmlOut = ser.serializeToString(baseDoc);
     const doctype = base.doctype;
-    if(doctype){ xmlOut = xmlDecl + doctype + xmlOut; }
-    else{ xmlOut = xmlDecl + xmlOut; }
+    if(doctype){ xmlOut = xmlDecl + doctype + xmlOut; } else { xmlOut = xmlDecl + xmlOut; }
 
     const blob = new Blob([xmlOut], {type:'application/xml'});
     const a = document.createElement('a');
@@ -357,11 +334,11 @@
     setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 0);
   }
 
-  $build.addEventListener('click', async ()=>{
-    try{ await buildTable(); }catch(e){ $msg.textContent = '載入失敗：' + (e?.message || e); console.error(e); }
-  });
+  // 綁定事件
+  $build.addEventListener('click', async ()=>{ try{ await buildGrid(); }catch(e){ $msg.textContent='載入失敗：'+(e?.message||e); console.error(e);} });
   $dl.addEventListener('click', downloadMerged);
   $search.addEventListener('input', applyFilter);
+  $onlyDiff.addEventListener('change', applyFilter);
 })();
 </script>
 </body>
