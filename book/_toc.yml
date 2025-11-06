@@ -11,6 +11,8 @@ chapters:
     title: ChatGPT API 翻譯
   - file: pages/app_local
     title: Local LLM 翻譯
+  - file: pages/edit
+    title: 編輯翻譯檔
   - file: pages/ods_view
     title: 字典詞庫推薦
   - file: pages/download
