@@ -6,7 +6,16 @@ title: Edit
 
 ```{raw} html
 <style>
-  /* —— 全部樣式限制在 #ts-ui —— */
+  .bd-sidebar-secondary { display: none !important; }
+  .bd-content,
+  .bd-article-container,
+  .tex2jax_ignore.mathjax_ignore {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+</style>
+
+<style>
   #ts-ui{
     --ts-gap: 12px; --ts-pad: 14px; --ts-radius: 12px;
     --ts-border:#e5e7eb; --ts-bg:#fff; --ts-surface:#fff; --ts-surface-2:#f9fafb;
