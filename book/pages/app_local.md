@@ -115,10 +115,10 @@ thebe: false
           <input id="batch" type="number" min="1" value="4">
         </label>
         <label>Max Tokens
-          <input id="maxTokens" type="number" min="1" value="8192">
+          <input id="maxTokens" type="number" min="1" value="1024">
         </label>
         <label>Min Tokens
-          <input id="minTokens" type="number" min="1" value="256">
+          <input id="minTokens" type="number" min="1" value="4">
         </label>
       </div>
     </div>
@@ -127,7 +127,7 @@ thebe: false
   <div class="card">
     <div class="btn-row">
       <button id="btn-download">下載 .ipynb 檔</button>
-      <button id="btn-preview">預覽 Install + Config cell</button>
+      <button id="btn-preview">預覽 Config cell</button>
     </div>
     <pre id="preview" class="preview muted"></pre>
   </div>
@@ -152,8 +152,7 @@ thebe: false
   function toSourceLines(text){ return text.replace(/\r\n/g, "\n").split("\n").map(l => l+"\n"); }
 
   function buildInstallCell(){
-    const src = `# %% Auto-install: 乾淨環境一鍵安裝（會自動判斷 CUDA，失敗則退回 CPU）\n`+
-`import os, sys, platform, subprocess, shutil\n\n`+
+    const src = `import os, sys, platform, subprocess, shutil\n\n`+
 `def run(cmd):\n`+
 `    print('[pip]', ' '.join(cmd))\n`+
 `    r = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)\n`+
@@ -164,9 +163,9 @@ thebe: false
 `    cmd = [sys.executable, '-m', 'pip', 'install', '-q'] + list(args)\n`+
 `    if index_url: cmd += ['--index-url', index_url]\n`+
 `    run(cmd)\n\n`+
-`# 升級安裝工具\n`+
+`# 升級\n`+
 `pip_install(['--upgrade', 'pip', 'setuptools', 'wheel'])\n\n`+
-`# 判斷 CUDA 可用性\n`+
+`# 判斷 CUDA\n`+
 `def cuda_available():\n`+
 `    try:\n`+
 `        out = subprocess.run(['nvidia-smi'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)\n`+
@@ -174,19 +173,18 @@ thebe: false
 `    except Exception:\n`+
 `        return False\n\n`+
 `cuda = cuda_available()\n`+
-`# 先嘗試 CUDA 12.1 的 PyTorch，失敗就退回 CPU 版\n`+
+`# 先嘗試 CUDA 12.1 的 PyTorch\n`+
 `tried_gpu = False\n`+
 `if cuda:\n`+
 `    try:\n`+
 `        pip_install(['torch', 'torchvision', 'torchaudio'], index_url='https://download.pytorch.org/whl/cu121')\n`+
 `        tried_gpu = True\n`+
-`        print('✔ Installed PyTorch (CUDA 12.1)')\n`+
+`        print('Installed PyTorch (CUDA 12.1)')\n`+
 `    except Exception as e:\n`+
-`        print('⚠ CUDA 安裝失敗，改裝 CPU 版。', e)\n\n`+
+`        print('CUDA 安裝失敗，改裝 CPU。', e)\n\n`+
 `if not tried_gpu:\n`+
 `    pip_install(['torch', 'torchvision', 'torchaudio'], index_url='https://download.pytorch.org/whl/cpu')\n`+
-`    print('✔ Installed PyTorch (CPU)')\n\n`+
-`# 高階常用生態（Transformers / HF Hub / 量化等）\n`+
+`    print('Installed PyTorch (CPU)')\n\n`+
 `common = [\n`+
 `  'transformers', 'accelerate', 'safetensors', 'sentencepiece', 'tokenizers',\n`+
 `  'datasets', 'huggingface_hub', 'peft', 'einops', 'tiktoken',\n`+
@@ -194,14 +192,13 @@ thebe: false
 `  'gradio', 'uvicorn', 'fastapi'\n`+
 `]\n`+
 `pip_install(common)\n\n`+
-`# bitsandbytes 僅在 Linux + CUDA 時安裝（Windows 常無可用輪子）\n`+
 `if cuda and platform.system() == 'Linux':\n`+
 `    try:\n`+
 `        pip_install(['bitsandbytes'])\n`+
-`        print('✔ Installed bitsandbytes')\n`+
+`        print('Installed bitsandbytes')\n`+
 `    except Exception as e:\n`+
-`        print('⚠ 安裝 bitsandbytes 失敗，略過。', e)\n\n`+
-`print('✅ 基礎套件安裝完成。')\n`;
+`        print('安裝 bitsandbytes 失敗，略過。', e)\n\n`+
+`print('基礎套件安裝完成。')\n`;
 
     return {
       cell_type: 'code',
