@@ -85,7 +85,13 @@ thebe: false
           <select id="model">
             <option value="THUDM/glm-4-9b-chat" selected>THUDM/glm-4-9b-chat</option>
             <option value="taide/Llama-3.1-TAIDE-LX-8B-Chat">taide/Llama-3.1-TAIDE-LX-8B-Chat</option>
+            <option value="taide/TAIDE-Gemma-2-9B-Chat">taide/TAIDE-Gemma-2-9B-Chat</option>
+            <option value="google/gemma-2-9b-it">google/gemma-2-9b-it</option>
             <option value="Qwen/Qwen2.5-7B-Instruct">Qwen/Qwen2.5-7B-Instruct</option>
+            <option value="Qwen/Qwen2.5-14B-Instruct">Qwen/Qwen2.5-14B-Instruct</option>
+            <option value="meta-llama/Meta-Llama-3.1-8B-Instruct">meta-llama/Meta-Llama-3.1-8B-Instruct</option>
+            <option value="01-ai/Yi-1.5-9B-Chat">01-ai/Yi-1.5-9B-Chat</option>
+            <option value="mistralai/Mistral-Nemo-Instruct-2407">mistralai/Mistral-Nemo-Instruct-2407</option>
           </select>
         </label>
         <label>備用模型（FALLBACK_MODEL）
@@ -121,7 +127,7 @@ thebe: false
   <div class="card">
     <div class="btn-row">
       <button id="btn-download">下載 .ipynb 檔</button>
-      <button id="btn-preview">預覽 Config cell</button>
+      <button id="btn-preview">預覽 Install + Config cell</button>
     </div>
     <pre id="preview" class="preview muted"></pre>
   </div>
@@ -144,6 +150,67 @@ thebe: false
 
   // 小工具
   function toSourceLines(text){ return text.replace(/\r\n/g, "\n").split("\n").map(l => l+"\n"); }
+
+  function buildInstallCell(){
+    const src = `# %% Auto-install: 乾淨環境一鍵安裝（會自動判斷 CUDA，失敗則退回 CPU）\n`+
+`import os, sys, platform, subprocess, shutil\n\n`+
+`def run(cmd):\n`+
+`    print('[pip]', ' '.join(cmd))\n`+
+`    r = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)\n`+
+`    print(r.stdout)\n`+
+`    if r.returncode != 0:\n`+
+`        raise RuntimeError('Command failed: ' + ' '.join(cmd))\n\n`+
+`def pip_install(args, index_url=None):\n`+
+`    cmd = [sys.executable, '-m', 'pip', 'install', '-q'] + list(args)\n`+
+`    if index_url: cmd += ['--index-url', index_url]\n`+
+`    run(cmd)\n\n`+
+`# 升級安裝工具\n`+
+`pip_install(['--upgrade', 'pip', 'setuptools', 'wheel'])\n\n`+
+`# 判斷 CUDA 可用性\n`+
+`def cuda_available():\n`+
+`    try:\n`+
+`        out = subprocess.run(['nvidia-smi'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)\n`+
+`        return out.returncode == 0\n`+
+`    except Exception:\n`+
+`        return False\n\n`+
+`cuda = cuda_available()\n`+
+`# 先嘗試 CUDA 12.1 的 PyTorch，失敗就退回 CPU 版\n`+
+`tried_gpu = False\n`+
+`if cuda:\n`+
+`    try:\n`+
+`        pip_install(['torch', 'torchvision', 'torchaudio'], index_url='https://download.pytorch.org/whl/cu121')\n`+
+`        tried_gpu = True\n`+
+`        print('✔ Installed PyTorch (CUDA 12.1)')\n`+
+`    except Exception as e:\n`+
+`        print('⚠ CUDA 安裝失敗，改裝 CPU 版。', e)\n\n`+
+`if not tried_gpu:\n`+
+`    pip_install(['torch', 'torchvision', 'torchaudio'], index_url='https://download.pytorch.org/whl/cpu')\n`+
+`    print('✔ Installed PyTorch (CPU)')\n\n`+
+`# 高階常用生態（Transformers / HF Hub / 量化等）\n`+
+`common = [\n`+
+`  'transformers', 'accelerate', 'safetensors', 'sentencepiece', 'tokenizers',\n`+
+`  'datasets', 'huggingface_hub', 'peft', 'einops', 'tiktoken',\n`+
+`  'protobuf>=3.20,<5', 'numpy', 'scipy', 'tqdm', 'pyyaml', 'requests', 'orjson', 'psutil',\n`+
+`  'gradio', 'uvicorn', 'fastapi'\n`+
+`]\n`+
+`pip_install(common)\n\n`+
+`# bitsandbytes 僅在 Linux + CUDA 時安裝（Windows 常無可用輪子）\n`+
+`if cuda and platform.system() == 'Linux':\n`+
+`    try:\n`+
+`        pip_install(['bitsandbytes'])\n`+
+`        print('✔ Installed bitsandbytes')\n`+
+`    except Exception as e:\n`+
+`        print('⚠ 安裝 bitsandbytes 失敗，略過。', e)\n\n`+
+`print('✅ 基礎套件安裝完成。')\n`;
+
+    return {
+      cell_type: 'code',
+      execution_count: null,
+      metadata: {"name":"auto_install"},
+      outputs: [],
+      source: toSourceLines(src)
+    };
+  }
 
   function buildConfigCell(){
     const outputFile    = document.getElementById('fname').value;
@@ -182,7 +249,9 @@ thebe: false
   function buildNotebook(BASE_NB){
     const nb = JSON.parse(JSON.stringify(BASE_NB));
     if (!nb.cells) nb.cells = [];
-    nb.cells = [buildConfigCell(), ...nb.cells];
+    const installCell = buildInstallCell();
+    const cfgCell = buildConfigCell();
+    nb.cells = [installCell, cfgCell, ...nb.cells];
     nb.nbformat = nb.nbformat || 4;
     nb.nbformat_minor = nb.nbformat_minor || 5;
     nb.metadata = nb.metadata || {};
@@ -198,17 +267,22 @@ thebe: false
   const previewEl  = document.getElementById('preview');
   let previewOpen  = false;
 
+  function buildPreviewText(){
+    const install = buildInstallCell().source.join("");
+    const cfg = buildConfigCell().source.join("");
+    return `# === Install Cell ===\n${install}\n\n# === Config Cell ===\n${cfg}`;
+  }
+
   function togglePreview(){
     if (previewOpen){
       // 收起
       previewEl.style.display = 'none';
-      previewBtn.textContent = '預覽 Config cell';
+      previewBtn.textContent = '預覽 Install + Config cell';
       previewEl.setAttribute('aria-hidden', 'true');
       previewBtn.setAttribute('aria-expanded', 'false');
     } else {
       // 展開
-      const cfg = buildConfigCell();
-      previewEl.textContent = cfg.source.join("");
+      previewEl.textContent = buildPreviewText();
       previewEl.style.display = 'block';
       previewBtn.textContent = '收起預覽';
       previewEl.setAttribute('aria-hidden', 'false');
