@@ -189,7 +189,7 @@ thebe: false
 `  'transformers', 'accelerate', 'safetensors', 'sentencepiece', 'tokenizers',\n`+
 `  'datasets', 'huggingface_hub', 'peft', 'einops', 'tiktoken',\n`+
 `  'protobuf>=3.20,<5', 'numpy', 'scipy', 'tqdm', 'pyyaml', 'requests', 'orjson', 'psutil',\n`+
-`  'gradio', 'uvicorn', 'fastapi'\n`+
+`  'gradio', 'uvicorn', 'fastapi', 'odfpy>=1.4.1'\n`+
 `]\n`+
 `pip_install(common)\n\n`+
 `if cuda and platform.system() == 'Linux':\n`+
