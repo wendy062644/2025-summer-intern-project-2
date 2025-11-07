@@ -89,7 +89,7 @@ thebe: false
             <option value="Qwen/Qwen3-7B-Instruct">Qwen/Qwen3-7B-Instruct</option>
             <option value="Qwen/Qwen2.5-7B-Instruct">Qwen/Qwen2.5-7B-Instruct</option>
             <option value="Qwen/Qwen2.5-14B-Instruct">Qwen/Qwen2.5-14B-Instruct</option>
-            <option value="THUDM/glm-4-9b-chat" selected>THUDM/glm-4-9b-chat</option>
+            <option value="THUDM/glm-4-9b-chat">THUDM/glm-4-9b-chat</option>
             <option value="google/gemma-2-9b-it">google/gemma-2-9b-it</option>
             <option value="meta-llama/Meta-Llama-3.1-8B-Instruct">meta-llama/Meta-Llama-3.1-8B-Instruct</option>
           </select>
