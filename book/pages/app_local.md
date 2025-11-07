@@ -83,15 +83,15 @@ thebe: false
       <div class="grid-2">
         <label>模型（Model）
           <select id="model">
-            <option value="THUDM/glm-4-9b-chat" selected>THUDM/glm-4-9b-chat</option>
+            <option value="taide/Gemma-3-TAIDE-12B-Chat" selected>taide/Gemma-3-TAIDE-12B-Chat</option>
             <option value="taide/Llama-3.1-TAIDE-LX-8B-Chat">taide/Llama-3.1-TAIDE-LX-8B-Chat</option>
             <option value="taide/TAIDE-Gemma-2-9B-Chat">taide/TAIDE-Gemma-2-9B-Chat</option>
-            <option value="google/gemma-2-9b-it">google/gemma-2-9b-it</option>
+            <option value="Qwen/Qwen3-7B-Instruct">Qwen/Qwen3-7B-Instruct</option>
             <option value="Qwen/Qwen2.5-7B-Instruct">Qwen/Qwen2.5-7B-Instruct</option>
             <option value="Qwen/Qwen2.5-14B-Instruct">Qwen/Qwen2.5-14B-Instruct</option>
+            <option value="THUDM/glm-4-9b-chat" selected>THUDM/glm-4-9b-chat</option>
+            <option value="google/gemma-2-9b-it">google/gemma-2-9b-it</option>
             <option value="meta-llama/Meta-Llama-3.1-8B-Instruct">meta-llama/Meta-Llama-3.1-8B-Instruct</option>
-            <option value="01-ai/Yi-1.5-9B-Chat">01-ai/Yi-1.5-9B-Chat</option>
-            <option value="mistralai/Mistral-Nemo-Instruct-2407">mistralai/Mistral-Nemo-Instruct-2407</option>
           </select>
         </label>
         <label>備用模型（FALLBACK_MODEL）
