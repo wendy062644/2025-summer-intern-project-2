@@ -1,289 +1,85 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>QGIS .ts 兩階段翻譯（含格式修補）</title>
-  <style>
-  /* —— 全部樣式只限制在 #ts-ui，並且用 --ts-* 變數，避免和主題衝突 —— */
-  #ts-ui{
-    --ts-gap: 12px; --ts-pad: 14px; --ts-radius: 12px; --ts-border: #e5e7eb;
-    --ts-bg: #fff; --ts-muted: #6b7280; --ts-text: #111827;
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", "PingFang TC", "Microsoft JhengHei", sans-serif;
-    line-height: 1.35; margin: 8px 0 16px; color: var(--ts-text);
+// ts-ui.js
+import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.mjs";
+
+// --- small DOM helpers ---
+const $ = (id) => document.getElementById(id);
+
+// --- counters from .ts file ---
+(function setupTsCounter(){
+  const tsFile = $('tsFile');
+  const limitN = $('limitN');
+  const countInfo = $('countInfo');
+  countInfo.textContent = ' / 0';
+
+  function needsTranslationJS(text){
+    if (!text) return false;
+    const t = String(text).trim();
+    if (!t) return false;
+    if (/^[\s\d\W%{}]+$/u.test(t)) return false; // 只有符號/數字/空白 -> 跳過
+    return true;
   }
-  @media (prefers-color-scheme: dark){
-    #ts-ui{ --ts-border: #2b2f36; --ts-bg: #111418; --ts-muted: #9aa3af; --ts-text: #e5e7eb; }
-  }
-  #ts-ui *, #ts-ui *::before, #ts-ui *::after{ box-sizing: border-box; }
-  #ts-ui .ts-card{ border:1px solid var(--ts-border); background:var(--ts-bg); border-radius: var(--ts-radius); padding:16px; box-shadow:0 1px 2px rgba(0,0,0,.04); }
-  #ts-ui .ts-title{ font-size:1.05rem; font-weight:600; margin:2px 0 10px; }
-  #ts-ui .ts-grid{ display:grid; grid-template-columns: 160px 1fr; gap:10px 14px; align-items:center; }
-  #ts-ui .ts-label{ color:var(--ts-muted); font-size:.95rem; white-space:nowrap; }
-  #ts-ui .ts-input input, #ts-ui .ts-input select{ width:100%; padding:8px 10px; border:1px solid var(--ts-border); border-radius:10px; background:transparent; font-size:.95rem; }
-  #ts-ui .ts-input select{ appearance:none; -webkit-appearance:none; -moz-appearance:none; }
-  #ts-ui .ts-input input[type="file"]{ padding:6px; }
-  #ts-ui .ts-inline{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-  #ts-ui .ts-hint{ color:var(--ts-muted); font-size:.9rem; }
-  #ts-ui .ts-toolbar{ margin-top:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-  #ts-ui .ts-btn-primary{ appearance:none; border:1px solid var(--ts-border); background:#111827; color:#fff; border-radius:10px; padding:8px 14px; font-weight:600; cursor:pointer; }
-  @media (prefers-color-scheme: dark){ #ts-ui .ts-btn-primary{ background:#e5e7eb; color:#111418; } }
-  #ts-ui .ts-btn-primary:hover{ filter:brightness(0.95); }
-  #ts-ui .ts-divider{ height:1px; background:var(--ts-border); margin:12px 0; border:0; }
-
-  /* 附屬區塊（ID 不變，但樣式仍只在 #ts-ui 作用） */
-  #ts-ui #ts-progress-wrap{ margin:12px 0; }
-  #ts-ui #compare-box{ border:1px solid var(--ts-border); border-radius:12px; padding:8px 12px; margin-top:8px; background:var(--ts-bg); }
-  #ts-ui #compare-box table{ width:100%; border-collapse:collapse; font-size:.95rem; }
-  #ts-ui #compare-box th, #ts-ui #compare-box td{ padding:6px 6px; border-bottom:1px solid var(--ts-border); text-align:left; }
-  #ts-ui #compare-box thead th{ font-weight:600; }
-  #ts-ui #ts-ui-msg{ color:var(--ts-muted); font-size:.95rem; margin-top:8px; }
-
-  /* 手機版：單欄 */
-  @media (max-width: 640px){
-    #ts-ui .ts-grid{ grid-template-columns: 1fr; }
-    #ts-ui .ts-label{ margin-top:6px; }
-  }
-
-  #ts-ui .ts-row-2{ display: grid; grid-template-columns: var(--ts-col1, 1fr) var(--ts-col2, 1fr); gap: 10px 14px; align-items: center; }
-  #ts-ui .ts-6-4{ --ts-col1: 6fr; --ts-col2: 4fr; }
-  #ts-ui .ts-4-6{ --ts-col1: 4fr; --ts-col2: 6fr; }
-  #ts-ui .ts-row-3{ display: grid; grid-template-columns: var(--ts-col1, 1fr) var(--ts-col2, 1fr) var(--ts-col3, 1fr); gap: 10px 14px; align-items: center; }
-  #ts-ui .ts-3-4-3{ --ts-col1: 3fr; --ts-col2: 4fr; --ts-col3: 3fr; }
-  #ts-ui .ts-field{ display: flex; flex-direction: column; gap: 6px; }
-  #ts-ui .ts-field .ts-label{ margin: 0; }
-  #ts-ui .left-col{ grid-column: 1 / 3; }
-  @media (max-width: 640px){ #ts-ui .ts-row-2, #ts-ui .ts-row-3{ grid-template-columns: 1fr; } }
-
-  /* 深色主題 tokens */
-  @media (prefers-color-scheme: dark){
-    #ts-ui{ --ts-bg: #0f1115; --ts-surface: #111418; --ts-surface-2: #0b0f14; --ts-input-bg: #0b0f14; --ts-border: #2b2f36; --ts-text: #e7eaf0; --ts-muted: #a6afbd; --ts-link: #8ab4ff; --ts-code-bg: #0b0f14; --ts-code-fg: #e7eaf0; --ts-accent: #3b82f6; --ts-on-accent: #0b0f14; --ts-focus: 0 0 0 2px rgba(59,130,246,.35); --ts-progress-bg: #1a1f29; --ts-table-head-bg: #121621; }
-  }
-  html[data-theme="dark"] #ts-ui{
-    --ts-bg: #0f1115; --ts-surface: #111418; --ts-surface-2: #0b0f14; --ts-input-bg: #0b0f14; --ts-border: #2b2f36; --ts-text: #e7eaf0; --ts-muted: #a6afbd; --ts-link: #8ab4ff; --ts-code-bg: #0b0f14; --ts-code-fg: #e7eaf0; --ts-accent: #3b82f6; --ts-on-accent: #0b0f14; --ts-focus: 0 0 0 2px rgba(59,130,246,.35); --ts-progress-bg: #1a1f29; --ts-table-head-bg: #121621;
-  }
-  #ts-ui .ts-card{ background: var(--ts-surface); border-color: var(--ts-border); color: var(--ts-text); }
-  #ts-ui .ts-label, #ts-ui .ts-hint{ color: var(--ts-muted); }
-  #ts-ui .ts-input input, #ts-ui .ts-input select{ background: var(--ts-input-bg); color: var(--ts-text); border-color: var(--ts-border); }
-  #ts-ui .ts-input input:focus, #ts-ui .ts-input select:focus{ outline: none; box-shadow: var(--ts-focus); border-color: color-mix(in oklab, var(--ts-accent) 60%, var(--ts-border)); }
-  #ts-ui .ts-btn-primary{ background: var(--ts-accent); color: var(--ts-on-accent); border: 1px solid var(--ts-border); }
-  #ts-ui .ts-btn-primary:hover{ filter: brightness(1.06); } #ts-ui .ts-btn-primary:focus{ outline: none; box-shadow: var(--ts-focus); }
-  #ts-ui #compare-box{ background: var(--ts-surface); border-color: var(--ts-border); }
-  #ts-ui #compare-box thead th{ background: var(--ts-table-head-bg); color: var(--ts-text); }
-  #ts-ui #compare-box td, #ts-ui #compare-box th{ border-bottom: 1px solid var(--ts-border); }
-  #ts-ui progress{ width:100%; height: 14px; background: var(--ts-progress-bg); border-radius: 8px; overflow: hidden; }
-  #ts-ui progress::-webkit-progress-bar{ background: var(--ts-progress-bg); }
-  #ts-ui progress::-webkit-progress-value{ background: var(--ts-accent); }
-  #ts-ui progress::-moz-progress-bar{ background: var(--ts-accent); }
-  #ts-ui code{ background: var(--ts-code-bg); color: var(--ts-code-fg); padding: .1em .35em; border-radius: .35em; border: 1px solid var(--ts-border); }
-  #ts-ui a{ color: var(--ts-link); text-underline-offset: 2px; }
-  #ts-ui ::selection{ background: color-mix(in oklab, var(--ts-accent) 35%, transparent); }
-  </style>
-</head>
-<body>
-  <div id="ts-ui">
-    <!-- Stage 1: API 設定 -->
-    <div class="ts-card">
-      <div class="ts-title">第一階段：API 設定（翻譯）</div>
-      <div class="ts-field" style="margin-bottom:10px;">
-        <label class="ts-label" for="apiKey">API Key</label>
-        <div class="ts-input"><input type="password" id="apiKey" placeholder="sk-..." autocomplete="off"></div>
-      </div>
-      <div class="ts-row-2 ts-6-4" style="margin-top:10px;">
-        <div class="ts-field">
-          <label class="ts-label" for="baseUrl">Base URL</label>
-          <div class="ts-input"><input type="text" id="baseUrl" value="https://api.openai.com/v1"></div>
-        </div>
-        <div class="ts-field">
-          <label class="ts-label" for="modelSel">Model</label>
-          <div class="ts-input">
-            <div class="ts-inline" style="width:100%;">
-              <select id="modelSel" style="flex:1;min-width:220px;">
-                <optgroup label="GPT-5"><option value="gpt-5">gpt-5</option><option value="gpt-5-mini">gpt-5-mini</option><option value="gpt-5-nano">gpt-5-nano</option></optgroup>
-                <optgroup label="GPT-4.1"><option value="gpt-4.1">gpt-4.1</option><option value="gpt-4.1-mini" selected>gpt-4.1-mini</option><option value="gpt-4.1-nano">gpt-4.1-nano</option></optgroup>
-                <optgroup label="GPT-4o"><option value="gpt-4o">gpt-4o</option><option value="gpt-4o-mini">gpt-4o-mini</option></optgroup>
-                <optgroup label="Reasoning"><option value="o4-mini">o4-mini</option><option value="o3-mini">o3-mini</option></optgroup>
-                <optgroup label="Legacy"><option value="gpt-4-turbo">gpt-4-turbo</option><option value="gpt-3.5-turbo">gpt-3.5-turbo</option></optgroup>
-                <optgroup label="自訂"><option value="__custom__">其他</option></optgroup>
-              </select>
-              <input id="modelCustom" type="text" placeholder="例如：my-org/gpt-xy-2025-10-15" style="display:none;flex:1;">
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <hr class="ts-divider">
-      <div class="ts-title">第二階段：API 設定（格式修補 / 後編輯）</div>
-      <div class="ts-grid" style="margin-bottom:6px;">
-        <label class="ts-label" for="stage2Enabled">啟用第二階段</label>
-        <div class="ts-input"><input type="checkbox" id="stage2Enabled" checked></div>
-      </div>
-      <div class="ts-field" style="margin-bottom:10px;">
-        <label class="ts-label" for="apiKey2">API Key（第二階段）</label>
-        <div class="ts-input"><input type="password" id="apiKey2" placeholder="若空白則沿用第一階段" autocomplete="off"></div>
-      </div>
-      <div class="ts-row-2 ts-6-4">
-        <div class="ts-field">
-          <label class="ts-label" for="baseUrl2">Base URL（第二階段）</label>
-          <div class="ts-input"><input type="text" id="baseUrl2" placeholder="留空沿用第一階段"></div>
-        </div>
-        <div class="ts-field">
-          <label class="ts-label" for="modelSel2">Model（第二階段）</label>
-          <div class="ts-input">
-            <div class="ts-inline" style="width:100%;">
-              <select id="modelSel2" style="flex:1;min-width:220px;">
-                <optgroup label="GPT-5"><option value="gpt-5">gpt-5</option><option value="gpt-5-mini">gpt-5-mini</option><option value="gpt-5-nano">gpt-5-nano</option></optgroup>
-                <optgroup label="GPT-4.1"><option value="gpt-4.1">gpt-4.1</option><option value="gpt-4.1-mini">gpt-4.1-mini</option><option value="gpt-4.1-nano">gpt-4.1-nano</option></optgroup>
-                <optgroup label="GPT-4o"><option value="gpt-4o">gpt-4o</option><option value="gpt-4o-mini">gpt-4o-mini</option></optgroup>
-                <optgroup label="Reasoning"><option value="o4-mini">o4-mini</option><option value="o3-mini">o3-mini</option></optgroup>
-                <optgroup label="Legacy"><option value="gpt-4-turbo">gpt-4-turbo</option><option value="gpt-3.5-turbo">gpt-3.5-turbo</option></optgroup>
-                <optgroup label="自訂"><option value="__custom2__">其他</option></optgroup>
-              </select>
-              <input id="modelCustom2" type="text" placeholder="例如：my-org/gpt-xy-2025-10-15" style="display:none;flex:1;">
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="ts-card" style="margin-top:12px;">
-      <div class="ts-title">處理參數</div>
-      <div class="ts-row-3 ts-3-4-3">
-        <div class="ts-field">
-          <label class="ts-label" for="batch">Batch</label>
-          <div class="ts-input"><input type="number" id="batch" value="32" min="1" max="64"></div>
-        </div>
-        <div class="ts-field">
-          <label class="ts-label" for="limitN">處理筆數上限</label>
-          <div class="ts-input ts-inline">
-            <input type="number" id="limitN" value="0" style="max-width:220px;">
-            <span id="countInfo" class="ts-hint"> / 0</span>
-          </div>
-        </div>
-        <div class="ts-field">
-          <label class="ts-label" for="tsFile">.ts 檔（上傳）</label>
-          <div class="ts-input"><input type="file" id="tsFile" accept=".ts"></div>
-        </div>
-      </div>
-
-      <hr class="ts-divider">
-      <div class="ts-title">輸入檔案</div>
-      <div class="ts-row-2" style="--ts-col1: 7fr; --ts-col2: 3fr;">
-        <div class="ts-field">
-          <label class="ts-label" for="glsFile">glossary（CSV / ODS）</label>
-          <div class="ts-input"><input type="file" id="glsFile" accept=".csv,.ods" multiple></div>
-        </div>
-        <div class="ts-field">
-          <label class="ts-label" style="visibility:hidden;">執行翻譯</label>
-          <div class="ts-input"><button id="run-btn" class="ts-btn-primary" style="width:100%;">執行翻譯</button></div>
-        </div>
-        <div class="ts-hint left-col" style="margin-top:6px;">欄位：<code>en, zh</code> 或 <code>英文名稱, 中文名稱</code></div>
-      </div>
-
-      <div id="ts-progress-wrap" style="display:none;">
-        <div class="ts-inline">
-          <progress id="ts-progress" value="0" max="100" style="width:100%;"></progress>
-          <span id="ts-progress-label" style="font-variant-numeric: tabular-nums;">0 / 0</span>
-        </div>
-      </div>
-
-      <div id="compare-box" style="display:none;">
-        <div style="font-size:0.95rem;color:var(--ts-text);margin-bottom:4px;">翻譯對照（即時刷新）</div>
-        <div style="max-height: 360px; overflow:auto;">
-          <table>
-            <thead><tr><th style="width:50%;">原文</th><th style="width:50%;">譯文</th></tr></thead>
-            <tbody id="compare-tbody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div id="ts-ui-msg"></div>
-    </div>
-  </div>
-
-  <!-- Pyodide + pipeline -->
-  <script type="module">
-  import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.mjs";
-
-  // --- small DOM helpers ---
-  const $ = (id) => document.getElementById(id);
-
-  // --- counters from .ts file ---
-  (function setupTsCounter(){
-    const tsFile = $('tsFile');
-    const limitN = $('limitN');
-    const countInfo = $('countInfo');
-    countInfo.textContent = ' / 0';
-
-    function needsTranslationJS(text){
-      if (!text) return false;
-      const t = String(text).trim();
-      if (!t) return false;
-      if (/^[\s\d\W%{}]+$/u.test(t)) return false; // 只有符號/數字/空白 -> 跳過
-      return true;
-    }
-    async function handleTsChange(){
-      const file = tsFile.files && tsFile.files[0];
-      if (!file){ countInfo.textContent = ' / 0'; limitN.removeAttribute('max'); return; }
-      try{
-        const txt = await file.text();
-        let total = 0;
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(txt, 'application/xml');
-        const hasErr = xmlDoc.getElementsByTagName('parsererror').length > 0;
-        if (!hasErr){
-          const sources = xmlDoc.getElementsByTagName('source');
-          for (let i = 0; i < sources.length; i++){
-            const s = sources[i].textContent || '';
-            if (needsTranslationJS(s)) total++;
-          }
-        } else {
-          const matches = txt.match(/<source>([\s\S]*?)<\/source>/g) || [];
-          for (const m of matches){
-            const inner = m.replace(/^<source>|<\/source>$/g, '');
-            if (needsTranslationJS(inner)) total++;
-          }
+  async function handleTsChange(){
+    const file = tsFile.files && tsFile.files[0];
+    if (!file){ countInfo.textContent = ' / 0'; limitN.removeAttribute('max'); return; }
+    try{
+      const txt = await file.text();
+      let total = 0;
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(txt, 'application/xml');
+      const hasErr = xmlDoc.getElementsByTagName('parsererror').length > 0;
+      if (!hasErr){
+        const sources = xmlDoc.getElementsByTagName('source');
+        for (let i = 0; i < sources.length; i++){
+          const s = sources[i].textContent || '';
+          if (needsTranslationJS(s)) total++;
         }
-        if (total > 0){
-          limitN.max = String(total);
-          if (Number(limitN.value) <= 0) limitN.value = total;
-          countInfo.textContent = ' / ' + total;
-        } else {
-          countInfo.textContent = ' / 0';
-          limitN.removeAttribute('max');
+      } else {
+        const matches = txt.match(/<source>([\s\S]*?)<\/source>/g) || [];
+        for (const m of matches){
+          const inner = m.replace(/^<source>|<\/source>$/g, '');
+          if (needsTranslationJS(inner)) total++;
         }
-      } catch(e){
-        console.error(e);
+      }
+      if (total > 0){
+        limitN.max = String(total);
+        if (Number(limitN.value) <= 0) limitN.value = total;
+        countInfo.textContent = ' / ' + total;
+      } else {
         countInfo.textContent = ' / 0';
         limitN.removeAttribute('max');
       }
+    } catch(e){
+      console.error(e);
+      countInfo.textContent = ' / 0';
+      limitN.removeAttribute('max');
     }
-    function clampLimit(){
-      const max = Number(limitN.max || '0');
-      let v = Number(limitN.value || '0');
-      if (max){ if (v > max) v = max; if (v < 0) v = 0; limitN.value = v; }
-      else if (v < 0){ limitN.value = 0; }
-    }
-    tsFile.addEventListener('change', handleTsChange);
-    limitN.addEventListener('input', clampLimit);
-  })();
+  }
+  function clampLimit(){
+    const max = Number(limitN.max || '0');
+    let v = Number(limitN.value || '0');
+    if (max){ if (v > max) v = max; if (v < 0) v = 0; limitN.value = v; }
+    else if (v < 0){ limitN.value = 0; }
+  }
+  tsFile.addEventListener('change', handleTsChange);
+  limitN.addEventListener('input', clampLimit);
+})();
 
-  // --- show "custom" model input boxes ---
-  (function setupModelCustom(){
-    const sel1 = $('modelSel'); const custom1 = $('modelCustom');
-    const sel2 = $('modelSel2'); const custom2 = $('modelCustom2');
-    function sync1(){ custom1.style.display = (sel1.value === '__custom__') ? 'block' : 'none'; }
-    function sync2(){ custom2.style.display = (sel2.value === '__custom2__') ? 'block' : 'none'; }
-    sel1.addEventListener('change', sync1); sel2.addEventListener('change', sync2);
-    sync1(); sync2();
-  })();
+// --- show "custom" model input boxes ---
+(function setupModelCustom(){
+  const sel1 = $('modelSel'); const custom1 = $('modelCustom');
+  const sel2 = $('modelSel2'); const custom2 = $('modelCustom2');
+  function sync1(){ custom1.style.display = (sel1.value === '__custom__') ? 'block' : 'none'; }
+  function sync2(){ custom2.style.display = (sel2.value === '__custom2__') ? 'block' : 'none'; }
+  sel1.addEventListener('change', sync1); sel2.addEventListener('change', sync2);
+  sync1(); sync2();
+})();
 
-  const pyodide = await loadPyodide();
-  await pyodide.loadPackage('micropip');
-  const $msg = $('ts-ui-msg');
+const pyodide = await loadPyodide();
+await pyodide.loadPackage('micropip');
+const $msg = $('ts-ui-msg');
 
-  try{
-    await pyodide.runPythonAsync(`
+try{
+  await pyodide.runPythonAsync(`
 import asyncio, json, re, io, base64, traceback, html, csv, zipfile
 from typing import List, Tuple, Dict, Optional
 from xml.etree import ElementTree as ET
@@ -605,7 +401,6 @@ async def _try_family(endpoints:List[str], build_body, base_url:str, api_key:str
         if status == 400:
             msg = (data.get('error',{}) or {}).get('message','')
             if ep == '/responses':
-                # key shuffle
                 if 'max_output_tokens' in msg and 'Unsupported' in msg:
                     body = build_body(ep, force_tokens_key='max_completion_tokens')
                     status2, data2 = await _post_json(base_url, ep, body, api_key)
@@ -626,7 +421,6 @@ async def _try_family(endpoints:List[str], build_body, base_url:str, api_key:str
                     if status2 < 400:
                         return status2, data2
                 if 'not compatible with the chat.completions' in msg.lower():
-                    # try responses
                     continue
     raise RuntimeError('API Error', tried)
 
@@ -647,9 +441,8 @@ async def call_stage1(api_key:str, base_url:str, model:str, masked_texts:List[st
         m = (model or '').lower()
         new_family = m.startswith(('gpt-5','gpt-4.1','o4','o3'))
         tokens = min(4000, 220 * max(4, len(masked_texts)))
-        chat_tokens_key = 'max_completion_tokens'
-        if not new_family: chat_tokens_key = 'max_tokens'
-        if force_tokens_key: chat_tokens_key = force_tokens_key
+        const_key = 'max_completion_tokens' if new_family else 'max_tokens'
+        if force_tokens_key: const_key = force_tokens_key
         if path == '/chat/completions':
             body = {
                 'model': model,
@@ -672,7 +465,7 @@ async def call_stage1(api_key:str, base_url:str, model:str, masked_texts:List[st
                 }],
                 'tool_choice':{'type':'function','function':{'name':'return_translations'}},
             }
-            body[chat_tokens_key] = tokens
+            body[const_key] = tokens
             return body
         else: # '/responses'
             body = {
@@ -698,14 +491,14 @@ async def call_stage1(api_key:str, base_url:str, model:str, masked_texts:List[st
             if not drop_reasoning and m.startswith(('gpt-5','o4','o3')):
                 body['reasoning'] = {'effort':'medium'}
             body['max_output_tokens'] = tokens
-            if force_tokens_key == 'max_completion_tokens':
+            if force_tokens_key === 'max_completion_tokens':
                 body.pop('max_output_tokens', None)
                 body['max_completion_tokens'] = tokens
             return body
 
-    # prefer responses for new family, else chat
-    m = (model or '').lower()
-    endpoints = ['/responses','/chat/completions'] if m.startswith(('gpt-5','gpt-4.1','o4','o3')) else ['/chat/completions','/responses']
+    const m = (model or '').toLowerCase();
+    const endpoints = m.startsWith('gpt-5') || m.startsWith('gpt-4.1') || m.startsWith('o4') || m.startsWith('o3')
+      ? ['/responses','/chat/completions'] : ['/chat/completions','/responses'];
     status, data = await _try_family(endpoints, build_body, base_url, api_key)
 
     def _extract_tool_args_from_chat(obj:dict)->Optional[str]:
@@ -767,8 +560,8 @@ async def call_stage2(api_key:str, base_url:str, model:str, masked_src:List[str]
         m = (model or '').lower()
         new_family = m.startswith(('gpt-5','gpt-4.1','o4','o3'))
         tokens = min(4000, 220 * max(4, len(masked_src)))
-        chat_tokens_key = 'max_completion_tokens' if new_family else 'max_tokens'
-        if force_tokens_key: chat_tokens_key = force_tokens_key
+        const_key = 'max_completion_tokens' if new_family else 'max_tokens'
+        if force_tokens_key: const_key = force_tokens_key
         if path == '/chat/completions':
             body = {
                 'model': model,
@@ -791,7 +584,7 @@ async def call_stage2(api_key:str, base_url:str, model:str, masked_src:List[str]
                 }],
                 'tool_choice':{'type':'function','function':{'name':'return_post_edits'}},
             }
-            body[chat_tokens_key] = tokens
+            body[const_key] = tokens
             return body
         else:
             body = {
@@ -822,8 +615,9 @@ async def call_stage2(api_key:str, base_url:str, model:str, masked_src:List[str]
                 body['max_completion_tokens'] = tokens
             return body
 
-    m = (model or '').lower()
-    endpoints = ['/responses','/chat/completions'] if m.startswith(('gpt-5','gpt-4.1','o4','o3')) else ['/chat/completions','/responses']
+    const m = (model or '').toLowerCase();
+    const endpoints = m.startsWith('gpt-5') || m.startsWith('gpt-4.1') || m.startsWith('o4') || m.startsWith('o3')
+      ? ['/responses','/chat/completions'] : ['/chat/completions','/responses'];
     status, data = await _try_family(endpoints, build_body, base_url, api_key)
 
     def _extract_tool_args_from_chat(obj:dict)->Optional[str]:
@@ -896,7 +690,6 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model:str, *
         try:
             zh_list = await call_stage1(api_key, base_url, model, masked_texts, glossaries)
         except Exception:
-            # fallback one-by-one
             zh_list=[]
             for masked, g in zip(masked_texts, glossaries):
                 one = await call_stage1(api_key, base_url, model, [masked], [g])
@@ -909,7 +702,6 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model:str, *
             try:
                 zh_list = await call_stage2(api_key2 or api_key, base_url2 or base_url, model2, masked_src2, masked_zh2)
             except Exception:
-                # best-effort per item
                 fixed=[]
                 for s,z in zip(masked_src2, masked_zh2):
                     one = await call_stage2(api_key2 or api_key, base_url2 or base_url, model2, [s], [z])
@@ -943,7 +735,7 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model:str, *
     if doctype:
         xml_bytes = head + doctype.encode('utf-8') + xml_bytes
     else:
-        xml_bytes = head + b'\n' + xml_bytes
+        xml_bytes = head + b'\\n' + xml_bytes
     return xml_bytes
 
 # ---- on click ----
@@ -962,8 +754,8 @@ async def _on_click(evt=None):
             model = document.getElementById('modelCustom').value.strip()
         if not model:
             _set_ui_msg('<span style="color:#b00">請選擇或輸入第一階段 model id</span>'); return
-        batch = int(document.getElementById('batch').value or '32')
-        limitN = int(document.getElementById('limitN').value or '0')
+        batch = int(document.getElementById('batch').value || '32')
+        limitN = int(document.getElementById('limitN').value || '0')
         if not api:
             _set_ui_msg('<span style="color:#b00">請輸入 API Key（第一階段）</span>'); return
         ts_text = await _read_file_text('tsFile')
@@ -972,23 +764,25 @@ async def _on_click(evt=None):
         pairs = await read_glossaries_from_file_input('glsFile')
 
         # stage 2 config
-        stage2_enabled = bool(document.getElementById('stage2Enabled').checked)
-        api2 = document.getElementById('apiKey2').value.strip() or None
-        base2 = document.getElementById('baseUrl2').value.strip() or None
-        sel2 = document.getElementById('modelSel2')
-        model2 = sel2.value
-        if (model2 == '__custom2__'):
-            model2 = document.getElementById('modelCustom2').value.strip()
-        if not stage2_enabled:
-            model2 = None
+        stage2_enabled = Boolean(document.getElementById('stage2Enabled').checked)
+        api2 = document.getElementById('apiKey2').value.trim() || null
+        base2 = document.getElementById('baseUrl2').value.trim() || null
+        const sel2 = document.getElementById('modelSel2')
+        let model2 = sel2.value
+        if (model2 === '__custom2__') {
+          model2 = document.getElementById('modelCustom2').value.trim()
+        }
+        if (!stage2_enabled) {
+          model2 = null
+        }
 
         _set_ui_msg('⏳ 連線中…')
         xml_bytes = await run_translation_pipeline_async(
             api_key=api, base_url=base_url, model=model,
-            api_key2=api2 or api, base_url2=base2 or base_url, model2=model2, stage2_enabled=bool(stage2_enabled),
+            api_key2=api2 || api, base_url2=base2 || base_url, model2=model2, stage2_enabled:Boolean(stage2_enabled),
             ts_text=ts_text, glossary_pairs=pairs, batch_size=batch, limit_n=limitN
         )
-        out_name = 'qgis_zh-Hant.ts'
+        const out_name = 'qgis_zh-Hant.ts'
         link = _build_download_link(out_name, xml_bytes)
         _set_ui_msg(link + '　<span style="color:#0a0">完成！</span>')
     except Exception as e:
@@ -999,11 +793,8 @@ async def _on_click(evt=None):
 
 _BTN_PROXY = create_proxy(lambda evt: asyncio.ensure_future(_on_click(evt)))
 document.getElementById('run-btn').addEventListener('click', _BTN_PROXY)
-    `);
-  } catch (e) {
-    console.error(e);
-    $msg.innerHTML = `<span style="color:#b00">Python 載入失敗：${String(e)}</span>`;
-  }
-  </script>
-</body>
-</html>
+  `);
+} catch (e) {
+  console.error(e);
+  $msg.innerHTML = `<span style="color:#b00">Python 載入失敗：${String(e)}</span>`;
+}
