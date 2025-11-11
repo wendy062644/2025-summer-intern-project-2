@@ -100,7 +100,7 @@ title: API
   }
   #ts-ui .ts-3-4-3{ --ts-col1: 3fr; --ts-col2: 4fr; --ts-col3: 3fr; }
 
-    /* 手機版改為單欄 */
+  /* 手機版改為單欄 */
   @media (max-width: 640px){
     #ts-ui .ts-row-3{ grid-template-columns: 1fr; }
   }
@@ -230,7 +230,7 @@ title: API
 
 <div id="ts-ui">
   <div class="ts-card">
-    <div class="ts-title">API 設定</div>
+    <div class="ts-title">API 設定（第一階段：翻譯）</div>
     <div class="ts-field" style="margin-bottom:10px;">
       <label class="ts-label" for="apiKey">API Key</label>
       <div class="ts-input">
@@ -245,92 +245,161 @@ title: API
         </div>
       </div>
       <div class="ts-field">
-  <label class="ts-label" for="modelSel">Model</label>
-  <div class="ts-input">
-    <div class="ts-inline" style="width:100%;">
-      <select id="modelSel" style="flex:1;min-width:220px;">
-        <optgroup label="GPT-5">
-          <option value="gpt-5">gpt-5</option>
-          <option value="gpt-5-mini">gpt-5-mini</option>
-          <option value="gpt-5-nano">gpt-5-nano</option>
-        </optgroup>
-        <optgroup label="GPT-4.1">
-          <option value="gpt-4.1">gpt-4.1</option>
-          <option value="gpt-4.1-mini" selected>gpt-4.1-mini</option>
-          <option value="gpt-4.1-nano">gpt-4.1-nano</option>
-        </optgroup>
-        <optgroup label="GPT-4o">
-          <option value="gpt-4o">gpt-4o</option>
-          <option value="gpt-4o-mini">gpt-4o-mini</option>
-        </optgroup>
-        <optgroup label="Reasoning">
-          <option value="o4-mini">o4-mini</option>
-          <option value="o3-mini">o3-mini</option>
-        </optgroup>
-        <optgroup label="Legacy">
-          <option value="gpt-4-turbo">gpt-4-turbo</option>
-          <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
-        </optgroup>
-        <optgroup label="自訂">
-          <option value="__custom__">其他</option>
-        </optgroup>
-      </select>
-      <!-- 選「其他」時顯示 -->
-      <input id="modelCustom" type="text"
-             placeholder="例如：my-org/gpt-xy-2025-10-15"
-             style="display:none;flex:1;">
+        <label class="ts-label" for="modelSel">Model</label>
+        <div class="ts-input">
+          <div class="ts-inline" style="width:100%;">
+            <select id="modelSel" style="flex:1;min-width:220px;">
+              <optgroup label="GPT-5">
+                <option value="gpt-5">gpt-5</option>
+                <option value="gpt-5-mini">gpt-5-mini</option>
+                <option value="gpt-5-nano">gpt-5-nano</option>
+              </optgroup>
+              <optgroup label="GPT-4.1">
+                <option value="gpt-4.1">gpt-4.1</option>
+                <option value="gpt-4.1-mini" selected>gpt-4.1-mini</option>
+                <option value="gpt-4.1-nano">gpt-4.1-nano</option>
+              </optgroup>
+              <optgroup label="GPT-4o">
+                <option value="gpt-4o">gpt-4o</option>
+                <option value="gpt-4o-mini">gpt-4o-mini</option>
+              </optgroup>
+              <optgroup label="Reasoning">
+                <option value="o4-mini">o4-mini</option>
+                <option value="o3-mini">o3-mini</option>
+              </optgroup>
+              <optgroup label="Legacy">
+                <option value="gpt-4-turbo">gpt-4-turbo</option>
+                <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+              </optgroup>
+              <optgroup label="自訂">
+                <option value="__custom__">其他</option>
+              </optgroup>
+            </select>
+            <!-- 選「其他」時顯示 -->
+            <input id="modelCustom" type="text"
+                   placeholder="例如：my-org/gpt-xy-2025-10-15"
+                   style="display:none;flex:1;">
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-    </div>
+
     <hr class="ts-divider">
+
+    <div class="ts-title">API 設定（第二階段：格式修正）</div>
+    <div class="ts-row-2 ts-6-4">
+      <div class="ts-field">
+        <label class="ts-label" for="enableStage2">啟用第二階段</label>
+        <div class="ts-input ts-inline">
+          <input type="checkbox" id="enableStage2" checked>
+          <span class="ts-hint">基於第一階段結果，修正譯文格式以符合原文（半形括號、分隔符、%1、{0}、%n 等佔位符，避免全形）。</span>
+        </div>
+      </div>
+      <div class="ts-field">
+        <label class="ts-label" for="apiKey2">API Key（第二階段）</label>
+        <div class="ts-input">
+          <input type="password" id="apiKey2" placeholder="若留空則沿用第一階段" autocomplete="off">
+        </div>
+      </div>
+    </div>
+    <div class="ts-row-2 ts-6-4">
+      <div class="ts-field">
+        <label class="ts-label" for="baseUrl2">Base URL（第二階段）</label>
+        <div class="ts-input">
+          <input type="text" id="baseUrl2" placeholder="若留空則沿用第一階段">
+        </div>
+      </div>
+      <div class="ts-field">
+        <label class="ts-label" for="modelSel2">Model（第二階段）</label>
+        <div class="ts-input">
+          <div class="ts-inline" style="width:100%;">
+            <select id="modelSel2" style="flex:1;min-width:220px;">
+              <optgroup label="GPT-5">
+                <option value="gpt-5">gpt-5</option>
+                <option value="gpt-5-mini" selected>gpt-5-mini</option>
+                <option value="gpt-5-nano">gpt-5-nano</option>
+              </optgroup>
+              <optgroup label="GPT-4.1">
+                <option value="gpt-4.1">gpt-4.1</option>
+                <option value="gpt-4.1-mini">gpt-4.1-mini</option>
+                <option value="gpt-4.1-nano">gpt-4.1-nano</option>
+              </optgroup>
+              <optgroup label="GPT-4o">
+                <option value="gpt-4o">gpt-4o</option>
+                <option value="gpt-4o-mini">gpt-4o-mini</option>
+              </optgroup>
+              <optgroup label="Reasoning">
+                <option value="o4-mini">o4-mini</option>
+                <option value="o3-mini">o3-mini</option>
+              </optgroup>
+              <optgroup label="Legacy">
+                <option value="gpt-4-turbo">gpt-4-turbo</option>
+                <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+              </optgroup>
+              <optgroup label="自訂">
+                <option value="__custom2__">其他</option>
+              </optgroup>
+            </select>
+            <input id="modelCustom2" type="text"
+                   placeholder="例如：my-org/format-fixer-2025-10"
+                   style="display:none;flex:1;">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="ts-divider">
+
     <div class="ts-title">處理參數</div>
     <div class="ts-row-3 ts-3-4-3">
-    <!-- 左：Batch (3) -->
-    <div class="ts-field">
+      <!-- 左：Batch (3) -->
+      <div class="ts-field">
         <label class="ts-label" for="batch">Batch</label>
         <div class="ts-input">
-        <input type="number" id="batch" value="32" min="1" max="64">
+          <input type="number" id="batch" value="32" min="1" max="64">
         </div>
-    </div>
-    <!-- 中：處理筆數上限 (3) -->
-    <div class="ts-field">
+      </div>
+      <!-- 中：處理筆數上限 (3) -->
+      <div class="ts-field">
         <label class="ts-label" for="limitN">處理筆數上限</label>
         <div class="ts-input ts-inline">
-        <input type="number" id="limitN" value="0" style="max-width:220px;">
-        <span id="countInfo" class="ts-hint"> / 0</span>
+          <input type="number" id="limitN" value="0" style="max-width:220px;">
+          <span id="countInfo" class="ts-hint"> / 0</span>
         </div>
-    </div>
-    <!-- 右：.ts 檔（上傳） (4) -->
-    <div class="ts-field">
+      </div>
+      <!-- 右：.ts 檔（上傳） (4) -->
+      <div class="ts-field">
         <label class="ts-label" for="tsFile">.ts 檔（上傳）</label>
         <div class="ts-input">
-        <input type="file" id="tsFile" accept=".ts">
+          <input type="file" id="tsFile" accept=".ts">
         </div>
+      </div>
     </div>
-    </div>
+
     <hr class="ts-divider">
+
     <div class="ts-title">輸入檔案</div>
     <div class="ts-row-2" style="--ts-col1: 7fr; --ts-col2: 3fr;">
-    <!-- 左：檔案上傳 -->
-    <div class="ts-field">
+      <!-- 左：檔案上傳 -->
+      <div class="ts-field">
         <label class="ts-label" for="glsFile">glossary（CSV / ODS）</label>
         <div class="ts-input">
-        <input type="file" id="glsFile" accept=".csv,.ods" multiple>
+          <input type="file" id="glsFile" accept=".csv,.ods" multiple>
         </div>
-    </div>
-    <!-- 右：執行翻譯（滿寬按鈕） -->
-    <div class="ts-field">
+      </div>
+      <!-- 右：執行翻譯（滿寬按鈕） -->
+      <div class="ts-field">
         <label class="ts-label" style="visibility:hidden;">執行翻譯</label>
         <div class="ts-input">
-        <button id="run-btn" class="ts-btn-primary" style="width:100%;">執行翻譯</button>
+          <button id="run-btn" class="ts-btn-primary" style="width:100%;">執行翻譯</button>
         </div>
-    </div>
-    <!-- 底下補一行提示：對齊右欄 -->
-    <div class="ts-hint right-col" style="margin-top:6px;">
+      </div>
+      <!-- 底下補一行提示：對齊右欄 -->
+      <div class="ts-hint right-col" style="margin-top:6px;">
         欄位：<code>en, zh</code> 或 <code>英文名稱, 中文名稱</code>
+      </div>
     </div>
-    </div>
+  </div>
 
   <!-- 進度條（ID 保持不變） -->
   <div id="ts-progress-wrap" style="display:none;">
@@ -347,8 +416,9 @@ title: API
       <table>
         <thead>
           <tr>
-            <th style="width:50%;">原文</th>
-            <th style="width:50%;">譯文</th>
+            <th style="width:40%;">原文</th>
+            <th style="width:30%;">第一階段</th>
+            <th style="width:30%;">第二階段</th>
           </tr>
         </thead>
         <tbody id="compare-tbody"></tbody>
@@ -363,7 +433,6 @@ title: API
 <script type="module">
 import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.mjs";
 const pyodide = await loadPyodide();
-
 await pyodide.loadPackage("micropip");
 
 (function setupTsCounter(){
@@ -439,13 +508,15 @@ await pyodide.loadPackage("micropip");
 })();
 
 (function setupModelCustom(){
-  const sel = document.getElementById('modelSel');
-  const custom = document.getElementById('modelCustom');
-  function sync(){
-    custom.style.display = (sel.value === '__custom__') ? 'block' : 'none';
-  }
-  sel.addEventListener('change', sync);
-  sync();
+  const sel1 = document.getElementById('modelSel');
+  const custom1 = document.getElementById('modelCustom');
+  function sync1(){ custom1.style.display = (sel1.value === '__custom__') ? 'block' : 'none'; }
+  sel1.addEventListener('change', sync1); sync1();
+
+  const sel2 = document.getElementById('modelSel2');
+  const custom2 = document.getElementById('modelCustom2');
+  function sync2(){ custom2.style.display = (sel2.value === '__custom2__') ? 'block' : 'none'; }
+  sel2.addEventListener('change', sync2); sync2();
 })();
 
 const $msg = document.getElementById("ts-ui-msg");
@@ -458,13 +529,10 @@ from js import document
 from pyodide.http import pyfetch
 from pyodide.ffi import create_proxy
 
-from typing import Optional
-
 try:
     from opencc import OpenCC
 except ModuleNotFoundError:
     import micropip
-    # 指定版本較穩
     await micropip.install("opencc-python-reimplemented==0.1.7")
     from opencc import OpenCC
 
@@ -478,21 +546,17 @@ def to_zh_tw(s: Optional[str]) -> str:
     if not s:
         return ""
     text = s
-
     placeholders = {}
     for i, term in enumerate(_TW_PROTECT_TERMS):
-        key = f"⟦TWTERM{i}⟧"  # 不與你原本 ⟦MASKn⟧ 衝突
+        key = f"⟦TWTERM{i}⟧"
         placeholders[key] = term
         text = text.replace(term, key)
-
     try:
         text = _OPENCC.convert(text)
     except Exception:
         pass
-
     for key, term in placeholders.items():
         text = text.replace(key, term)
-
     return text
 
 _COORD_RE = re.compile(r"坐標")
@@ -506,10 +570,12 @@ def normalize_zh(s: Optional[str]) -> str:
         return s
 
 # ===== UI：訊息列 =====
+
 def _set_ui_msg(msg_html: str):
     document.getElementById("ts-ui-msg").innerHTML = msg_html
 
 # ===== UI：進度條 & 對照表 =====
+
 def _progress_setup(total:int):
     wrap = document.getElementById("ts-progress-wrap")
     bar = document.getElementById("ts-progress")
@@ -529,11 +595,10 @@ def _compare_reset():
     box = document.getElementById("compare-box")
     box.style.display = "block"
     tbody = document.getElementById("compare-tbody")
-    # 清空舊列
     while tbody.firstChild:
         tbody.removeChild(tbody.firstChild)
 
-def _compare_add(src_text:str, zh_text:str):
+def _compare_add(src_text:str, zh1_text:str, zh2_text:str):
     box = document.getElementById("compare-box")
     box.style.display = "block"
     tbody = document.getElementById("compare-tbody")
@@ -543,16 +608,15 @@ def _compare_add(src_text:str, zh_text:str):
         td = document.createElement("td")
         td.style.padding = "4px"
         td.style.borderBottom = "1px solid #eee"
-        td.textContent = txt  # 用 textContent 避免 HTML 注入
+        td.textContent = txt
         return td
 
     tr.appendChild(_td(src_text or ""))
-    tr.appendChild(_td(zh_text or ""))
+    tr.appendChild(_td(zh1_text or ""))
+    tr.appendChild(_td(zh2_text or ""))
     tbody.appendChild(tr)
 
-    # 自動滾動到表格底部
     try:
-        # compare-box 的第 2 個子元素是帶滾動的 div
         scroller = box.children.item(1)
         if scroller:
             scroller.scrollTop = scroller.scrollHeight
@@ -593,17 +657,8 @@ async def _read_file_text(input_id: str)->Optional[str]:
     buf = await files.item(0).arrayBuffer()
     return bytes(buf.to_py()).decode("utf-8", "ignore")
 
-async def _read_file_bytes(input_id: str)->Optional[bytes]:
-    files = document.getElementById(input_id).files
-    if not files or files.length==0: return None
-    buf = await files.item(0).arrayBuffer()
-    return bytes(buf.to_py())
-
-def _build_download_link(filename: str, content_bytes: bytes) -> str:
-    b64 = base64.b64encode(content_bytes).decode("utf-8")
-    return f'<a download="{filename}" href="data:application/octet-stream;base64,{b64}">⬇️ 下載 {filename}</a>'
-
 # ===== 保留 DOCTYPE =====
+
 def _read_doctype(xml_text: str) -> str:
     m = re.search(r'<!DOCTYPE[^>]+>', xml_text)
     return m.group(0) if m else ""
@@ -613,6 +668,7 @@ _MASK_PAT = re.compile(
     r'(</?[A-Za-z][^>]*>|&lt;/?[A-Za-z][^&]*?&gt;|%L\d+|%\d+|%n|\{\d+\}|&(?:[A-Za-z]+|#\d+|#x[0-9A-Fa-f]+);)',
     re.IGNORECASE
 )
+
 def _mask_text(s:str):
     idx=0; mapping={}
     def _repl(m):
@@ -620,14 +676,17 @@ def _mask_text(s:str):
         k=f"⟦MASK{idx}⟧"; mapping[k]=m.group(0); idx+=1; return k
     return _MASK_PAT.sub(_repl, s), mapping
 
+
 def _unmask_text(s:str, mapping:Dict[str,str])->str:
     for k,v in mapping.items():
         s = s.replace(k,v)
     return s
 
+
 def _et_ready(s:str)->str:
     try: return html.unescape(s)
     except Exception: return s
+
 
 def needs_translation(en_text: Optional[str]) -> bool:
     if not en_text or not en_text.strip():
@@ -636,8 +695,9 @@ def needs_translation(en_text: Optional[str]) -> bool:
         return False
     return True
 
-# ===== LCS 詞庫匹配（不依賴 pandas）=====
+# ===== LCS 詞庫匹配（簡版）=====
 _SEP_RE = re.compile(r"[-\s/_.\\]+")
+
 def soft_norm(s:str)->str: return _SEP_RE.sub(" ", s.lower()).strip()
 _TOKEN_RE = re.compile(r"[A-Za-z0-9]+(?:[\\/_.-][A-Za-z0-9]+)*")
 
@@ -661,27 +721,6 @@ class LCSMatcher:
                 self.soft_index[key] = (r["en"], r["zh"])
                 self.max_soft_len = max(self.max_soft_len, len(key.split()))
 
-    def _topk_for_word(self, token:str, k:int=3)->List[Dict]:
-        t_norm = token.lower()
-        if len(t_norm) < self.min_token_len: return []
-        t_chars = set(t_norm)
-        cand = [r for r in self.rows if len(t_chars & r["charset"])>0]
-        res=[]
-        def anchored_prefix_sub_in(token_norm:str, cand_norm:str):
-            if not token_norm or not cand_norm: return 0,""
-            max_k = min(len(token_norm), len(cand_norm))
-            for kk in range(max_k,0,-1):
-                sub = token_norm[:kk]
-                if sub in cand_norm:
-                    return kk, sub
-            return 0,""
-        for r in cand:
-            kk, sub = anchored_prefix_sub_in(t_norm, r["en_norm"])
-            if kk >= self.min_lcs_len:
-                res.append({"token":token,"en":r["en"],"zh":r["zh"],"lcs_len":kk})
-        res.sort(key=lambda d: (-d["lcs_len"], len(d["en"])))
-        return res[:k]
-
     def build_glossary_sentence_first(self, text:str, *, limit:int=12, per_word_k:int=3, min_lcs_len:int=4)->Dict[str,str]:
         text_clean = _MASK_PAT.sub(" ", text)
         tokens = _TOKEN_RE.findall(text_clean)
@@ -700,17 +739,10 @@ class LCSMatcher:
                     if en not in glossary:
                         glossary[en]=zh; _mark(i,i+w)
                         if len(glossary)>=limit: break
-        for idx, tok in enumerate(tokens):
-            if len(glossary)>=limit: break
-            if covered[idx]: continue
-            if len(tok) < min_lcs_len: continue
-            for r in self._topk_for_word(tok, k=per_word_k):
-                if r["lcs_len"]>=min_lcs_len and r["en"] not in glossary:
-                    glossary[r["en"]] = r["zh"]; covered[idx]=True
-                    if len(glossary)>=limit: break
         return glossary
 
 # ===== 讀 CSV / ODS =====
+
 def load_glossary_csv_text(csv_text: Optional[str]) -> List[Tuple[str,str]]:
     if not csv_text:
         return []
@@ -733,6 +765,7 @@ def load_glossary_csv_text(csv_text: Optional[str]) -> List[Tuple[str,str]]:
             pairs.append((en, zh))
             seen.add(en)
     return pairs
+
 
 def load_glossary_ods_bytes(ods_bytes: bytes)->List[Tuple[str,str]]:
     with zipfile.ZipFile(io.BytesIO(ods_bytes)) as z:
@@ -772,49 +805,70 @@ def load_glossary_ods_bytes(ods_bytes: bytes)->List[Tuple[str,str]]:
             pairs.append((en, zh)); seen.add(en)
     return pairs
 
-# ===== OpenAI Chat Completions（批次）=====
-async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:str,
-                                              masked_texts:List[str], glossaries:List[Dict[str,str]]):
-    # 1) 準備資料
-    items = [{"id": i, "text": t, "glossary": [f"{en} -> {zh}" for en, zh in g.items()]}
-             for i,(t,g) in enumerate(zip(masked_texts, glossaries))]
+# ===== OpenAI Chat/Responses 呼叫（共用）=====
+async def _post_json(base_url:str, api_key:str, path:str, body:dict):
+    resp = await pyfetch(base_url.rstrip("/") + path,
+                         method="POST",
+                         headers={"Authorization": f"Bearer {api_key}", "Content-Type":"application/json"},
+                         body=json.dumps(body))
+    data = await resp.json()
+    return resp.status, data
 
-    system_prompt = """你是台灣 GIS 在地化譯者，將多個獨立英文片段翻為自然專業的繁體中文（台灣）。
-規則：
-• 保留所有 ⟦MASK數字⟧；
-• 不要解釋；
-• 不要改動任何 HTML 標籤或 HTML 實體；
-• 只輸出與輸入等長、同序的結果。"""
-    user_prompt = "請逐一翻譯 items。只需回傳 function 參數，不要輸出其他文字。\n" + \
-                  "items = " + json.dumps(items, ensure_ascii=False)
+
+def _family_and_tokens(model:str):
+    m = (model or "").lower()
+    new_family = m.startswith(("gpt-5", "gpt-4.1", "o4", "o3"))
+    # chat.completions：舊家族多用 max_tokens，新家族常要求 max_completion_tokens
+    chat_tokens_key = "max_completion_tokens" if new_family else "max_tokens"
+    resp_tokens_key = "max_output_tokens"
+    return new_family, chat_tokens_key, resp_tokens_key
+
+
+def _extract_tool_args_from_chat(obj:dict)->Optional[str]:
+    try:
+        msg = obj["choices"][0]["message"]
+        tcalls = msg.get("tool_calls") or []
+        if not tcalls: return None
+        return tcalls[0]["function"]["arguments"]
+    except Exception:
+        return None
+
+
+def _deep_find_arguments(o):
+    if isinstance(o, dict):
+        if "arguments" in o and isinstance(o["arguments"], str):
+            return o["arguments"]
+        for v in o.values():
+            r = _deep_find_arguments(v)
+            if r is not None: return r
+    elif isinstance(o, list):
+        for v in o:
+            r = _deep_find_arguments(v)
+            if r is not None: return r
+    return None
+
+
+async def call_batch_function(api_key:str, base_url:str, model:str, *, system_prompt:str, items:List[dict], function_name:str, out_key:str, tokens:int=2048):
+    new_family, chat_tokens_key, resp_tokens_key = _family_and_tokens(model)
 
     tools = [{
       "type": "function",
       "function": {
-        "name": "return_translations",
-        "description": "回傳與輸入 items 等長、同序的繁中翻譯陣列",
+        "name": function_name,
+        "description": "結構化輸出",
         "parameters": {
           "type": "object",
           "properties": {
-            "translations": {"type": "array", "items": {"type": "string"}}
+            out_key: {"type": "array", "items": {"type": "string"}}
           },
-          "required": ["translations"],
+          "required": [out_key],
           "additionalProperties": False
         }
       }
     }]
 
-    # 2) 端點與 tokens 參數選擇
-    m = (model or "").lower()
-    new_family = m.startswith(("gpt-5", "gpt-4.1", "o4", "o3"))
+    user_prompt = "items = " + json.dumps(items, ensure_ascii=False)
 
-    tokens = min(4000, 220 * max(4, len(masked_texts)))
-    # chat.completions：舊家族多用 max_tokens，新家族常要求 max_completion_tokens
-    chat_tokens_key = "max_completion_tokens" if new_family else "max_tokens"
-    # responses：一律 max_output_tokens
-    resp_tokens_key = "max_output_tokens"
-
-    # 3) 建立 request body（兩種端點）
     def build_chat_body():
         body = {
           "model": model,
@@ -823,8 +877,7 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
             {"role": "user",   "content": user_prompt}
           ],
           "tools": tools,
-          "tool_choice": {"type": "function", "function": {"name": "return_translations"}},
-          # "temperature": 0.2  # ← 移除
+          "tool_choice": {"type": "function", "function": {"name": function_name}},
         }
         for k in ("max_tokens", "max_completion_tokens", "max_output_tokens"):
             body.pop(k, None)
@@ -835,74 +888,55 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
         body = {
           "model": model,
           "input": [
-            {"role": "system", "content": [
-                {"type": "input_text", "text": system_prompt}   # ← 這裡
-            ]},
-            {"role": "user",   "content": [
-                {"type": "input_text", "text": user_prompt}     # ← 這裡本來就對
-            ]}
+            {"role": "system", "content": [{"type": "input_text", "text": system_prompt}]},
+            {"role": "user",   "content": [{"type": "input_text", "text": user_prompt}]}
           ],
           "tools": tools,
-          "tool_choice": {"type": "function", "function": {"name": "return_translations"}},
+          "tool_choice": {"type": "function", "function": {"name": function_name}},
         }
         for k in ("max_tokens", "max_completion_tokens", "max_output_tokens"):
             body.pop(k, None)
         body[resp_tokens_key] = tokens
-        # reasoning 對部分模型/代理不支援，可保留；若 400 再移除
-        if m.startswith(("gpt-5", "o4", "o3")):
+        if model.lower().startswith(("gpt-5", "o4", "o3")):
             body.setdefault("reasoning", {"effort": "medium"})
         return body
 
-    async def post_json(path:str, body:dict):
-        resp = await pyfetch(base_url.rstrip("/") + path,
-                             method="POST",
-                             headers={"Authorization": f"Bearer {api_key}", "Content-Type":"application/json"},
-                             body=json.dumps(body))
-        data = await resp.json()
-        return resp.status, data
-
-    # 4) 送出（新家族先走 responses，舊家族先走 chat），必要時自動 fallback
     tried = []
     async def try_responses():
-        status, data = await post_json("/responses", build_responses_body())
+        status, data = await _post_json(base_url, api_key, "/responses", build_responses_body())
         tried.append(("responses", status, data))
         if status == 400:
             msg = (data.get("error", {}) or {}).get("message", "")
-            # 1) tokens key 兼容（你原本就有）
             if "max_output_tokens" in msg and "Unsupported" in msg:
                 body = build_responses_body()
                 body.pop(resp_tokens_key, None)
                 body["max_completion_tokens"] = tokens
-                return await post_json("/responses", body)
-            # 2) reasoning 兼容（新增這段）
+                return await _post_json(base_url, api_key, "/responses", body)
             if "reasoning" in msg.lower():
                 body = build_responses_body()
                 body.pop("reasoning", None)
-                return await post_json("/responses", body)
+                return await _post_json(base_url, api_key, "/responses", body)
         return status, data
 
     async def try_chat():
-        status, data = await post_json("/chat/completions", build_chat_body())
+        status, data = await _post_json(base_url, api_key, "/chat/completions", build_chat_body())
         tried.append(("chat", status, data))
         if status == 400:
             msg = (data.get("error", {}) or {}).get("message", "")
             if ("Unsupported parameter" in msg or "not supported" in msg) and "max_tokens" in msg:
                 body = build_chat_body()
-                # 換另一個 tokens key 再試一次
                 if chat_tokens_key == "max_completion_tokens":
                     body.pop("max_completion_tokens", None); body["max_tokens"] = tokens
                 else:
                     body.pop("max_tokens", None); body["max_completion_tokens"] = tokens
-                return await post_json("/chat/completions", body)
+                return await _post_json(base_url, api_key, "/chat/completions", body)
             if "not compatible with the chat.completions" in msg.lower():
-                # 直接建議走 responses
                 return await try_responses()
         return status, data
 
     if new_family:
         status, data = await try_responses()
         if status >= 400:
-            # 再回退 chat 一次
             status2, data2 = await try_chat()
             if status2 >= 400:
                 raise RuntimeError(f"API Error {status2}: {data2}")
@@ -915,54 +949,50 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
                 raise RuntimeError(f"API Error {status2}: {data2}")
             status, data = status2, data2
 
-    # 5) 解析回傳（同時支援 chat 與 responses 結構）
-    def _extract_tool_args_from_chat(obj:dict)->Optional[str]:
-        try:
-            msg = obj["choices"][0]["message"]
-            tcalls = msg.get("tool_calls") or []
-            if not tcalls: return None
-            return tcalls[0]["function"]["arguments"]
-        except Exception:
-            return None
-
-    def _deep_find_arguments(o):
-        # 在 responses 的任意巢狀處找第一個 "arguments" (string) 值
-        if isinstance(o, dict):
-            if "arguments" in o and isinstance(o["arguments"], str):
-                return o["arguments"]
-            for v in o.values():
-                r = _deep_find_arguments(v)
-                if r is not None: return r
-        elif isinstance(o, list):
-            for v in o:
-                r = _deep_find_arguments(v)
-                if r is not None: return r
-        return None
-
     args_raw = _extract_tool_args_from_chat(data)
     if args_raw is None and "output" in data:
-        # Responses API：從 output 裡深搜 function.arguments
         args_raw = _deep_find_arguments(data["output"])
-    if args_raw is None:
-        # 部分 Responses 容器把 message 放在 top-level "response"
-        if "response" in data:
-            args_raw = _deep_find_arguments(data["response"])
-
+    if args_raw is None and "response" in data:
+        args_raw = _deep_find_arguments(data["response"])
     if not args_raw:
-        raise ValueError("模型未呼叫 function（找不到結構化輸出）。\ntrace=" + json.dumps({"tried": tried}, ensure_ascii=False))
+        raise ValueError("模型未呼叫 function（找不到結構化輸出）。")
 
     parsed = json.loads(args_raw)
-    arr = parsed.get("translations")
+    arr = parsed.get(out_key)
     if not (isinstance(arr, list) and all(isinstance(x, str) for x in arr)):
-        raise ValueError("function 參數不符合 {translations: string[]} 格式")
-
-    if len(arr) != len(masked_texts):
-        raise ValueError(f"JSON 陣列長度不符，期待 {len(masked_texts)}，得到 {len(arr)}")
-
+        raise ValueError(f"function 參數不符合 {{{out_key}: string[]}} 格式")
     return arr
 
-# ===== 主流程（加入即時對照與進度）=====
+# ===== 第一階段：翻譯 =====
+async def stage1_translate(api_key:str, base_url:str, model:str, masked_texts:List[str], glossaries:List[Dict[str,str]]):
+    items = [{"id": i, "text": t, "glossary": [f"{en} -> {zh}" for en, zh in g.items()]}
+             for i,(t,g) in enumerate(zip(masked_texts, glossaries))]
+    system_prompt = """你是台灣 GIS 在地化譯者，將多個獨立英文片段翻為自然專業的繁體中文（台灣）。\n規則：\n• 保留所有 ⟦MASK數字⟧；\n• 不要解釋；\n• 不要改動任何 HTML 標籤或 HTML 實體；\n• 只輸出與輸入等長、同序的結果。"""
+    return await call_batch_function(api_key, base_url, model,
+                                     system_prompt=system_prompt,
+                                     items=items,
+                                     function_name="return_translations",
+                                     out_key="translations",
+                                     tokens=min(4000, 220*max(4, len(items))))
+
+# ===== 第二階段：格式修正 =====
+async def stage2_fix_format(api_key:str, base_url:str, model:str, src_texts:List[str], zh_texts:List[str]):
+    # 交給模型的 items：原文 + 第一階段譯文
+    items = [{"id": i, "src": s, "zh": z} for i,(s,z) in enumerate(zip(src_texts, zh_texts))]
+
+    system_prompt = """你是資深在地化工程師。請根據原文 src，將 zh 修改為「格式完全對齊原文」的繁體中文。\n嚴格規則：\n1) 保留所有 ⟦MASK數字⟧。\n2) 保持與原文相同的佔位符與括號、引號、冒號等格式（例如 %n、%1、%L1、{0}、{1}、%d、%s、[ ]、( )、{ }、:、;、, 皆用半形，禁止全形）。\n3) 只改動格式與標點，不增刪意義內容。\n4) 不要改動任何 HTML 標籤或 HTML 實體。\n5) 回傳與輸入等長、同序的結果。"""
+
+    return await call_batch_function(api_key, base_url, model,
+                                     system_prompt=system_prompt,
+                                     items=items,
+                                     function_name="return_fixed",
+                                     out_key="fixed",
+                                     tokens=min(4000, 160*max(4, len(items))))
+
+# ===== 主流程（加入雙階段與即時三欄對照）=====
 async def run_translation_pipeline_async(api_key:str, base_url:str, model:str,
+                                         api_key2:str, base_url2:str, model2:str,
+                                         enable_stage2:bool,
                                          ts_text:str, glossary_pairs:List[Tuple[str,str]],
                                          batch_size:int=32, limit_n:int=0) -> bytes:
     doctype = _read_doctype(ts_text)
@@ -970,7 +1000,6 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model:str,
     messages = root.findall(".//message")
     matcher = LCSMatcher(glossary_pairs, min_token_len=4, min_lcs_len=4)
 
-    # 收集任務
     tasks=[]
     for m in messages:
         src=m.find("source")
@@ -978,52 +1007,70 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model:str,
         if needs_translation(src.text):
             tasks.append((m, src.text, m.get("numerus")=="yes"))
         if limit_n > 0 and len(tasks) >= limit_n:
-          break
+            break
 
     finished=0; total=len(tasks)
     if total==0:
         return ET.tostring(root, encoding="utf-8")
 
-    # 初始化 UI
     _compare_reset()
     _progress_setup(total)
 
     for start in range(0, total, batch_size):
         batch = tasks[start:start+batch_size]
-        glossaries=[]; masked_texts=[]; maps=[]
+        glossaries=[]; masked_texts=[]; maps=[]; src_plain=[]
         for _, src_text, _ in batch:
             g = matcher.build_glossary_sentence_first(src_text, limit=12, per_word_k=3, min_lcs_len=4)
             glossaries.append(g)
             masked, mp = _mask_text(src_text)
             masked_texts.append(masked); maps.append(mp)
+            src_plain.append(src_text)
 
+        # 第一階段翻譯
         try:
-            zh_list = await call_chat_completions_batch_pyfetch(api_key, base_url, model, masked_texts, glossaries)
+            zh_list = await stage1_translate(api_key, base_url, model, masked_texts, glossaries)
         except Exception as e:
+            # 逐筆回退
             zh_list=[]
             for masked, g in zip(masked_texts, glossaries):
-                one = await call_chat_completions_batch_pyfetch(api_key, base_url, model, [masked], [g])
+                one = await stage1_translate(api_key, base_url, model, [masked], [g])
                 zh_list.append(one[0])
 
-        # 寫回 XML，並即時輸出「原文／譯文」對照與進度
-        for (m, src_text, is_num), zh_raw, mp in zip(batch, zh_list, maps):
+        # 解除遮罩 + OpenCC/正規化
+        zh_stage1 = [normalize_zh(to_zh_tw(_et_ready(_unmask_text(z, mp)))) for z, mp in zip(zh_list, maps)]
+
+        # 第二階段（可選）
+        if enable_stage2:
+            key2 = (api_key2 or api_key).strip()
+            url2 = (base_url2 or base_url).strip() or "https://api.openai.com/v1"
+            try:
+                zh_stage2 = await stage2_fix_format(key2, url2, model2 or model, src_plain, zh_stage1)
+            except Exception:
+                # 逐筆回退
+                zh_stage2=[]
+                for s, z in zip(src_plain, zh_stage1):
+                    one = await stage2_fix_format(key2, url2, model2 or model, [s], [z])
+                    zh_stage2.append(one[0])
+        else:
+            zh_stage2 = zh_stage1
+
+        # 寫回 XML，並顯示三欄對照
+        for (m, src_text, is_num), zh1, zh2 in zip(batch, zh_stage1, zh_stage2):
             trans = m.find("translation")
             if trans is None:
                 trans = ET.SubElement(m, "translation")
-            zh = _et_ready(_unmask_text(zh_raw, mp))
-            zh = normalize_zh(to_zh_tw(zh))
+            final_zh = zh2
             if is_num:
                 forms = trans.findall("numerusform")
                 if not forms:
                     forms=[ET.SubElement(trans, "numerusform")]
                 for f in forms:
-                    f.text = zh
+                    f.text = final_zh
             else:
-                trans.text = zh
+                trans.text = final_zh
             if "type" in trans.attrib: trans.attrib.pop("type", None)
 
-            # 即時對照（翻譯前 / 翻譯後）
-            _compare_add(src_text, zh)
+            _compare_add(src_text, zh1, final_zh)
 
             finished += 1
             _progress_tick(finished, total)
@@ -1033,7 +1080,7 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model:str,
     xml_bytes = ET.tostring(root, encoding="utf-8")
     head = b'<?xml version="1.0" encoding="utf-8"?>'
     if doctype: xml_bytes = head + (doctype).encode("utf-8") + xml_bytes
-    else: xml_bytes = head + b"\\n" + xml_bytes
+    else: xml_bytes = head + b"\n" + xml_bytes
     return xml_bytes
 
 # ===== 點擊事件 =====
@@ -1051,12 +1098,24 @@ async def _on_click(evt=None):
         if model == "__custom__":
             model = document.getElementById("modelCustom").value.strip()
         if not model:
-            _set_ui_msg("<span style='color:#b00'>請選擇或輸入 model id</span>")
+            _set_ui_msg("<span style='color:#b00'>請選擇或輸入 model id（第一階段）</span>")
             return
+
+        enable2 = bool(document.getElementById("enableStage2").checked)
+        api2 = document.getElementById("apiKey2").value.strip() or api
+        base_url2 = document.getElementById("baseUrl2").value.strip() or base_url
+        sel2 = document.getElementById("modelSel2")
+        model2 = sel2.value
+        if model2 == "__custom2__":
+            model2 = document.getElementById("modelCustom2").value.strip()
+        if enable2 and not model2:
+            _set_ui_msg("<span style='color:#b00'>請選擇或輸入 model id（第二階段）</span>")
+            return
+
         batch = int(document.getElementById("batch").value or "32")
         limitN = int(document.getElementById("limitN").value or "200")
         if not api:
-            _set_ui_msg("<span style='color:#b00'>請輸入 API Key</span>"); return
+            _set_ui_msg("<span style='color:#b00'>請輸入 API Key（第一階段）</span>"); return
         ts_text = await _read_file_text("tsFile")
         if not ts_text:
             _set_ui_msg("<span style='color:#b00'>請上傳 .ts 檔</span>"); return
@@ -1066,14 +1125,14 @@ async def _on_click(evt=None):
         _set_ui_msg("⏳ 連線中…")
         xml_bytes = await run_translation_pipeline_async(
             api_key=api, base_url=base_url, model=model,
+            api_key2=api2, base_url2=base_url2, model2=model2,
+            enable_stage2=enable2,
             ts_text=ts_text, glossary_pairs=pairs,
             batch_size=batch, limit_n=limitN
         )
 
         out_name = "qgis_zh-Hant.ts"
-        ts_files = document.getElementById("tsFile").files
-
-        link = _build_download_link(out_name, xml_bytes)
+        link = '<a download="' + out_name + '" href="data:application/octet-stream;base64,' + __import__('base64').b64encode(xml_bytes).decode('utf-8') + '">⬇️ 下載 ' + out_name + '</a>'
         _set_ui_msg(link + "　<span style='color:#0a0'>完成！</span>")
     except Exception as e:
         _set_ui_msg(f"<span style='color:#b00'>發生錯誤：{html.escape(str(e))}</span>")
@@ -1081,6 +1140,7 @@ async def _on_click(evt=None):
     finally:
         _BUSY=False
 
+from pyodide.ffi import create_proxy
 _BTN_PROXY = create_proxy(lambda evt: asyncio.ensure_future(_on_click(evt)))
 document.getElementById("run-btn").addEventListener("click", _BTN_PROXY)
 `);
