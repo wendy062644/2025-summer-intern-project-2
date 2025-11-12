@@ -6,6 +6,13 @@ title: API
 
 <!-- ===== 外層 UI ===== -->
 <style>
+  .bd-sidebar-secondary { display: none !important; }
+  .bd-content,
+  .bd-article-container,
+  .tex2jax_ignore.mathjax_ignore {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
   /* —— 全部樣式只限制在 #ts-ui，並且用 --ts-* 變數，避免和主題衝突 —— */
   #ts-ui{
     --ts-gap: 12px;
