@@ -226,6 +226,37 @@ title: API
       background: var(--ts-surface);
     }
   }
+  #ts-ui .ts-field:has(#useModel2){
+    flex-direction: row;         /* 標籤與輸入改成同一行 */
+    align-items: center;         /* 垂直置中 */
+    gap: 10px;
+  }
+
+  /* 調整標籤與內容區的分配與間距 */
+  #ts-ui .ts-field:has(#useModel2) .ts-label{
+    margin: 0 6px 0 0;
+  }
+  #ts-ui .ts-field:has(#useModel2) .ts-input{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* 讓勾選框尺寸與文字更貼齊 */
+  #ts-ui #useModel2{
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    vertical-align: middle;
+  }
+
+  /* 手機版仍維持單欄堆疊 */
+  @media (max-width:640px){
+    #ts-ui .ts-field:has(#useModel2){
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
 </style>
 
 <div id="ts-ui">
@@ -287,9 +318,11 @@ title: API
     <!-- 第二排：第二模型（校對）開關 + 選擇器 -->
     <div class="ts-row-2 ts-6-4" style="margin-top:10px;">
       <div class="ts-field">
-        <label class="ts-label" for="useModel2">第二模型（校對 / 對齊）</label>
         <div class="ts-input ts-inline">
-          <input type="checkbox" id="useModel2" checked>
+          <label for="useModel2" class="ts-inline" style="gap:8px; align-items:center; white-space:nowrap;">
+            <input type="checkbox" id="useModel2" checked>
+            <span class="ts-label" style="margin:0;">第二模型（校對 / 對齊）</span>
+          </label>
           <span class="ts-hint" style="margin-left:8px;">將 Model-1 輸出 + 原文交給此模型做格式檢查與對齊</span>
         </div>
       </div>
