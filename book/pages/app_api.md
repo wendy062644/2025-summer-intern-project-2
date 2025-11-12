@@ -407,16 +407,13 @@ title: API
 <script type="module">
 import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.mjs";
 const pyodide = await loadPyodide();
-
 await pyodide.loadPackage("micropip");
 
 (function setupTsCounter(){
   const tsFile   = document.getElementById('tsFile');
   const limitN   = document.getElementById('limitN');
   const countInfo= document.getElementById('countInfo');
-
   countInfo.textContent = ' / 0';
-
   function needsTranslationJS(text){
     if (!text) return false;
     const t = String(text).trim();
@@ -424,18 +421,15 @@ await pyodide.loadPackage("micropip");
     if (/^[\s\d\W%{}]+$/u.test(t)) return false;
     return true;
   }
-
   async function handleTsChange(){
     const file = tsFile.files && tsFile.files[0];
     if (!file){ countInfo.textContent = ' / 0'; limitN.removeAttribute('max'); return; }
     try{
       const txt = await file.text();
       let total = 0;
-
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(txt, 'application/xml');
       const hasErr = xmlDoc.getElementsByTagName('parsererror').length > 0;
-
       if (!hasErr){
         const sources = xmlDoc.getElementsByTagName('source');
         for (let i = 0; i < sources.length; i++){
@@ -449,7 +443,6 @@ await pyodide.loadPackage("micropip");
           if (needsTranslationJS(inner)) total++;
         }
       }
-
       if (total > 0){
         limitN.value = total;
         limitN.max   = String(total);
@@ -465,7 +458,6 @@ await pyodide.loadPackage("micropip");
       limitN.removeAttribute('max');
     }
   }
-
   function clampLimit(){
     const max = Number(limitN.max || '0');
     let v = Number(limitN.value || '0');
@@ -477,7 +469,6 @@ await pyodide.loadPackage("micropip");
       limitN.value = 0;
     }
   }
-
   tsFile.addEventListener('change', handleTsChange);
   limitN.addEventListener('input', clampLimit);
 })();
@@ -485,9 +476,15 @@ await pyodide.loadPackage("micropip");
 (function setupModelCustom(){
   const sel = document.getElementById('modelSel');
   const custom = document.getElementById('modelCustom');
-  function sync(){
-    custom.style.display = (sel.value === '__custom__') ? 'block' : 'none';
-  }
+  function sync(){ custom.style.display = (sel.value === '__custom__') ? 'block' : 'none'; }
+  sel.addEventListener('change', sync);
+  sync();
+})();
+
+(function setupModelCustom2(){
+  const sel = document.getElementById('modelSel2');
+  const custom = document.getElementById('modelCustom2');
+  function sync(){ custom.style.display = (sel.value === '__custom__') ? 'block' : 'none'; }
   sel.addEventListener('change', sync);
   sync();
 })();
@@ -502,44 +499,42 @@ from js import document
 from pyodide.http import pyfetch
 from pyodide.ffi import create_proxy
 
-from typing import Optional
-
 try:
     from opencc import OpenCC
 except ModuleNotFoundError:
     import micropip
-    # 指定版本較穩
     await micropip.install("opencc-python-reimplemented==0.1.7")
     from opencc import OpenCC
 
 _OPENCC = OpenCC("s2twp")  # 簡→繁（台灣用語）
+_TW_PROTECT_TERMS = ["演算法"]
 
-_TW_PROTECT_TERMS = [
-    "演算法",
-]
+_COORD_RE = re.compile(r"坐標")
+_MASK_PAT = re.compile(
+    r'(</?[A-Za-z][^>]*>|&lt;/?[A-Za-z][^&]*?&gt;|%L\d+|%\d+|%n|\{\d+\}|&(?!\s)[A-Za-z#x0-9]+;)',
+    re.IGNORECASE
+)
+_SEP_RE = re.compile(r"[-\s/_.\\]+")
+_TOKEN_RE = re.compile(r"[A-Za-z0-9]+(?:[\\/_.-][A-Za-z0-9]+)*")
+
+# ====== 基本工具 ======
 
 def to_zh_tw(s: Optional[str]) -> str:
     if not s:
         return ""
     text = s
-
     placeholders = {}
     for i, term in enumerate(_TW_PROTECT_TERMS):
-        key = f"⟦TWTERM{i}⟧"  # 不與你原本 ⟦MASKn⟧ 衝突
+        key = f"⟦TWTERM{i}⟧"
         placeholders[key] = term
         text = text.replace(term, key)
-
     try:
         text = _OPENCC.convert(text)
     except Exception:
         pass
-
     for key, term in placeholders.items():
         text = text.replace(key, term)
-
     return text
-
-_COORD_RE = re.compile(r"坐標")
 
 def normalize_zh(s: Optional[str]) -> str:
     if not s:
@@ -549,11 +544,16 @@ def normalize_zh(s: Optional[str]) -> str:
     except Exception:
         return s
 
-# ===== UI：訊息列 =====
+def fix_zh_punct(s: Optional[str]) -> str:
+    if not s:
+        return ""
+    return s.replace("（","(").replace("）",")")
+
+# ===== UI：訊息、進度、對照 =====
+
 def _set_ui_msg(msg_html: str):
     document.getElementById("ts-ui-msg").innerHTML = msg_html
 
-# ===== UI：進度條 & 對照表 =====
 def _progress_setup(total:int):
     wrap = document.getElementById("ts-progress-wrap")
     bar = document.getElementById("ts-progress")
@@ -573,7 +573,6 @@ def _compare_reset():
     box = document.getElementById("compare-box")
     box.style.display = "block"
     tbody = document.getElementById("compare-tbody")
-    # 清空舊列
     while tbody.firstChild:
         tbody.removeChild(tbody.firstChild)
 
@@ -582,81 +581,24 @@ def _compare_add(src_text:str, zh_text:str):
     box.style.display = "block"
     tbody = document.getElementById("compare-tbody")
     tr = document.createElement("tr")
-
     def _td(txt):
         td = document.createElement("td")
         td.style.padding = "4px"
         td.style.borderBottom = "1px solid #eee"
-        td.textContent = txt  # 用 textContent 避免 HTML 注入
+        td.textContent = txt
         return td
-
     tr.appendChild(_td(src_text or ""))
     tr.appendChild(_td(zh_text or ""))
     tbody.appendChild(tr)
-
-    # 自動滾動到表格底部
     try:
-        # compare-box 的第 2 個子元素是帶滾動的 div
         scroller = box.children.item(1)
         if scroller:
             scroller.scrollTop = scroller.scrollHeight
     except Exception:
         pass
 
-# ===== 讀取上傳檔 =====
-async def read_glossaries_from_file_input(input_id: str) -> List[Tuple[str,str]]:
-    files = document.getElementById(input_id).files
-    if not files or files.length == 0:
-        return []
-    pairs_all: List[Tuple[str,str]] = []
-    for i in range(files.length):
-        f = files.item(i)
-        name = (f.name or "").lower()
-        try:
-            buf = await f.arrayBuffer()
-            raw = buf.to_py()
-            b = raw if isinstance(raw, (bytes, bytearray)) else bytes(raw)
-            if name.endswith(".ods"):
-                pairs_all.extend(load_glossary_ods_bytes(b))
-            elif name.endswith(".csv"):
-                txt = b.decode("utf-8", "ignore")
-                pairs_all.extend(load_glossary_csv_text(txt))
-        except Exception as e:
-            print(f"[glossary] 讀取 {f.name} 失敗：{e}")
+# ===== 遮罩/還原 =====
 
-    seen, dedup = set(), []
-    for en, zh in pairs_all:
-        if en not in seen:
-            dedup.append((en, zh))
-            seen.add(en)
-    return dedup
-
-async def _read_file_text(input_id: str)->Optional[str]:
-    files = document.getElementById(input_id).files
-    if not files or files.length==0: return None
-    buf = await files.item(0).arrayBuffer()
-    return bytes(buf.to_py()).decode("utf-8", "ignore")
-
-async def _read_file_bytes(input_id: str)->Optional[bytes]:
-    files = document.getElementById(input_id).files
-    if not files or files.length==0: return None
-    buf = await files.item(0).arrayBuffer()
-    return bytes(buf.to_py())
-
-def _build_download_link(filename: str, content_bytes: bytes) -> str:
-    b64 = base64.b64encode(content_bytes).decode("utf-8")
-    return f'<a download="{filename}" href="data:application/octet-stream;base64,{b64}">⬇️ 下載 {filename}</a>'
-
-# ===== 保留 DOCTYPE =====
-def _read_doctype(xml_text: str) -> str:
-    m = re.search(r'<!DOCTYPE[^>]+>', xml_text)
-    return m.group(0) if m else ""
-
-# ===== 遮罩/還原（HTML/實體/%n/%1/%L1/{0} 等）=====
-_MASK_PAT = re.compile(
-    r'(</?[A-Za-z][^>]*>|&lt;/?[A-Za-z][^&]*?&gt;|%L\d+|%\d+|%n|\{\d+\}|&(?:[A-Za-z]+|#\d+|#x[0-9A-Fa-f]+);)',
-    re.IGNORECASE
-)
 def _mask_text(s:str):
     idx=0; mapping={}
     def _repl(m):
@@ -673,6 +615,8 @@ def _et_ready(s:str)->str:
     try: return html.unescape(s)
     except Exception: return s
 
+# ===== 判斷是否需要翻譯 =====
+
 def needs_translation(en_text: Optional[str]) -> bool:
     if not en_text or not en_text.strip():
         return False
@@ -680,10 +624,9 @@ def needs_translation(en_text: Optional[str]) -> bool:
         return False
     return True
 
-# ===== LCS 詞庫匹配（不依賴 pandas）=====
-_SEP_RE = re.compile(r"[-\s/_.\\]+")
+# ===== LCS 詞庫匹配（無 pandas 依賴） =====
+
 def soft_norm(s:str)->str: return _SEP_RE.sub(" ", s.lower()).strip()
-_TOKEN_RE = re.compile(r"[A-Za-z0-9]+(?:[\\/_.-][A-Za-z0-9]+)*")
 
 class LCSMatcher:
     def __init__(self, pairs: List[Tuple[str,str]], min_token_len:int=4, min_lcs_len:int=4):
@@ -700,9 +643,9 @@ class LCSMatcher:
         self.soft_index = {}
         self.max_soft_len = 1
         for r in rows:
-            key = soft_norm(r["en"])
+            key = soft_norm(r["en"]) 
             if key and key not in self.soft_index:
-                self.soft_index[key] = (r["en"], r["zh"])
+                self.soft_index[key] = (r["en"], r["zh"]) 
                 self.max_soft_len = max(self.max_soft_len, len(key.split()))
 
     def _topk_for_word(self, token:str, k:int=3)->List[Dict]:
@@ -723,7 +666,7 @@ class LCSMatcher:
             kk, sub = anchored_prefix_sub_in(t_norm, r["en_norm"])
             if kk >= self.min_lcs_len:
                 res.append({"token":token,"en":r["en"],"zh":r["zh"],"lcs_len":kk})
-        res.sort(key=lambda d: (-d["lcs_len"], len(d["en"])))
+        res.sort(key=lambda d: (-d["lcs_len"], len(d["en"])) )
         return res[:k]
 
     def build_glossary_sentence_first(self, text:str, *, limit:int=12, per_word_k:int=3, min_lcs_len:int=4)->Dict[str,str]:
@@ -755,6 +698,7 @@ class LCSMatcher:
         return glossary
 
 # ===== 讀 CSV / ODS =====
+
 def load_glossary_csv_text(csv_text: Optional[str]) -> List[Tuple[str,str]]:
     if not csv_text:
         return []
@@ -816,10 +760,10 @@ def load_glossary_ods_bytes(ods_bytes: bytes)->List[Tuple[str,str]]:
             pairs.append((en, zh)); seen.add(en)
     return pairs
 
-# ===== OpenAI Chat Completions（批次）=====
+# ===== OpenAI 請求：翻譯（第一模型） =====
+
 async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:str,
                                               masked_texts:List[str], glossaries:List[Dict[str,str]]):
-    # 1) 準備資料
     items = [{"id": i, "text": t, "glossary": [f"{en} -> {zh}" for en, zh in g.items()]}
              for i,(t,g) in enumerate(zip(masked_texts, glossaries))]
 
@@ -848,17 +792,13 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
       }
     }]
 
-    # 2) 端點與 tokens 參數選擇
     m = (model or "").lower()
     new_family = m.startswith(("gpt-5", "gpt-4.1", "o4", "o3"))
 
     tokens = min(4000, 220 * max(4, len(masked_texts)))
-    # chat.completions：舊家族多用 max_tokens，新家族常要求 max_completion_tokens
     chat_tokens_key = "max_completion_tokens" if new_family else "max_tokens"
-    # responses：一律 max_output_tokens
     resp_tokens_key = "max_output_tokens"
 
-    # 3) 建立 request body（兩種端點）
     def build_chat_body():
         body = {
           "model": model,
@@ -868,7 +808,6 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
           ],
           "tools": tools,
           "tool_choice": {"type": "function", "function": {"name": "return_translations"}},
-          # "temperature": 0.2  # ← 移除
         }
         for k in ("max_tokens", "max_completion_tokens", "max_output_tokens"):
             body.pop(k, None)
@@ -880,10 +819,10 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
           "model": model,
           "input": [
             {"role": "system", "content": [
-                {"type": "input_text", "text": system_prompt}   # ← 這裡
+                {"type": "input_text", "text": system_prompt}
             ]},
             {"role": "user",   "content": [
-                {"type": "input_text", "text": user_prompt}     # ← 這裡本來就對
+                {"type": "input_text", "text": user_prompt}
             ]}
           ],
           "tools": tools,
@@ -892,7 +831,6 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
         for k in ("max_tokens", "max_completion_tokens", "max_output_tokens"):
             body.pop(k, None)
         body[resp_tokens_key] = tokens
-        # reasoning 對部分模型/代理不支援，可保留；若 400 再移除
         if m.startswith(("gpt-5", "o4", "o3")):
             body.setdefault("reasoning", {"effort": "medium"})
         return body
@@ -905,20 +843,17 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
         data = await resp.json()
         return resp.status, data
 
-    # 4) 送出（新家族先走 responses，舊家族先走 chat），必要時自動 fallback
     tried = []
     async def try_responses():
         status, data = await post_json("/responses", build_responses_body())
         tried.append(("responses", status, data))
         if status == 400:
             msg = (data.get("error", {}) or {}).get("message", "")
-            # 1) tokens key 兼容（你原本就有）
             if "max_output_tokens" in msg and "Unsupported" in msg:
                 body = build_responses_body()
                 body.pop(resp_tokens_key, None)
                 body["max_completion_tokens"] = tokens
                 return await post_json("/responses", body)
-            # 2) reasoning 兼容（新增這段）
             if "reasoning" in msg.lower():
                 body = build_responses_body()
                 body.pop("reasoning", None)
@@ -932,21 +867,18 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
             msg = (data.get("error", {}) or {}).get("message", "")
             if ("Unsupported parameter" in msg or "not supported" in msg) and "max_tokens" in msg:
                 body = build_chat_body()
-                # 換另一個 tokens key 再試一次
                 if chat_tokens_key == "max_completion_tokens":
                     body.pop("max_completion_tokens", None); body["max_tokens"] = tokens
                 else:
                     body.pop("max_tokens", None); body["max_completion_tokens"] = tokens
                 return await post_json("/chat/completions", body)
             if "not compatible with the chat.completions" in msg.lower():
-                # 直接建議走 responses
                 return await try_responses()
         return status, data
 
     if new_family:
         status, data = await try_responses()
         if status >= 400:
-            # 再回退 chat 一次
             status2, data2 = await try_chat()
             if status2 >= 400:
                 raise RuntimeError(f"API Error {status2}: {data2}")
@@ -959,7 +891,6 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
                 raise RuntimeError(f"API Error {status2}: {data2}")
             status, data = status2, data2
 
-    # 5) 解析回傳（同時支援 chat 與 responses 結構）
     def _extract_tool_args_from_chat(obj:dict)->Optional[str]:
         try:
             msg = obj["choices"][0]["message"]
@@ -970,7 +901,6 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
             return None
 
     def _deep_find_arguments(o):
-        # 在 responses 的任意巢狀處找第一個 "arguments" (string) 值
         if isinstance(o, dict):
             if "arguments" in o and isinstance(o["arguments"], str):
                 return o["arguments"]
@@ -985,36 +915,232 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
 
     args_raw = _extract_tool_args_from_chat(data)
     if args_raw is None and "output" in data:
-        # Responses API：從 output 裡深搜 function.arguments
         args_raw = _deep_find_arguments(data["output"])
-    if args_raw is None:
-        # 部分 Responses 容器把 message 放在 top-level "response"
-        if "response" in data:
-            args_raw = _deep_find_arguments(data["response"])
+    if args_raw is None and "response" in data:
+        args_raw = _deep_find_arguments(data["response"]) 
 
     if not args_raw:
-        raise ValueError("模型未呼叫 function（找不到結構化輸出）。\ntrace=" + json.dumps({"tried": tried}, ensure_ascii=False))
+        raise ValueError("模型未呼叫 function（找不到結構化輸出）。")
 
     parsed = json.loads(args_raw)
     arr = parsed.get("translations")
     if not (isinstance(arr, list) and all(isinstance(x, str) for x in arr)):
         raise ValueError("function 參數不符合 {translations: string[]} 格式")
-
     if len(arr) != len(masked_texts):
         raise ValueError(f"JSON 陣列長度不符，期待 {len(masked_texts)}，得到 {len(arr)}")
-
     return arr
 
-# ===== 主流程（加入即時對照與進度）=====
-async def run_translation_pipeline_async(api_key:str, base_url:str, model:str,
+# ===== OpenAI 請求：校對（第二模型） =====
+
+async def call_post_edit_batch_pyfetch(api_key:str, base_url:str, model:str,
+                                       src_masked:List[str], zh_masked:List[str]):
+    items = [{"id": i, "src": s, "zh": z} for i,(s,z) in enumerate(zip(src_masked, zh_masked))]
+
+    system_prompt = """你是嚴格的格式校對器。對每項 item：
+1) 以 src 為基準，檢查 zh 中的 ⟦MASK數字⟧、HTML 標籤/實體、%n/%L1/{0} 等佔位符是否完整且順序一致；
+2) 不得新增、刪除或改動任何這些標記；
+3) 允許修正文句與標點，將全形括號（，）改為半形 ()；
+4) 只回傳修正後的 zh，同序且等長的陣列，不要任何解釋。"""
+
+    user_prompt = "請將 items 的 zh 依據對應的 src 做格式校對。只需回傳 function 參數，不要輸出其他文字。\n" + \
+                  "items = " + json.dumps(items, ensure_ascii=False)
+
+    tools = [{
+      "type": "function",
+      "function": {
+        "name": "return_fixes",
+        "description": "回傳與輸入 items 等長、同序的修正後 zh 字串陣列",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "fixed": {"type": "array", "items": {"type": "string"}}
+          },
+          "required": ["fixed"],
+          "additionalProperties": False
+        }
+      }
+    }]
+
+    m = (model or "").lower()
+    new_family = m.startswith(("gpt-5", "gpt-4.1", "o4", "o3"))
+    tokens = min(4000, 220 * max(4, len(src_masked)))
+    chat_tokens_key = "max_completion_tokens" if new_family else "max_tokens"
+    resp_tokens_key = "max_output_tokens"
+
+    def build_chat_body():
+        body = {
+          "model": model,
+          "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user",   "content": user_prompt}
+          ],
+          "tools": tools,
+          "tool_choice": {"type": "function", "function": {"name": "return_fixes"}},
+        }
+        for k in ("max_tokens", "max_completion_tokens", "max_output_tokens"):
+            body.pop(k, None)
+        body[chat_tokens_key] = tokens
+        return body
+
+    def build_responses_body():
+        body = {
+          "model": model,
+          "input": [
+            {"role": "system", "content": [
+                {"type": "input_text", "text": system_prompt}
+            ]},
+            {"role": "user",   "content": [
+                {"type": "input_text", "text": user_prompt}
+            ]}
+          ],
+          "tools": tools,
+          "tool_choice": {"type": "function", "function": {"name": "return_fixes"}},
+        }
+        for k in ("max_tokens", "max_completion_tokens", "max_output_tokens"):
+            body.pop(k, None)
+        body[resp_tokens_key] = tokens
+        if m.startswith(("gpt-5", "o4", "o3")):
+            body.setdefault("reasoning", {"effort": "medium"})
+        return body
+
+    async def post_json(path:str, body:dict):
+        resp = await pyfetch(base_url.rstrip("/") + path,
+                             method="POST",
+                             headers={"Authorization": f"Bearer {api_key}", "Content-Type":"application/json"},
+                             body=json.dumps(body))
+        data = await resp.json()
+        return resp.status, data
+
+    tried = []
+    async def try_responses():
+        status, data = await post_json("/responses", build_responses_body())
+        tried.append(("responses", status, data))
+        if status == 400:
+            msg = (data.get("error", {}) or {}).get("message", "")
+            if "max_output_tokens" in msg and "Unsupported" in msg:
+                body = build_responses_body()
+                body.pop(resp_tokens_key, None)
+                body["max_completion_tokens"] = tokens
+                return await post_json("/responses", body)
+            if "reasoning" in msg.lower():
+                body = build_responses_body()
+                body.pop("reasoning", None)
+                return await post_json("/responses", body)
+        return status, data
+
+    async def try_chat():
+        status, data = await post_json("/chat/completions", build_chat_body())
+        tried.append(("chat", status, data))
+        if status == 400:
+            msg = (data.get("error", {}) or {}).get("message", "")
+            if ("Unsupported parameter" in msg or "not supported" in msg) and "max_tokens" in msg:
+                body = build_chat_body()
+                if chat_tokens_key == "max_completion_tokens":
+                    body.pop("max_completion_tokens", None); body["max_tokens"] = tokens
+                else:
+                    body.pop("max_tokens", None); body["max_completion_tokens"] = tokens
+                return await post_json("/chat/completions", body)
+            if "not compatible with the chat.completions" in msg.lower():
+                return await try_responses()
+        return status, data
+
+    if new_family:
+        status, data = await try_responses()
+        if status >= 400:
+            status2, data2 = await try_chat()
+            if status2 >= 400:
+                raise RuntimeError(f"API Error {status2}: {data2}")
+            status, data = status2, data2
+    else:
+        status, data = await try_chat()
+        if status >= 400:
+            status2, data2 = await try_responses()
+            if status2 >= 400:
+                raise RuntimeError(f"API Error {status2}: {data2}")
+            status, data = status2, data2
+
+    def _extract_tool_args_from_chat(obj:dict)->Optional[str]:
+        try:
+            msg = obj["choices"][0]["message"]
+            tcalls = msg.get("tool_calls") or []
+            if not tcalls: return None
+            return tcalls[0]["function"]["arguments"]
+        except Exception:
+            return None
+
+    def _deep_find_arguments(o):
+        if isinstance(o, dict):
+            if "arguments" in o and isinstance(o["arguments"], str):
+                return o["arguments"]
+            for v in o.values():
+                r = _deep_find_arguments(v)
+                if r is not None: return r
+        elif isinstance(o, list):
+            for v in o:
+                r = _deep_find_arguments(v)
+                if r is not None: return r
+        return None
+
+    args_raw = _extract_tool_args_from_chat(data)
+    if args_raw is None and "output" in data:
+        args_raw = _deep_find_arguments(data["output"])
+    if args_raw is None and "response" in data:
+        args_raw = _deep_find_arguments(data["response"]) 
+
+    if not args_raw:
+        raise ValueError("模型未呼叫 function（找不到結構化輸出）。")
+
+    parsed = json.loads(args_raw)
+    arr = parsed.get("fixed")
+    if not (isinstance(arr, list) and all(isinstance(x, str) for x in arr)):
+        raise ValueError("function 參數不符合 {fixed: string[]} 格式")
+    if len(arr) != len(src_masked):
+        raise ValueError(f"JSON 陣列長度不符，期待 {len(src_masked)}，得到 {len(arr)}")
+    return arr
+
+# ===== 主流程（加入第二模型校對） =====
+
+async def read_glossaries_from_file_input(input_id: str) -> List[Tuple[str,str]]:
+    files = document.getElementById(input_id).files
+    if not files or files.length == 0:
+        return []
+    pairs_all: List[Tuple[str,str]] = []
+    for i in range(files.length):
+        f = files.item(i)
+        name = (f.name or "").lower()
+        try:
+            buf = await f.arrayBuffer()
+            raw = buf.to_py()
+            b = raw if isinstance(raw, (bytes, bytearray)) else bytes(raw)
+            if name.endswith(".ods"):
+                pairs_all.extend(load_glossary_ods_bytes(b))
+            elif name.endswith(".csv"):
+                txt = b.decode("utf-8", "ignore")
+                pairs_all.extend(load_glossary_csv_text(txt))
+        except Exception as e:
+            print(f"[glossary] 讀取 {f.name} 失敗：{e}")
+    seen, dedup = set(), []
+    for en, zh in pairs_all:
+        if en not in seen:
+            dedup.append((en, zh))
+            seen.add(en)
+    return dedup
+
+async def _read_file_text(input_id: str)->Optional[str]:
+    files = document.getElementById(input_id).files
+    if not files or files.length==0: return None
+    buf = await files.item(0).arrayBuffer()
+    return bytes(buf.to_py()).decode("utf-8", "ignore")
+
+async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
                                          ts_text:str, glossary_pairs:List[Tuple[str,str]],
-                                         batch_size:int=32, limit_n:int=0) -> bytes:
+                                         batch_size:int=32, limit_n:int=0,
+                                         use_model2:bool=False, model2:str="") -> bytes:
     doctype = _read_doctype(ts_text)
     root = ET.fromstring(ts_text)
     messages = root.findall(".//message")
     matcher = LCSMatcher(glossary_pairs, min_token_len=4, min_lcs_len=4)
 
-    # 收集任務
     tasks=[]
     for m in messages:
         src=m.find("source")
@@ -1022,13 +1148,12 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model:str,
         if needs_translation(src.text):
             tasks.append((m, src.text, m.get("numerus")=="yes"))
         if limit_n > 0 and len(tasks) >= limit_n:
-          break
+            break
 
     finished=0; total=len(tasks)
     if total==0:
         return ET.tostring(root, encoding="utf-8")
 
-    # 初始化 UI
     _compare_reset()
     _progress_setup(total)
 
@@ -1042,19 +1167,28 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model:str,
             masked_texts.append(masked); maps.append(mp)
 
         try:
-            zh_list = await call_chat_completions_batch_pyfetch(api_key, base_url, model, masked_texts, glossaries)
-        except Exception as e:
+            zh_list = await call_chat_completions_batch_pyfetch(api_key, base_url, model1, masked_texts, glossaries)
+        except Exception:
             zh_list=[]
             for masked, g in zip(masked_texts, glossaries):
-                one = await call_chat_completions_batch_pyfetch(api_key, base_url, model, [masked], [g])
+                one = await call_chat_completions_batch_pyfetch(api_key, base_url, model1, [masked], [g])
                 zh_list.append(one[0])
 
-        # 寫回 XML，並即時輸出「原文／譯文」對照與進度
+        # 第二模型：校對/對齊（可選）
+        if use_model2 and model2:
+            try:
+                zh_list = await call_post_edit_batch_pyfetch(api_key, base_url, model2, masked_texts, zh_list)
+            except Exception as e:
+                # 若校對失敗，沿用第一模型結果
+                print("[warn] second-model post-edit failed:", e)
+
+        # 寫回 XML + 對照 + 進度
         for (m, src_text, is_num), zh_raw, mp in zip(batch, zh_list, maps):
             trans = m.find("translation")
             if trans is None:
                 trans = ET.SubElement(m, "translation")
             zh = _et_ready(_unmask_text(zh_raw, mp))
+            zh = fix_zh_punct(zh)
             zh = normalize_zh(to_zh_tw(zh))
             if is_num:
                 forms = trans.findall("numerusform")
@@ -1066,9 +1200,7 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model:str,
                 trans.text = zh
             if "type" in trans.attrib: trans.attrib.pop("type", None)
 
-            # 即時對照（翻譯前 / 翻譯後）
             _compare_add(src_text, zh)
-
             finished += 1
             _progress_tick(finished, total)
 
@@ -1077,10 +1209,16 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model:str,
     xml_bytes = ET.tostring(root, encoding="utf-8")
     head = b'<?xml version="1.0" encoding="utf-8"?>'
     if doctype: xml_bytes = head + (doctype).encode("utf-8") + xml_bytes
-    else: xml_bytes = head + b"\\n" + xml_bytes
+    else: xml_bytes = head + b"\n" + xml_bytes
     return xml_bytes
 
-# ===== 點擊事件 =====
+# ===== 保留 DOCTYPE =====
+
+def _read_doctype(xml_text: str) -> str:
+    m = re.search(r'<!DOCTYPE[^>]+>', xml_text)
+    return m.group(0) if m else ""
+
+# ===== 事件 =====
 _BUSY=False
 async def _on_click(evt=None):
     global _BUSY
@@ -1090,17 +1228,26 @@ async def _on_click(evt=None):
     try:
         api = document.getElementById("apiKey").value.strip()
         base_url = document.getElementById("baseUrl").value.strip() or "https://api.openai.com/v1"
-        sel = document.getElementById("modelSel")
-        model = sel.value
-        if model == "__custom__":
-            model = document.getElementById("modelCustom").value.strip()
-        if not model:
-            _set_ui_msg("<span style='color:#b00'>請選擇或輸入 model id</span>")
-            return
+        # 第一模型
+        sel1 = document.getElementById("modelSel"); model1 = sel1.value
+        if model1 == "__custom__":
+            model1 = document.getElementById("modelCustom").value.strip()
+        # 第二模型
+        use2 = bool(document.getElementById("useModel2").checked)
+        sel2 = document.getElementById("modelSel2"); model2 = sel2.value
+        if model2 == "__custom__":
+            model2 = document.getElementById("modelCustom2").value.strip()
+
         batch = int(document.getElementById("batch").value or "32")
         limitN = int(document.getElementById("limitN").value or "200")
+
         if not api:
             _set_ui_msg("<span style='color:#b00'>請輸入 API Key</span>"); return
+        if not model1:
+            _set_ui_msg("<span style='color:#b00'>請選擇或輸入 Model-1</span>"); return
+        if use2 and not model2:
+            _set_ui_msg("<span style='color:#b00'>請選擇或輸入 Model-2</span>"); return
+
         ts_text = await _read_file_text("tsFile")
         if not ts_text:
             _set_ui_msg("<span style='color:#b00'>請上傳 .ts 檔</span>"); return
@@ -1109,15 +1256,14 @@ async def _on_click(evt=None):
 
         _set_ui_msg("⏳ 連線中…")
         xml_bytes = await run_translation_pipeline_async(
-            api_key=api, base_url=base_url, model=model,
+            api_key=api, base_url=base_url, model1=model1,
             ts_text=ts_text, glossary_pairs=pairs,
-            batch_size=batch, limit_n=limitN
+            batch_size=batch, limit_n=limitN,
+            use_model2=use2, model2=model2
         )
 
         out_name = "qgis_zh-Hant.ts"
-        ts_files = document.getElementById("tsFile").files
-
-        link = _build_download_link(out_name, xml_bytes)
+        link = (lambda filename, content_bytes: f'<a download="{filename}" href="data:application/octet-stream;base64,' + __import__('base64').b64encode(content_bytes).decode('utf-8') + f'">⬇️ 下載 {filename}</a>')(out_name, xml_bytes)
         _set_ui_msg(link + "　<span style='color:#0a0'>完成！</span>")
     except Exception as e:
         _set_ui_msg(f"<span style='color:#b00'>發生錯誤：{html.escape(str(e))}</span>")
