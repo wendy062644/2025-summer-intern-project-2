@@ -29,6 +29,8 @@ title: merge
   #ts-ui col:nth-child(3) { width: calc((100% - 150px) / 3); }
   #ts-ui col:nth-child(4) { width: 150px; }
 
+  #ts-ui td.will { white-space: pre-line; }
+
   #table-wrap{
     border:1px solid var(--ts-border);
     border-radius:12px;
@@ -290,9 +292,7 @@ title: merge
         const td2 = document.createElement('td'); td2.innerHTML = '<div class="cell-content">'+escapeHtml(r.srcText||'')+'</div>';
         const td3 = document.createElement('td');
         td3.className = 'will ' + (r.will? 'ok':'skip');
-        td3.textContent = '跳過：';
-        td3.appendChild(document.createElement('br'));
-        td3.append(r.reason);
+        td3.textContent = r.will ? '覆蓋' : ('跳過：\n'+r.reason);
         tr.appendChild(td0); tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3);
         frag.appendChild(tr);
         shown++; if(r.will) totalWill++;
