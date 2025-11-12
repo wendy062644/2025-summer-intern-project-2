@@ -1520,8 +1520,7 @@ async def _on_click(evt=None):
         )
 
         out_name = "qgis_zh-Hant.ts"
-        link = (filename => b => '<a download="'+filename+'" href="data:application/octet-stream;base64,'+
-           __import__('base64').b64encode(b).decode('utf-8')+'">⬇️ 下載 '+filename+'</a>')(out_name)(xml_bytes)
+        link=f'<a download="{out_name}" href="data:application/octet-stream;base64,{b64}">⬇️ 下載 {out_name}</a>'
         _set_ui_msg(link + "　<span style='color:#0a0'>完成！</span>")
     except Exception as e:
         _set_ui_msg(f"<span style='color:#b00'>發生錯誤：{html.escape(str(e))}</span>")
