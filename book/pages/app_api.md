@@ -65,13 +65,39 @@ title: API
 
   /* 附屬區塊（ID 不變，但樣式仍只在 #ts-ui 作用） */
   #ts-ui #ts-progress-wrap{ margin:12px 0; }
+
   #ts-ui #compare-box{
-    border:1px solid var(--ts-border); border-radius:12px; padding:8px 12px; margin-top:8px; background:var(--ts-bg);
+    border:1px solid var(--ts-border);
+    border-radius:12px;
+    padding:8px 12px;
+    margin-top:8px;
+    background:var(--ts-bg);
   }
-  #ts-ui #compare-box table{ width:100%; border-collapse:collapse; font-size:.95rem; }
-  #ts-ui #compare-box th, #ts-ui #compare-box td{ padding:6px 6px; border-bottom:1px solid var(--ts-border); text-align:left; }
+
+  #ts-ui #compare-box table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:.95rem;
+    table-layout: fixed;           /* 固定欄寬 */
+  }
+
+  #ts-ui #compare-box th,
+  #ts-ui #compare-box td{
+    padding:6px 6px;
+    border-bottom:1px solid var(--ts-border);
+    text-align:left;
+    word-break: break-word;        /* 盡量在字邊界換行 */
+    overflow-wrap: anywhere;       /* 連續長字/路徑也能硬斷 */
+    white-space: normal;           /* 允許換行 */
+  }
+
   #ts-ui #compare-box thead th{ font-weight:600; }
-  #ts-ui #ts-ui-msg{ color:var(--ts-muted); font-size:.95rem; margin-top:8px; }
+
+  #ts-ui #ts-ui-msg{
+    color:var(--ts-muted);
+    font-size:.95rem;
+    margin-top:8px;
+  }
 
   /* 手機版：單欄 */
   @media (max-width: 640px){
