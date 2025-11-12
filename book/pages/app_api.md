@@ -615,6 +615,17 @@ def fix_zh_punct(s: Optional[str]) -> str:
         return ""
     return s.replace("（","(").replace("）",")")
 
+def strip_all_newlines(s: Optional[str]) -> str:
+    if not s:
+        return ""
+    # 去除字面 \n/\r 與實際換行
+    return (
+        s.replace("\\n", "")
+         .replace("\\r", "")
+         .replace("\n", "")
+         .replace("\r", "")
+    )
+
 # ===== UI：訊息、進度、對照 =====
 
 def _set_ui_msg(msg_html: str):
@@ -686,7 +697,7 @@ def _et_ready(s:str)->str:
 def needs_translation(en_text: Optional[str]) -> bool:
     if not en_text or not en_text.strip():
         return False
-    if re.fullmatch(r"[\s\d\W%{}]+", en_text):
+    if re.fullmatch(r"[\\s\\d\\W%{}]+", en_text):
         return False
     return True
 
@@ -709,9 +720,9 @@ class LCSMatcher:
         self.soft_index = {}
         self.max_soft_len = 1
         for r in rows:
-            key = soft_norm(r["en"]) 
+            key = soft_norm(r["en"])
             if key and key not in self.soft_index:
-                self.soft_index[key] = (r["en"], r["zh"]) 
+                self.soft_index[key] = (r["en"], r["zh"])
                 self.max_soft_len = max(self.max_soft_len, len(key.split()))
 
     def _topk_for_word(self, token:str, k:int=3)->List[Dict]:
@@ -826,10 +837,13 @@ def load_glossary_ods_bytes(ods_bytes: bytes)->List[Tuple[str,str]]:
             pairs.append((en, zh)); seen.add(en)
     return pairs
 
-# ===== OpenAI 請求：翻譯（第一模型） =====
+# ===== OpenAI：第一階段（翻譯） =====
 
-async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:str,
-                                              masked_texts:List[str], glossaries:List[Dict[str,str]]):
+async def call_chat_completions_batch_pyfetch(
+    api_key:str, base_url:str, model:str,
+    masked_texts:List[str], glossaries:List[Dict[str,str]],
+    temperature: float = 0.2
+):
     items = [{"id": i, "text": t, "glossary": [f"{en} -> {zh}" for en, zh in g.items()]}
              for i,(t,g) in enumerate(zip(masked_texts, glossaries))]
 
@@ -874,6 +888,7 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
           ],
           "tools": tools,
           "tool_choice": {"type": "function", "function": {"name": "return_translations"}},
+          "temperature": temperature,
         }
         for k in ("max_tokens", "max_completion_tokens", "max_output_tokens"):
             body.pop(k, None)
@@ -884,15 +899,12 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
         body = {
           "model": model,
           "input": [
-            {"role": "system", "content": [
-                {"type": "input_text", "text": system_prompt}
-            ]},
-            {"role": "user",   "content": [
-                {"type": "input_text", "text": user_prompt}
-            ]}
+            {"role": "system", "content": [{"type":"input_text","text": system_prompt}]},
+            {"role": "user",   "content": [{"type":"input_text","text": user_prompt}]}
           ],
           "tools": tools,
           "tool_choice": {"type": "function", "function": {"name": "return_translations"}},
+          "temperature": temperature,
         }
         for k in ("max_tokens", "max_completion_tokens", "max_output_tokens"):
             body.pop(k, None)
@@ -983,7 +995,7 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
     if args_raw is None and "output" in data:
         args_raw = _deep_find_arguments(data["output"])
     if args_raw is None and "response" in data:
-        args_raw = _deep_find_arguments(data["response"]) 
+        args_raw = _deep_find_arguments(data["response"])
 
     if not args_raw:
         raise ValueError("模型未呼叫 function（找不到結構化輸出）。")
@@ -996,7 +1008,159 @@ async def call_chat_completions_batch_pyfetch(api_key:str, base_url:str, model:s
         raise ValueError(f"JSON 陣列長度不符，期待 {len(masked_texts)}，得到 {len(arr)}")
     return arr
 
-# ===== OpenAI 請求：校對（第二模型） =====
+# ===== 第二階段（兩候選擇優 + 修正） =====
+
+async def call_post_edit_select_batch_pyfetch(
+    api_key:str, base_url:str, model:str,
+    src_masked:List[str], cand1_masked:List[str], cand2_masked:List[str]
+):
+    items = [{"id": i, "src": s, "c1": a, "c2": b}
+             for i,(s,a,b) in enumerate(zip(src_masked, cand1_masked, cand2_masked))]
+
+    system_prompt = """你是嚴格的格式校對器與選擇器。對每個 item：
+1) 以 src 為基準，從 c1 與 c2 選擇「遮罩(⟦MASK數字⟧)、HTML 標籤/實體、%n/%L1/{0} 等佔位符」保留最完整且順序一致的候選；
+2) 在選中的候選上做必要的格式修正：不得新增/刪除/改動上述標記；將全形括號改為半形 ()；
+3) 輸出不得含有任何換行（包含字面 \\n、\\r 與真正的換行字元）；
+4) 只回傳修正後的繁中 zh，同序且等長的陣列，不要任何解釋。"""
+
+    user_prompt = "請為每個 item 從 c1、c2 擇優並修正格式。只需回傳 function 參數，不要輸出其他文字。\n" + \
+                  "items = " + json.dumps(items, ensure_ascii=False)
+
+    tools = [{
+      "type": "function",
+      "function": {
+        "name": "return_picked",
+        "description": "回傳與輸入 items 等長、同序的最終 zh 字串陣列",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "picked": {"type": "array", "items": {"type": "string"}}
+          },
+          "required": ["picked"],
+          "additionalProperties": False
+        }
+      }
+    }]
+
+    m = (model or "").lower()
+    new_family = m.startswith(("gpt-5", "gpt-4.1", "o4", "o3"))
+    tokens = min(4000, 220 * max(4, len(src_masked)))
+    chat_tokens_key = "max_completion_tokens" if new_family else "max_tokens"
+    resp_tokens_key = "max_output_tokens"
+
+    def build_chat_body():
+        body = {
+          "model": model,
+          "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user",   "content": user_prompt}
+          ],
+          "tools": tools,
+          "tool_choice": {"type": "function", "function": {"name": "return_picked"}},
+          "temperature": 0.2,
+        }
+        for k in ("max_tokens", "max_completion_tokens", "max_output_tokens"):
+            body.pop(k, None)
+        body[chat_tokens_key] = tokens
+        return body
+
+    def build_responses_body():
+        body = {
+          "model": model,
+          "input": [
+            {"role": "system", "content": [{"type":"input_text","text": system_prompt}]},
+            {"role": "user",   "content": [{"type":"input_text","text": user_prompt}]}
+          ],
+          "tools": tools,
+          "tool_choice": {"type": "function", "function": {"name": "return_picked"}},
+          "temperature": 0.2,
+        }
+        for k in ("max_tokens", "max_completion_tokens", "max_output_tokens"):
+            body.pop(k, None)
+        body[resp_tokens_key] = tokens
+        if m.startswith(("gpt-5","o4","o3")):
+            body.setdefault("reasoning", {"effort": "low"})
+        return body
+
+    async def post_json(path:str, body:dict):
+        resp = await pyfetch(base_url.rstrip("/") + path,
+                             method="POST",
+                             headers={"Authorization": f"Bearer {api_key}", "Content-Type":"application/json"},
+                             body=json.dumps(body))
+        data = await resp.json()
+        return resp.status, data
+
+    async def try_responses():
+        status, data = await post_json("/responses", build_responses_body())
+        if status == 400:
+            msg = (data.get("error", {}) or {}).get("message", "")
+            if "max_output_tokens" in msg and "Unsupported" in msg:
+                body = build_responses_body()
+                body.pop(resp_tokens_key, None)
+                body["max_completion_tokens"] = tokens
+                return await post_json("/responses", body)
+            if "reasoning" in msg.lower():
+                body = build_responses_body()
+                body.pop("reasoning", None)
+                return await post_json("/responses", body)
+        return status, data
+
+    async def try_chat():
+        status, data = await post_json("/chat/completions", build_chat_body())
+        if status == 400:
+            msg = (data.get("error", {}) or {}).get("message", "")
+            if ("Unsupported parameter" in msg or "not supported" in msg) and "max_tokens" in msg:
+                body = build_chat_body()
+                if chat_tokens_key == "max_completion_tokens":
+                    body.pop("max_completion_tokens", None); body["max_tokens"] = tokens
+                else:
+                    body.pop("max_tokens", None); body["max_completion_tokens"] = tokens
+                return await post_json("/chat/completions", body)
+            if "not compatible with the chat.completions" in msg.lower():
+                return await try_responses()
+        return status, data
+
+    if new_family:
+        status, data = await try_responses()
+        if status >= 400:
+            status, data = await try_chat()
+            if status >= 400:
+                raise RuntimeError(f"API Error {status}: {data}")
+    else:
+        status, data = await try_chat()
+        if status >= 400:
+            status, data = await try_responses()
+            if status >= 400:
+                raise RuntimeError(f"API Error {status}: {data}")
+
+    def _find_args(o):
+        if isinstance(o, dict):
+            if "arguments" in o and isinstance(o["arguments"], str): return o["arguments"]
+            for v in o.values():
+                r = _find_args(v)
+                if r is not None: return r
+        elif isinstance(o, list):
+            for v in o:
+                r = _find_args(v)
+                if r is not None: return r
+        return None
+
+    args_raw = _find_args(data)
+    if not args_raw:
+        raise ValueError("模型未呼叫 function（找不到結構化輸出）。")
+
+    parsed = json.loads(args_raw)
+    picked = parsed.get("picked")
+    if not (isinstance(picked, list) and all(isinstance(x, str) for x in picked)):
+        raise ValueError("function 參數不符合 {picked: string[]} 格式")
+    if len(picked) != len(src_masked):
+        raise ValueError(f"JSON 陣列長度不符，期待 {len(src_masked)}，得到 {len(picked)}")
+
+    # 移除所有換行（雙保險）
+    picked = [strip_all_newlines(s) for s in picked]
+    return picked
+
+# =====（保留）第二階段：單一路徑校對 =====
 
 async def call_post_edit_batch_pyfetch(api_key:str, base_url:str, model:str,
                                        src_masked:List[str], zh_masked:List[str]):
@@ -1151,7 +1315,7 @@ async def call_post_edit_batch_pyfetch(api_key:str, base_url:str, model:str,
     if args_raw is None and "output" in data:
         args_raw = _deep_find_arguments(data["output"])
     if args_raw is None and "response" in data:
-        args_raw = _deep_find_arguments(data["response"]) 
+        args_raw = _deep_find_arguments(data["response"])
 
     if not args_raw:
         raise ValueError("模型未呼叫 function（找不到結構化輸出）。")
@@ -1164,7 +1328,7 @@ async def call_post_edit_batch_pyfetch(api_key:str, base_url:str, model:str,
         raise ValueError(f"JSON 陣列長度不符，期待 {len(src_masked)}，得到 {len(arr)}")
     return arr
 
-# ===== 主流程（加入第二模型校對） =====
+# ===== 主流程（加入第二模型校對 / 兩候選擇優） =====
 
 async def read_glossaries_from_file_input(input_id: str) -> List[Tuple[str,str]]:
     files = document.getElementById(input_id).files
@@ -1232,30 +1396,57 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
             masked, mp = _mask_text(src_text)
             masked_texts.append(masked); maps.append(mp)
 
+        # --- 第一階段：若啟用第二階段，先產生兩個候選；否則單一路徑 ---
         try:
-            zh_list = await call_chat_completions_batch_pyfetch(api_key, base_url, model1, masked_texts, glossaries)
+            if use_model2 and model2:
+                zh_list_a = await call_chat_completions_batch_pyfetch(
+                    api_key, base_url, model1, masked_texts, glossaries, temperature=0.2
+                )
+                zh_list_b = await call_chat_completions_batch_pyfetch(
+                    api_key, base_url, model1, masked_texts, glossaries, temperature=0.8
+                )
+                zh_list = await call_post_edit_select_batch_pyfetch(
+                    api_key, base_url, model2, masked_texts, zh_list_a, zh_list_b
+                )
+            else:
+                zh_list = await call_chat_completions_batch_pyfetch(
+                    api_key, base_url, model1, masked_texts, glossaries, temperature=0.2
+                )
+                zh_list = [strip_all_newlines(z) for z in zh_list]
         except Exception:
-            zh_list=[]
+            # 逐筆退避（相同邏輯）
+            zh_list = []
             for masked, g in zip(masked_texts, glossaries):
-                one = await call_chat_completions_batch_pyfetch(api_key, base_url, model1, [masked], [g])
-                zh_list.append(one[0])
+                if use_model2 and model2:
+                    one_a = await call_chat_completions_batch_pyfetch(
+                        api_key, base_url, model1, [masked], [g], temperature=0.2
+                    )
+                    one_b = await call_chat_completions_batch_pyfetch(
+                        api_key, base_url, model1, [masked], [g], temperature=0.8
+                    )
+                    one = await call_post_edit_select_batch_pyfetch(
+                        api_key, base_url, model2, [masked], one_a, one_b
+                    )
+                    zh_list.append(one[0])
+                else:
+                    one = await call_chat_completions_batch_pyfetch(
+                        api_key, base_url, model1, [masked], [g], temperature=0.2
+                    )
+                    zh_list.append(strip_all_newlines(one[0]))
 
-        # 第二模型：校對/對齊（可選）
-        if use_model2 and model2:
-            try:
-                zh_list = await call_post_edit_batch_pyfetch(api_key, base_url, model2, masked_texts, zh_list)
-            except Exception as e:
-                # 若校對失敗，沿用第一模型結果
-                print("[warn] second-model post-edit failed:", e)
-
-        # 寫回 XML + 對照 + 進度
+        # --- 寫回 XML + 對照 + 進度 ---
         for (m, src_text, is_num), zh_raw, mp in zip(batch, zh_list, maps):
             trans = m.find("translation")
             if trans is None:
                 trans = ET.SubElement(m, "translation")
-            zh = _et_ready(_unmask_text(zh_raw, mp))
+
+            # 先還原遮罩，再做實體處理與移除換行（雙保險）
+            zh = _unmask_text(zh_raw, mp)
+            zh = _et_ready(zh)
+            zh = strip_all_newlines(zh)
             zh = fix_zh_punct(zh)
             zh = normalize_zh(to_zh_tw(zh))
+
             if is_num:
                 forms = trans.findall("numerusform")
                 if not forms:
@@ -1329,7 +1520,8 @@ async def _on_click(evt=None):
         )
 
         out_name = "qgis_zh-Hant.ts"
-        link = (lambda filename, content_bytes: f'<a download="{filename}" href="data:application/octet-stream;base64,' + __import__('base64').b64encode(content_bytes).decode('utf-8') + f'">⬇️ 下載 {filename}</a>')(out_name, xml_bytes)
+        link = (filename => b => '<a download="'+filename+'" href="data:application/octet-stream;base64,'+
+           __import__('base64').b64encode(b).decode('utf-8')+'">⬇️ 下載 '+filename+'</a>')(out_name)(xml_bytes)
         _set_ui_msg(link + "　<span style='color:#0a0'>完成！</span>")
     except Exception as e:
         _set_ui_msg(f"<span style='color:#b00'>發生錯誤：{html.escape(str(e))}</span>")
@@ -1345,3 +1537,4 @@ document.getElementById("run-btn").addEventListener("click", _BTN_PROXY)
   $msg.innerHTML = `<span style="color:#b00">Python 載入失敗：${String(e)}</span>`;
 }
 </script>
+
