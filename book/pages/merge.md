@@ -29,11 +29,16 @@ title: merge
   #ts-ui col:nth-child(3) { width: calc((100% - 150px) / 3); }
   #ts-ui col:nth-child(4) { width: 150px; }
 
-  #table-wrap { overflow-x: auto; scrollbar-gutter: stable; }
+  #table-wrap{
+    border:1px solid var(--ts-border);
+    border-radius:12px;
+    overflow-x:auto;
+    overflow-y:auto;
+    scrollbar-gutter:stable;
+    max-height:70vh;
+  }
 
   #ts-ui table#grid {
-    width: 100%;
-    table-layout: fixed;
     box-sizing: b
     order-box;
   }
@@ -62,7 +67,6 @@ title: merge
   .kpi{ color:var(--ts-muted); font-variant-numeric:tabular-nums; }
   .ts-divider{ height:1px; background:var(--ts-border); border:0; margin:12px 0; }
 
-  #table-wrap{ border:1px solid var(--ts-border); border-radius:12px; overflow:auto; max-height:70vh; }
   #ts-ui table{
     width:100%;
     border-collapse:separate; border-spacing:0;
@@ -71,8 +75,6 @@ title: merge
   thead th{ position:sticky; top:0; z-index:3; background:var(--ts-head-bg); border-bottom:1px solid var(--ts-border); padding:10px; text-align:left; font-weight:700; }
   tbody td, tbody th{ border-bottom:1px solid var(--ts-border); }
   th, td{ padding:8px 10px; vertical-align:top; }
-  /* 取消固定 34% 寬，交給 colgroup 控制比例 */
-  .row-label{ width:auto; max-width:none; }
   .cell-content{ white-space:pre-wrap; word-break:break-word; }
   .will{ font-weight:700; }
   .ok { color:#059669; }
@@ -114,10 +116,10 @@ title: merge
     <div id="table-wrap" style="display:none;">
       <table id="grid">
         <colgroup>
-          <col style="width: calc((100% - 150px) * 0.3334)">
-          <col style="width: calc((100% - 150px) * 0.3333)">
-          <col style="width: calc((100% - 150px) * 0.3333)">
-          <col style="width: 150px">
+          <col>
+          <col>
+          <col>
+          <col>
         </colgroup>
         <thead>
           <tr>
