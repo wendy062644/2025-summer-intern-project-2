@@ -237,6 +237,7 @@ title: API
         <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
       </div>
     </div>
+    <!-- 第一排：Base URL + 第一模型 -->
     <div class="ts-row-2 ts-6-4" style="margin-top:10px;">
       <div class="ts-field">
         <label class="ts-label" for="baseUrl">Base URL</label>
@@ -245,118 +246,161 @@ title: API
         </div>
       </div>
       <div class="ts-field">
-  <label class="ts-label" for="modelSel">Model</label>
-  <div class="ts-input">
-    <div class="ts-inline" style="width:100%;">
-      <select id="modelSel" style="flex:1;min-width:220px;">
-        <optgroup label="GPT-5">
-          <option value="gpt-5">gpt-5</option>
-          <option value="gpt-5-mini">gpt-5-mini</option>
-          <option value="gpt-5-nano">gpt-5-nano</option>
-        </optgroup>
-        <optgroup label="GPT-4.1">
-          <option value="gpt-4.1">gpt-4.1</option>
-          <option value="gpt-4.1-mini" selected>gpt-4.1-mini</option>
-          <option value="gpt-4.1-nano">gpt-4.1-nano</option>
-        </optgroup>
-        <optgroup label="GPT-4o">
-          <option value="gpt-4o">gpt-4o</option>
-          <option value="gpt-4o-mini">gpt-4o-mini</option>
-        </optgroup>
-        <optgroup label="Reasoning">
-          <option value="o4-mini">o4-mini</option>
-          <option value="o3-mini">o3-mini</option>
-        </optgroup>
-        <optgroup label="Legacy">
-          <option value="gpt-4-turbo">gpt-4-turbo</option>
-          <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
-        </optgroup>
-        <optgroup label="自訂">
-          <option value="__custom__">其他</option>
-        </optgroup>
-      </select>
-      <!-- 選「其他」時顯示 -->
-      <input id="modelCustom" type="text"
-             placeholder="例如：my-org/gpt-xy-2025-10-15"
-             style="display:none;flex:1;">
+        <label class="ts-label" for="modelSel">Model-1（翻譯）</label>
+        <div class="ts-input">
+          <div class="ts-inline" style="width:100%;">
+            <select id="modelSel" style="flex:1;min-width:220px;">
+              <optgroup label="GPT-5">
+                <option value="gpt-5">gpt-5</option>
+                <option value="gpt-5-mini">gpt-5-mini</option>
+                <option value="gpt-5-nano">gpt-5-nano</option>
+              </optgroup>
+              <optgroup label="GPT-4.1">
+                <option value="gpt-4.1">gpt-4.1</option>
+                <option value="gpt-4.1-mini" selected>gpt-4.1-mini</option>
+                <option value="gpt-4.1-nano">gpt-4.1-nano</option>
+              </optgroup>
+              <optgroup label="GPT-4o">
+                <option value="gpt-4o">gpt-4o</option>
+                <option value="gpt-4o-mini">gpt-4o-mini</option>
+              </optgroup>
+              <optgroup label="Reasoning">
+                <option value="o4-mini">o4-mini</option>
+                <option value="o3-mini">o3-mini</option>
+              </optgroup>
+              <optgroup label="Legacy">
+                <option value="gpt-4-turbo">gpt-4-turbo</option>
+                <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+              </optgroup>
+              <optgroup label="自訂">
+                <option value="__custom__">其他</option>
+              </optgroup>
+            </select>
+            <!-- 選「其他」時顯示 -->
+            <input id="modelCustom" type="text"
+                   placeholder="例如：my-org/gpt-xy-2025-10-15"
+                   style="display:none;flex:1;">
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
+    <!-- 第二排：第二模型（校對）開關 + 選擇器 -->
+    <div class="ts-row-2 ts-6-4" style="margin-top:10px;">
+      <div class="ts-field">
+        <label class="ts-label" for="useModel2">第二模型（校對 / 對齊）</label>
+        <div class="ts-input ts-inline">
+          <input type="checkbox" id="useModel2" checked>
+          <span class="ts-hint" style="margin-left:8px;">將 Model-1 輸出 + 原文交給此模型做格式檢查與對齊</span>
+        </div>
+      </div>
+      <div class="ts-field">
+        <label class="ts-label" for="modelSel2">Model-2（校對）</label>
+        <div class="ts-input">
+          <div class="ts-inline" style="width:100%;">
+            <select id="modelSel2" style="flex:1;min-width:220px;">
+              <optgroup label="GPT-5">
+                <option value="gpt-5">gpt-5</option>
+                <option value="gpt-5-mini" selected>gpt-5-mini</option>
+                <option value="gpt-5-nano">gpt-5-nano</option>
+              </optgroup>
+              <optgroup label="GPT-4.1">
+                <option value="gpt-4.1">gpt-4.1</option>
+                <option value="gpt-4.1-mini">gpt-4.1-mini</option>
+                <option value="gpt-4.1-nano">gpt-4.1-nano</option>
+              </optgroup>
+              <optgroup label="GPT-4o">
+                <option value="gpt-4o">gpt-4o</option>
+                <option value="gpt-4o-mini">gpt-4o-mini</option>
+              </optgroup>
+              <optgroup label="Reasoning">
+                <option value="o4-mini">o4-mini</option>
+                <option value="o3-mini">o3-mini</option>
+              </optgroup>
+              <optgroup label="Legacy">
+                <option value="gpt-4-turbo">gpt-4-turbo</option>
+                <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+              </optgroup>
+              <optgroup label="自訂">
+                <option value="__custom__">其他</option>
+              </optgroup>
+            </select>
+            <input id="modelCustom2" type="text" placeholder="例如：my-org/gpt-xy-2025-10-15" style="display:none;flex:1;">
+          </div>
+        </div>
+      </div>
     </div>
     <hr class="ts-divider">
     <div class="ts-title">處理參數</div>
     <div class="ts-row-3 ts-3-4-3">
-    <!-- 左：Batch (3) -->
-    <div class="ts-field">
+      <!-- 左：Batch (3) -->
+      <div class="ts-field">
         <label class="ts-label" for="batch">Batch</label>
         <div class="ts-input">
-        <input type="number" id="batch" value="32" min="1" max="64">
+          <input type="number" id="batch" value="32" min="1" max="64">
         </div>
-    </div>
-    <!-- 中：處理筆數上限 (3) -->
-    <div class="ts-field">
+      </div>
+      <!-- 中：處理筆數上限 (3) -->
+      <div class="ts-field">
         <label class="ts-label" for="limitN">處理筆數上限</label>
         <div class="ts-input ts-inline">
-        <input type="number" id="limitN" value="0" style="max-width:220px;">
-        <span id="countInfo" class="ts-hint"> / 0</span>
+          <input type="number" id="limitN" value="0" style="max-width:220px;">
+          <span id="countInfo" class="ts-hint"> / 0</span>
         </div>
-    </div>
-    <!-- 右：.ts 檔（上傳） (4) -->
-    <div class="ts-field">
+      </div>
+      <!-- 右：.ts 檔（上傳） (4) -->
+      <div class="ts-field">
         <label class="ts-label" for="tsFile">.ts 檔（上傳）</label>
         <div class="ts-input">
-        <input type="file" id="tsFile" accept=".ts">
+          <input type="file" id="tsFile" accept=".ts">
         </div>
-    </div>
+      </div>
     </div>
     <hr class="ts-divider">
     <div class="ts-title">輸入檔案</div>
     <div class="ts-row-2" style="--ts-col1: 7fr; --ts-col2: 3fr;">
-    <!-- 左：檔案上傳 -->
-    <div class="ts-field">
+      <!-- 左：檔案上傳 -->
+      <div class="ts-field">
         <label class="ts-label" for="glsFile">glossary（CSV / ODS）</label>
         <div class="ts-input">
-        <input type="file" id="glsFile" accept=".csv,.ods" multiple>
+          <input type="file" id="glsFile" accept=".csv,.ods" multiple>
         </div>
-    </div>
-    <!-- 右：執行翻譯（滿寬按鈕） -->
-    <div class="ts-field">
+      </div>
+      <!-- 右：執行翻譯（滿寬按鈕） -->
+      <div class="ts-field">
         <label class="ts-label" style="visibility:hidden;">執行翻譯</label>
         <div class="ts-input">
-        <button id="run-btn" class="ts-btn-primary" style="width:100%;">執行翻譯</button>
+          <button id="run-btn" class="ts-btn-primary" style="width:100%;">執行翻譯</button>
         </div>
-    </div>
-    <!-- 底下補一行提示：對齊右欄 -->
-    <div class="ts-hint right-col" style="margin-top:6px;">
+      </div>
+      <!-- 底下補一行提示：對齊右欄 -->
+      <div class="ts-hint right-col" style="margin-top:6px;">
         欄位：<code>en, zh</code> 或 <code>英文名稱, 中文名稱</code>
+      </div>
     </div>
+    <!-- 進度條（ID 保持不變） -->
+    <div id="ts-progress-wrap" style="display:none;">
+      <div class="ts-inline">
+        <progress id="ts-progress" value="0" max="100" style="width:100%;"></progress>
+        <span id="ts-progress-label" style="font-variant-numeric: tabular-nums;">0 / 0</span>
+      </div>
     </div>
-
-  <!-- 進度條（ID 保持不變） -->
-  <div id="ts-progress-wrap" style="display:none;">
-    <div class="ts-inline">
-      <progress id="ts-progress" value="0" max="100" style="width:100%;"></progress>
-      <span id="ts-progress-label" style="font-variant-numeric: tabular-nums;">0 / 0</span>
+    <!-- 對照表（ID 保持不變） -->
+    <div id="compare-box" style="display:none;">
+      <div style="font-size:0.95rem;color:var(--ts-text);margin-bottom:4px;">翻譯對照（即時刷新）</div>
+      <div style="max-height: 360px; overflow:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:50%;">原文</th>
+              <th style="width:50%;">譯文</th>
+            </tr>
+          </thead>
+          <tbody id="compare-tbody"></tbody>
+        </table>
+      </div>
     </div>
+    <div id="ts-ui-msg"></div>
   </div>
-
-  <!-- 對照表（ID 保持不變） -->
-  <div id="compare-box" style="display:none;">
-    <div style="font-size:0.95rem;color:var(--ts-text);margin-bottom:4px;">翻譯對照（即時刷新）</div>
-    <div style="max-height: 360px; overflow:auto;">
-      <table>
-        <thead>
-          <tr>
-            <th style="width:50%;">原文</th>
-            <th style="width:50%;">譯文</th>
-          </tr>
-        </thead>
-        <tbody id="compare-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <div id="ts-ui-msg"></div>
 </div>
 
 <!-- ===== Pyodide ===== -->
