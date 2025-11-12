@@ -323,7 +323,6 @@ title: API
             <input type="checkbox" id="useModel2" checked>
             <span class="ts-label" style="margin:0;">第二模型（校對 / 對齊）</span>
           </label>
-          <span class="ts-hint" style="margin-left:8px;">將 Model-1 輸出 + 原文交給此模型做格式檢查與對齊</span>
         </div>
       </div>
       <div class="ts-field">
