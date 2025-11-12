@@ -89,18 +89,16 @@ title: merge
         <div class="ts-input" style="min-width:220px;"><input id="searchBox" type="text" placeholder="搜尋 source / 目前譯文 / 來源譯文"></div>
       </label>
     </div>
-
     <div class="toolbar"><span class="kpi" id="stat">尚未載入</span></div>
-
     <hr class="ts-divider"/>
 
     <div id="table-wrap" style="display:none;">
       <table id="grid">
         <colgroup>
           <!-- 前三欄等分「扣掉動作欄 150px」後的剩餘寬度 -->
-          <col style="width: calc((100% - 150px) / 3)">
-          <col style="width: calc((100% - 150px) / 3)">
-          <col style="width: calc((100% - 150px) / 3)">
+          <col style="width: calc((100% - 150px) / 3 - 0.5px)">
+          <col style="width: calc((100% - 150px) / 3 - 0.5px)">
+          <col style="width: calc((100% - 150px) / 3 - 0.5px)">
           <col style="width: 150px">
         </colgroup>
         <thead>
