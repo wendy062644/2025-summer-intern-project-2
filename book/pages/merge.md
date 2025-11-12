@@ -290,7 +290,9 @@ title: merge
         const td2 = document.createElement('td'); td2.innerHTML = '<div class="cell-content">'+escapeHtml(r.srcText||'')+'</div>';
         const td3 = document.createElement('td');
         td3.className = 'will ' + (r.will? 'ok':'skip');
-        td3.textContent = r.will ? '覆蓋' : ('跳過：\n'+r.reason);
+        td3.textContent = '跳過：';
+        td3.appendChild(document.createElement('br'));
+        td3.append(r.reason);
         tr.appendChild(td0); tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3);
         frag.appendChild(tr);
         shown++; if(r.will) totalWill++;
