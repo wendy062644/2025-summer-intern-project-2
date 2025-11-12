@@ -18,7 +18,6 @@ title: merge
 </style>
 
 <style>
-  /* —— 全部樣式限制在 #ts-ui —— */
   #ts-ui{
     --ts-gap: 12px; --ts-pad: 14px; --ts-radius: 12px;
     --ts-border:#e5e7eb; --ts-bg:#fff; --ts-surface:#fff; --ts-surface-2:#f9fafb;
@@ -33,7 +32,6 @@ title: merge
   }
   #ts-ui *, #ts-ui *::before, #ts-ui *::after{ box-sizing:border-box; }
   .ts-card{ border:1px solid var(--ts-border); background:var(--ts-surface); border-radius:var(--ts-radius); padding:16px; box-shadow:0 1px 2px rgba(0,0,0,.04); }
-  .ts-title{ font-weight:800; font-size:1.1rem; margin:2px 0 10px; }
   .ts-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
   .ts-field{ display:flex; flex-direction:column; gap:6px; }
   .ts-label{ color:var(--ts-muted); font-size:.95rem; }
@@ -45,13 +43,17 @@ title: merge
   .kpi{ color:var(--ts-muted); font-variant-numeric:tabular-nums; }
   .ts-divider{ height:1px; background:var(--ts-border); border:0; margin:12px 0; }
 
-  /* 表格（預覽）*/
   #table-wrap{ border:1px solid var(--ts-border); border-radius:12px; overflow:auto; max-height:70vh; }
-  #ts-ui table{ width:100%; border-collapse:separate; border-spacing:0; table-layout: fixed; }
+  #ts-ui table{
+    width:100%;
+    border-collapse:separate; border-spacing:0;
+    table-layout: fixed;
+  }
   thead th{ position:sticky; top:0; z-index:3; background:var(--ts-head-bg); border-bottom:1px solid var(--ts-border); padding:10px; text-align:left; font-weight:700; }
   tbody td, tbody th{ border-bottom:1px solid var(--ts-border); }
   th, td{ padding:8px 10px; vertical-align:top; }
-  .row-label{ width:34%; }
+  /* 取消固定 34% 寬，交給 colgroup 控制比例 */
+  .row-label{ width:auto; max-width:none; }
   .cell-content{ white-space:pre-wrap; word-break:break-word; }
   .will{ font-weight:700; }
   .ok { color:#059669; }
@@ -60,7 +62,6 @@ title: merge
 
 <div id="ts-ui">
   <div class="ts-card">
-    <div class="ts-title">以 `<source>` 覆蓋 `<translation>`</div>
     <div class="ts-grid">
       <div class="ts-field">
         <label class="ts-label">目標檔（被覆蓋）</label>
@@ -96,10 +97,11 @@ title: merge
     <div id="table-wrap" style="display:none;">
       <table id="grid">
         <colgroup>
-          <col style="width:34%">
-          <col style="width:33%">
-          <col style="width:33%">
-          <col style="width:150px">
+          <!-- 前三欄等分「扣掉動作欄 150px」後的剩餘寬度 -->
+          <col style="width: calc((100% - 150px) / 3)">
+          <col style="width: calc((100% - 150px) / 3)">
+          <col style="width: calc((100% - 150px) / 3)">
+          <col style="width: 150px">
         </colgroup>
         <thead>
           <tr>
@@ -111,10 +113,6 @@ title: merge
         </thead>
         <tbody id="tbody"></tbody>
       </table>
-    </div>
-
-    <div class="ts-label" style="margin-top:10px;">
-      規則：**僅以 `<source>` 完全相同** 為匹配條件。若來源檔存在相同 `<source>` 多筆，將採用第一筆並計入「重複 source」統計。
     </div>
   </div>
   <div id="msg" style="margin-top:8px; color:var(--ts-muted);"></div>
