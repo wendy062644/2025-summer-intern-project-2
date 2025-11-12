@@ -2,7 +2,8 @@
 title: merge
 ---
 
-# 檔案合併(將已翻譯內容覆蓋原文)
+# 檔案合併
+將已翻譯內容覆蓋原文
 
 > 功能：上傳 2 個 .ts 檔（目標檔 與 來源檔）。僅當 **`<source>` 完全相同** 時，將來源檔對應訊息的 `<translation>` 覆蓋到目標檔。
 
@@ -18,6 +19,17 @@ title: merge
 </style>
 
 <style>
+  #ts-ui .row-label { width:auto !important; max-width:none !important; }
+  #table-wrap {
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-gutter: stable both-edges;
+  }
+  #ts-ui table#grid {
+    width: 100%;
+    table-layout: fixed;
+    box-sizing: border-box;
+  }
   #ts-ui{
     --ts-gap: 12px; --ts-pad: 14px; --ts-radius: 12px;
     --ts-border:#e5e7eb; --ts-bg:#fff; --ts-surface:#fff; --ts-surface-2:#f9fafb;
@@ -96,9 +108,9 @@ title: merge
       <table id="grid">
         <colgroup>
           <!-- 前三欄等分「扣掉動作欄 150px」後的剩餘寬度 -->
-          <col style="width: calc((100% - 150px) / 3 - 0.5px)">
-          <col style="width: calc((100% - 150px) / 3 - 0.5px)">
-          <col style="width: calc((100% - 150px) / 3 - 0.5px)">
+          <col style="width: calc((100% - 150px) * 0.3334)">
+          <col style="width: calc((100% - 150px) * 0.3333)">
+          <col style="width: calc((100% - 150px) * 0.3333)">
           <col style="width: 150px">
         </colgroup>
         <thead>
