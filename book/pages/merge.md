@@ -19,16 +19,23 @@ title: merge
 </style>
 
 <style>
-  #ts-ui .row-label { width:auto !important; max-width:none !important; }
-  #table-wrap {
-    overflow-y: auto;
-    overflow-x: hidden;
-    scrollbar-gutter: stable both-edges;
+  #ts-ui .row-label {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
+  #ts-ui col:nth-child(1),
+  #ts-ui col:nth-child(2),
+  #ts-ui col:nth-child(3) { width: calc((100% - 150px) / 3); }
+  #ts-ui col:nth-child(4) { width: 150px; }
+
+  #table-wrap { overflow-x: auto; scrollbar-gutter: stable; }
+
   #ts-ui table#grid {
     width: 100%;
     table-layout: fixed;
-    box-sizing: border-box;
+    box-sizing: b
+    order-box;
   }
   #ts-ui{
     --ts-gap: 12px; --ts-pad: 14px; --ts-radius: 12px;
@@ -107,7 +114,6 @@ title: merge
     <div id="table-wrap" style="display:none;">
       <table id="grid">
         <colgroup>
-          <!-- 前三欄等分「扣掉動作欄 150px」後的剩餘寬度 -->
           <col style="width: calc((100% - 150px) * 0.3334)">
           <col style="width: calc((100% - 150px) * 0.3333)">
           <col style="width: calc((100% - 150px) * 0.3333)">
