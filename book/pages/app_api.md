@@ -839,6 +839,10 @@ def load_glossary_ods_bytes(ods_bytes: bytes)->List[Tuple[str,str]]:
 
 # ===== OpenAI：第一階段（翻譯） =====
 
+def _supports_temperature(model: str) -> bool:
+    m = (model or "").lower()
+    return not m.startswith(("o3", "o4"))
+
 async def call_chat_completions_batch_pyfetch(
     api_key:str, base_url:str, model:str,
     masked_texts:List[str], glossaries:List[Dict[str,str]],
@@ -888,7 +892,6 @@ async def call_chat_completions_batch_pyfetch(
           ],
           "tools": tools,
           "tool_choice": {"type": "function", "function": {"name": "return_translations"}},
-          "temperature": temperature,
         }
         for k in ("max_tokens", "max_completion_tokens", "max_output_tokens"):
             body.pop(k, None)
@@ -904,7 +907,6 @@ async def call_chat_completions_batch_pyfetch(
           ],
           "tools": tools,
           "tool_choice": {"type": "function", "function": {"name": "return_translations"}},
-          "temperature": temperature,
         }
         for k in ("max_tokens", "max_completion_tokens", "max_output_tokens"):
             body.pop(k, None)
@@ -1057,8 +1059,9 @@ async def call_post_edit_select_batch_pyfetch(
           ],
           "tools": tools,
           "tool_choice": {"type": "function", "function": {"name": "return_picked"}},
-          "temperature": 0.2,
         }
+        if _supports_temperature(model):
+          body["temperature"] = 0.2
         for k in ("max_tokens", "max_completion_tokens", "max_output_tokens"):
             body.pop(k, None)
         body[chat_tokens_key] = tokens
@@ -1073,8 +1076,9 @@ async def call_post_edit_select_batch_pyfetch(
           ],
           "tools": tools,
           "tool_choice": {"type": "function", "function": {"name": "return_picked"}},
-          "temperature": 0.2,
         }
+        if _supports_temperature(model):
+          body["temperature"] = 0.2
         for k in ("max_tokens", "max_completion_tokens", "max_output_tokens"):
             body.pop(k, None)
         body[resp_tokens_key] = tokens
@@ -1520,6 +1524,7 @@ async def _on_click(evt=None):
         )
 
         out_name = "qgis_zh-Hant.ts"
+        b64 = base64.b64encode(xml_bytes).decode("ascii")
         link=f'<a download="{out_name}" href="data:application/octet-stream;base64,{b64}">⬇️ 下載 {out_name}</a>'
         _set_ui_msg(link + "　<span style='color:#0a0'>完成！</span>")
     except Exception as e:
