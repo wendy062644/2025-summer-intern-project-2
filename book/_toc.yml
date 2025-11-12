@@ -13,6 +13,8 @@ chapters:
     title: Local LLM 翻譯
   - file: pages/edit
     title: 編輯翻譯檔
+  - file: pages/merge
+    title: 檔案合併
   - file: pages/ods_view
     title: 字典詞庫推薦
   - file: pages/download
