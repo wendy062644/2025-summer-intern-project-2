@@ -1130,10 +1130,8 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
                         {
                             "role":"system",
                             "content": (
-                                "你是嚴格的校對員。比較 A 與 B 版譯文，"
-                                "並在 results 中『直接輸出最好的那句翻譯內容』。"
-                                "注意：請直接輸出翻譯文字，絕對不要只回傳 'A' 或 'B' 這種代號。"
-                                "若兩者皆差請直接重寫，但也要遵守 placeholder 與格式。"
+                                "你是嚴格的校對員。比較並參考 A 與 B 版譯文，並檢查格式是否正確"
+                                "若有漏翻或格式錯誤，則修正後再直接輸出"
                             )
                         },
                         {"role":"user", "content": json.dumps(sel_items, ensure_ascii=False)}
