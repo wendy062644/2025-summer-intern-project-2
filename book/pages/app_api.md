@@ -206,6 +206,14 @@ title: API
   }
   #ts-ui .ts-btn-primary:hover{ filter: brightness(1.06); }
   #ts-ui .ts-btn-primary:focus{ outline: none; box-shadow: var(--ts-focus); }
+  
+  /* 暫停按鈕樣式 */
+  #ts-ui .ts-btn-warning{
+    background: #d97706; /* Amber 600 */
+    color: #fff;
+    border: 1px solid var(--ts-border);
+  }
+  #ts-ui .ts-btn-warning:hover{ filter: brightness(1.1); }
 
   #ts-ui #compare-box{
     background: var(--ts-surface);
@@ -397,8 +405,9 @@ title: API
       </div>
       <div class="ts-field">
         <label class="ts-label" style="visibility:hidden;">執行翻譯</label>
-        <div class="ts-input">
-          <button id="run-btn" class="ts-btn-primary" style="width:100%;">執行翻譯</button>
+        <div class="ts-input ts-inline" style="gap:6px;">
+          <button id="run-btn" class="ts-btn-primary" style="flex:2;">執行翻譯</button>
+          <button id="pause-btn" class="ts-btn-primary ts-btn-warning" style="flex:1; display:none;">暫停</button>
         </div>
       </div>
       <div class="ts-hint right-col" style="margin-top:6px;">
@@ -514,13 +523,27 @@ await pyodide.loadPackage("micropip");
   sync();
 })();
 
+// === 暫停邏輯 ===
+window._TS_PAUSED = false;
+const pauseBtn = document.getElementById("pause-btn");
+pauseBtn.addEventListener("click", function(){
+  window._TS_PAUSED = !window._TS_PAUSED;
+  if(window._TS_PAUSED){
+    pauseBtn.textContent = "繼續";
+    pauseBtn.style.background = "#059669"; // Green to resume
+  } else {
+    pauseBtn.textContent = "暫停";
+    pauseBtn.style.background = "#d97706"; // Amber to pause
+  }
+});
+
 const $msg = document.getElementById("ts-ui-msg");
 try {
   await pyodide.runPythonAsync(String.raw`
 import asyncio, json, re, io, base64, traceback, html, csv, zipfile
 from typing import List, Tuple, Dict, Optional
 from xml.etree import ElementTree as ET
-from js import document
+from js import document, window
 from pyodide.http import pyfetch
 from pyodide.ffi import create_proxy
 
@@ -629,10 +652,12 @@ def _compare_add(src_text:str, zh_text:str, context_info:str=""):
 
     tr.appendChild(_td(zh_text))
     tbody.appendChild(tr)
-    try:
-        scroller = box.children.item(1)
-        if scroller: scroller.scrollTop = scroller.scrollHeight
-    except Exception: pass
+    
+    # === 移除自動捲動 ===
+    # try:
+    #     scroller = box.children.item(1)
+    #     if scroller: scroller.scrollTop = scroller.scrollHeight
+    # except Exception: pass
 
 # ====== 遮罩與 LCS ======
 
@@ -893,6 +918,10 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
     }]
 
     for start in range(0, total, batch_size):
+        # === 暫停檢測 ===
+        while window._TS_PAUSED:
+            await asyncio.sleep(0.2)
+
         batch = tasks[start:start+batch_size]
         masked_inputs = []; maps = []; context_list = []; gls_list = []
         
@@ -1020,6 +1049,10 @@ async def _on_click(evt=None):
     if _BUSY:
         _set_ui_msg("<span style='color:#b00'>正在處理，請稍候...</span>"); return
     _BUSY=True; _set_ui_msg("")
+    
+    # 顯示暫停按鈕
+    document.getElementById("pause-btn").style.display = "block"
+    
     try:
         api = document.getElementById("apiKey").value.strip()
         base_url = document.getElementById("baseUrl").value.strip() or "https://api.openai.com/v1"
@@ -1052,9 +1085,11 @@ async def _on_click(evt=None):
         b64 = base64.b64encode(xml_bytes).decode("ascii")
         link=f'<a download="{out_name}" href="data:application/octet-stream;base64,{b64}">下載 {out_name}</a>'
         _set_ui_msg(link + "　<span style='color:#0a0'>完成！</span>")
+        document.getElementById("pause-btn").style.display = "none" # 完成後隱藏
     except Exception as e:
         _set_ui_msg(f"<span style='color:#b00'>發生錯誤：{html.escape(str(e))}</span>")
         traceback.print_exc()
+        document.getElementById("pause-btn").style.display = "none"
     finally:
         _BUSY=False
 
