@@ -332,7 +332,7 @@ title: API
             <input type="checkbox" id="useModel2" checked>
             <span class="ts-label" style="margin:0;">第二模型（校對 / 對齊）</span>
           </label>
-          <span class="ts-hint" style="margin-left:8px; font-size: 12px">產生 A/B 兩版譯文，擇優校正</span>
+          <span class="ts-hint" style="margin-left:8px; font-size: 12px">產生兩版譯文，擇優校正</span>
         </div>
       </div>
       <div class="ts-field">
