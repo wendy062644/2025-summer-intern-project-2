@@ -4,7 +4,6 @@ title: API
 
 # ChatGPT API 翻譯
 
-<!-- ===== 外層 UI ===== -->
 <style>
   .bd-sidebar-secondary { display: none !important; }
   .bd-content,
@@ -13,7 +12,7 @@ title: API
     max-width: 100% !important;
     width: 100% !important;
   }
-  /* —— 全部樣式只限制在 #ts-ui，並且用 --ts-* 變數，避免和主題衝突 —— */
+  /* —— 全部樣式只限制在 #ts-ui —— */
   #ts-ui{
     --ts-gap: 12px;
     --ts-pad: 14px;
@@ -63,7 +62,7 @@ title: API
   #ts-ui .ts-btn-primary:hover{ filter:brightness(0.95); }
   #ts-ui .ts-divider{ height:1px; background:var(--ts-border); margin:12px 0; border:0; }
 
-  /* 附屬區塊（ID 不變，但樣式仍只在 #ts-ui 作用） */
+  /* 附屬區塊 */
   #ts-ui #ts-progress-wrap{ margin:12px 0; }
 
   #ts-ui #compare-box{
@@ -78,7 +77,7 @@ title: API
     width:100%;
     border-collapse:collapse;
     font-size:.95rem;
-    table-layout: fixed;           /* 固定欄寬 */
+    table-layout: fixed;
   }
 
   #ts-ui #compare-box th,
@@ -86,9 +85,9 @@ title: API
     padding:6px 6px;
     border-bottom:1px solid var(--ts-border);
     text-align:left;
-    word-break: break-word;        /* 盡量在字邊界換行 */
-    overflow-wrap: anywhere;       /* 連續長字/路徑也能硬斷 */
-    white-space: normal;           /* 允許換行 */
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    white-space: normal;
   }
 
   #ts-ui #compare-box thead th{ font-weight:600; }
@@ -99,7 +98,6 @@ title: API
     margin-top:8px;
   }
 
-  /* 手機版：單欄 */
   @media (max-width: 640px){
     #ts-ui .ts-grid{ grid-template-columns: 1fr; }
     #ts-ui .ts-label{ margin-top:6px; }
@@ -114,13 +112,11 @@ title: API
   #ts-ui .ts-6-4{ --ts-col1: 6fr; --ts-col2: 4fr; }
   #ts-ui .ts-4-6{ --ts-col1: 4fr; --ts-col2: 6fr; }
 
-  /* 每一欄的欄位（標籤在上、輸入在下） */
   #ts-ui .ts-field{
     display: flex; flex-direction: column; gap: 6px;
   }
   #ts-ui .ts-field .ts-label{ margin: 0; }
 
-  /* 手機版改為單欄堆疊 */
   @media (max-width: 640px){
     #ts-ui .ts-row-2{ grid-template-columns: 1fr; }
   }
@@ -133,20 +129,15 @@ title: API
   }
   #ts-ui .ts-3-4-3{ --ts-col1: 3fr; --ts-col2: 4fr; --ts-col3: 3fr; }
 
-    /* 手機版改為單欄 */
   @media (max-width: 640px){
     #ts-ui .ts-row-3{ grid-template-columns: 1fr; }
   }
   #ts-ui .left-col{ grid-column: 1 / 3; }
   
   @media (max-width:640px){
-    #ts-ui{
-      grid-template-columns: 1fr; /* 單欄 */
-    }
+    #ts-ui{ grid-template-columns: 1fr; }
     #ts-ui .left-col,
-    #ts-ui .right-col{
-      grid-column: 1 / -1; /* 滿版 */
-    }
+    #ts-ui .right-col{ grid-column: 1 / -1; }
   }
 
   @media (prefers-color-scheme: dark){
@@ -161,7 +152,7 @@ title: API
       --ts-link: #8ab4ff;
       --ts-code-bg: #0b0f14;
       --ts-code-fg: #e7eaf0;
-      --ts-accent: #3b82f6;   /* 主要強調色：按鈕、progress */
+      --ts-accent: #3b82f6;
       --ts-on-accent: #0b0f14;
       --ts-focus: 0 0 0 2px rgba(59,130,246,.35);
       --ts-progress-bg: #1a1f29;
@@ -186,7 +177,6 @@ title: API
     --ts-table-head-bg: #121621;
   }
 
-  /* ===== Components inherit tokens ===== */
   #ts-ui .ts-card{
     background: var(--ts-surface);
     border-color: var(--ts-border);
@@ -217,7 +207,6 @@ title: API
   #ts-ui .ts-btn-primary:hover{ filter: brightness(1.06); }
   #ts-ui .ts-btn-primary:focus{ outline: none; box-shadow: var(--ts-focus); }
 
-  /* 表格（即時對照） */
   #ts-ui #compare-box{
     background: var(--ts-surface);
     border-color: var(--ts-border);
@@ -231,13 +220,11 @@ title: API
     border-bottom: 1px solid var(--ts-border);
   }
 
-  /* 進度條（跨瀏覽器） */
   #ts-ui progress{ width:100%; height: 14px; background: var(--ts-progress-bg); border-radius: 8px; overflow: hidden; }
   #ts-ui progress::-webkit-progress-bar{ background: var(--ts-progress-bg); }
   #ts-ui progress::-webkit-progress-value{ background: var(--ts-accent); }
   #ts-ui progress::-moz-progress-bar{ background: var(--ts-accent); }
 
-  /* code 與連結 */
   #ts-ui code{
     background: var(--ts-code-bg);
     color: var(--ts-code-fg);
@@ -246,13 +233,10 @@ title: API
     border: 1px solid var(--ts-border);
   }
   #ts-ui a{ color: var(--ts-link); text-underline-offset: 2px; }
-
-  /* 選取反白 */
   #ts-ui ::selection{
     background: color-mix(in oklab, var(--ts-accent) 35%, transparent);
   }
 
-  /* 小螢幕微調（確保深色 token 同步生效） */
   @media (max-width:640px){
     html[data-theme="dark"] #ts-ui .ts-card,
     #ts-ui .ts-card{
@@ -260,34 +244,20 @@ title: API
     }
   }
   #ts-ui .ts-field:has(#useModel2){
-    flex-direction: row;         /* 標籤與輸入改成同一行 */
-    align-items: center;         /* 垂直置中 */
-    gap: 10px;
-  }
-
-  /* 調整標籤與內容區的分配與間距 */
-  #ts-ui .ts-field:has(#useModel2) .ts-label{
-    margin: 0 6px 0 0;
-  }
-  #ts-ui .ts-field:has(#useModel2) .ts-input{
-    display: flex;
+    flex-direction: row;
     align-items: center;
     gap: 10px;
   }
-
-  /* 讓勾選框尺寸與文字更貼齊 */
-  #ts-ui #useModel2{
-    width: 16px;
-    height: 16px;
-    margin: 0;
-    vertical-align: middle;
+  #ts-ui .ts-field:has(#useModel2) .ts-label{ margin: 0 6px 0 0; }
+  #ts-ui .ts-field:has(#useModel2) .ts-input{
+    display: flex; align-items: center; gap: 10px;
   }
-
-  /* 手機版仍維持單欄堆疊 */
+  #ts-ui #useModel2{
+    width: 16px; height: 16px; margin: 0; vertical-align: middle;
+  }
   @media (max-width:640px){
     #ts-ui .ts-field:has(#useModel2){
-      flex-direction: column;
-      align-items: stretch;
+      flex-direction: column; align-items: stretch;
     }
   }
 </style>
@@ -301,7 +271,6 @@ title: API
         <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
       </div>
     </div>
-    <!-- 第一排：Base URL + 第一模型 -->
     <div class="ts-row-2 ts-6-4" style="margin-top:10px;">
       <div class="ts-field">
         <label class="ts-label" for="baseUrl">Base URL</label>
@@ -329,7 +298,7 @@ title: API
                 <option value="gpt-4o-mini">gpt-4o-mini</option>
               </optgroup>
               <optgroup label="Reasoning">
-                <option value="o4-mini">o4-mini</option>
+                <option value="o1-mini">o1-mini</option>
                 <option value="o3-mini">o3-mini</option>
               </optgroup>
               <optgroup label="Legacy">
@@ -340,15 +309,11 @@ title: API
                 <option value="__custom__">其他</option>
               </optgroup>
             </select>
-            <!-- 選「其他」時顯示 -->
-            <input id="modelCustom" type="text"
-                   placeholder="例如：my-org/gpt-xy-2025-10-15"
-                   style="display:none;flex:1;">
+            <input id="modelCustom" type="text" placeholder="例如：my-org/gpt-xy" style="display:none;flex:1;">
           </div>
         </div>
       </div>
     </div>
-    <!-- 第二排：第二模型（校對）開關 + 選擇器 -->
     <div class="ts-row-2 ts-6-4" style="margin-top:10px;">
       <div class="ts-field">
         <div class="ts-input ts-inline">
@@ -356,7 +321,7 @@ title: API
             <input type="checkbox" id="useModel2" checked>
             <span class="ts-label" style="margin:0;">第二模型（校對 / 對齊）</span>
           </label>
-          <span class="ts-hint" style="margin-left:8px; font-size: 12px">將 Model-1 輸出 + 原文交給此模型做格式檢查與對齊</span>
+          <span class="ts-hint" style="margin-left:8px; font-size: 12px">產生 A/B 兩版譯文，交給此模型擇優修復</span>
         </div>
       </div>
       <div class="ts-field">
@@ -379,7 +344,7 @@ title: API
                 <option value="gpt-4o-mini">gpt-4o-mini</option>
               </optgroup>
               <optgroup label="Reasoning">
-                <option value="o4-mini">o4-mini</option>
+                <option value="o1-mini">o1-mini</option>
                 <option value="o3-mini">o3-mini</option>
               </optgroup>
               <optgroup label="Legacy">
@@ -390,7 +355,7 @@ title: API
                 <option value="__custom__">其他</option>
               </optgroup>
             </select>
-            <input id="modelCustom2" type="text" placeholder="例如：my-org/gpt-xy-2025-10-15" style="display:none;flex:1;">
+            <input id="modelCustom2" type="text" placeholder="例如：my-org/gpt-xy" style="display:none;flex:1;">
           </div>
         </div>
       </div>
@@ -398,14 +363,12 @@ title: API
     <hr class="ts-divider">
     <div class="ts-title">處理參數</div>
     <div class="ts-row-3 ts-3-4-3">
-      <!-- 左：Batch (3) -->
       <div class="ts-field">
         <label class="ts-label" for="batch">Batch</label>
         <div class="ts-input">
           <input type="number" id="batch" value="32" min="1" max="64">
         </div>
       </div>
-      <!-- 中：處理筆數上限 (3) -->
       <div class="ts-field">
         <label class="ts-label" for="limitN">處理筆數上限</label>
         <div class="ts-input ts-inline">
@@ -413,7 +376,6 @@ title: API
           <span id="countInfo" class="ts-hint"> / 0</span>
         </div>
       </div>
-      <!-- 右：.ts 檔（上傳） (4) -->
       <div class="ts-field">
         <label class="ts-label" for="tsFile">.ts 檔（上傳）</label>
         <div class="ts-input">
@@ -424,33 +386,28 @@ title: API
     <hr class="ts-divider">
     <div class="ts-title">輸入檔案</div>
     <div class="ts-row-2" style="--ts-col1: 7fr; --ts-col2: 3fr;">
-      <!-- 左：檔案上傳 -->
       <div class="ts-field">
         <label class="ts-label" for="glsFile">glossary（CSV / ODS）</label>
         <div class="ts-input">
           <input type="file" id="glsFile" accept=".csv,.ods" multiple>
         </div>
       </div>
-      <!-- 右：執行翻譯（滿寬按鈕） -->
       <div class="ts-field">
         <label class="ts-label" style="visibility:hidden;">執行翻譯</label>
         <div class="ts-input">
           <button id="run-btn" class="ts-btn-primary" style="width:100%;">執行翻譯</button>
         </div>
       </div>
-      <!-- 底下補一行提示：對齊右欄 -->
       <div class="ts-hint right-col" style="margin-top:6px;">
         欄位：<code>en, zh</code> 或 <code>英文名稱, 中文名稱</code>
       </div>
     </div>
-    <!-- 進度條（ID 保持不變） -->
     <div id="ts-progress-wrap" style="display:none;">
       <div class="ts-inline">
         <progress id="ts-progress" value="0" max="100" style="width:100%;"></progress>
         <span id="ts-progress-label" style="font-variant-numeric: tabular-nums;">0 / 0</span>
       </div>
     </div>
-    <!-- 對照表（ID 保持不變） -->
     <div id="compare-box" style="display:none;">
       <div style="font-size:0.95rem;color:var(--ts-text);margin-bottom:4px;">翻譯對照（即時刷新）</div>
       <div style="max-height: 360px; overflow:auto;">
@@ -469,7 +426,6 @@ title: API
   </div>
 </div>
 
-<!-- ===== Pyodide ===== -->
 <script type="module">
 import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.mjs";
 const pyodide = await loadPyodide();
@@ -618,7 +574,6 @@ def fix_zh_punct(s: Optional[str]) -> str:
 def strip_all_newlines(s: Optional[str]) -> str:
     if not s:
         return ""
-    # 去除字面 \n/\r 與實際換行
     return (
         s.replace("\\n", "")
          .replace("\\r", "")
@@ -701,7 +656,7 @@ def needs_translation(en_text: Optional[str]) -> bool:
         return False
     return True
 
-# ===== LCS 詞庫匹配（無 pandas 依賴） =====
+# ===== LCS 詞庫匹配 =====
 
 def soft_norm(s:str)->str: return _SEP_RE.sub(" ", s.lower()).strip()
 
@@ -841,7 +796,8 @@ def load_glossary_ods_bytes(ods_bytes: bytes)->List[Tuple[str,str]]:
 
 def _supports_temperature(model: str) -> bool:
     m = (model or "").lower()
-    return not m.startswith(("o3", "o4"))
+    # o1, o3, o4 系列不支援 temperature
+    return not m.startswith(("o1", "o3", "o4"))
 
 async def call_chat_completions_batch_pyfetch(
     api_key:str, base_url:str, model:str,
@@ -877,7 +833,7 @@ async def call_chat_completions_batch_pyfetch(
     }]
 
     m = (model or "").lower()
-    new_family = m.startswith(("gpt-5", "gpt-4.1", "o4", "o3"))
+    new_family = m.startswith(("gpt-5", "gpt-4.1", "o4", "o3", "o1"))
 
     tokens = min(4000, 220 * max(4, len(masked_texts)))
     chat_tokens_key = "max_completion_tokens" if new_family else "max_tokens"
@@ -893,6 +849,10 @@ async def call_chat_completions_batch_pyfetch(
           "tools": tools,
           "tool_choice": {"type": "function", "function": {"name": "return_translations"}},
         }
+        # [優化] 檢查是否支援 temperature
+        if _supports_temperature(model):
+            body["temperature"] = temperature
+            
         for k in ("max_tokens", "max_completion_tokens", "max_output_tokens"):
             body.pop(k, None)
         body[chat_tokens_key] = tokens
@@ -908,10 +868,14 @@ async def call_chat_completions_batch_pyfetch(
           "tools": tools,
           "tool_choice": {"type": "function", "function": {"name": "return_translations"}},
         }
+        # [優化] 檢查是否支援 temperature
+        if _supports_temperature(model):
+            body["temperature"] = temperature
+
         for k in ("max_tokens", "max_completion_tokens", "max_output_tokens"):
             body.pop(k, None)
         body[resp_tokens_key] = tokens
-        if m.startswith(("gpt-5", "o4", "o3")):
+        if m.startswith(("gpt-5", "o4", "o3", "o1")):
             body.setdefault("reasoning", {"effort": "medium"})
         return body
 
@@ -1019,12 +983,11 @@ async def call_post_edit_select_batch_pyfetch(
     items = [{"id": i, "src": s, "c1": a, "c2": b}
              for i,(s,a,b) in enumerate(zip(src_masked, cand1_masked, cand2_masked))]
 
-    system_prompt = """你是嚴格的格式校對器與選擇器。對每個 item：
+    # [優化] System Prompt 加入台灣繁體中文習慣的指示
+    system_prompt = """你是嚴格的格式校對器與繁體中文（台灣）語言專家。對每個 item：
 1) 以 src 為基準，從 c1 與 c2 選擇「遮罩(⟦MASK數字⟧)、HTML 標籤/實體、%n/%L1/{0} 等佔位符」保留最完整且順序一致的候選；
-2) 在選中的候選上做必要的「格式」修正：不得新增/刪除/改動上述標記；**所有特殊符號與英數一律以半形 ASCII 為主**
-   （例如 ! ? : ; , . / \\ | * [ ] { } < > ' " \` ~ @ # $ % ^ & - _ + =），**盡可能不改變特殊字符本身**（包含檔名/副檔名如 *.py、正則或萬用字元、路徑、參數、版本號、程式碼片段等）；
-   將全形括號改為半形 ()；大小寫與空白需與 src 保持一致（除非是修正明顯錯字）。
-3) 輸出不得含有任何換行（包含字面 \\n、\\r 與真正的換行字元）；
+2) 在選中的候選上做必要的「格式」修正：不得新增/刪除/改動上述標記；所有特殊符號與英數以半形 ASCII 為主；
+3) **確保最終產出符合台灣繁體中文習慣（如：資訊、演算法、連線、專案、檔案）**；
 4) 只回傳修正後的繁中 zh，同序且等長的陣列，不要任何解釋。"""
 
     user_prompt = "請為每個 item 從 c1、c2 擇優並修正格式。只需回傳 function 參數，不要輸出其他文字。\n" + \
@@ -1047,7 +1010,7 @@ async def call_post_edit_select_batch_pyfetch(
     }]
 
     m = (model or "").lower()
-    new_family = m.startswith(("gpt-5", "gpt-4.1", "o4", "o3"))
+    new_family = m.startswith(("gpt-5", "gpt-4.1", "o4", "o3", "o1"))
     tokens = min(4000, 220 * max(4, len(src_masked)))
     chat_tokens_key = "max_completion_tokens" if new_family else "max_tokens"
     resp_tokens_key = "max_output_tokens"
@@ -1084,7 +1047,7 @@ async def call_post_edit_select_batch_pyfetch(
         for k in ("max_tokens", "max_completion_tokens", "max_output_tokens"):
             body.pop(k, None)
         body[resp_tokens_key] = tokens
-        if m.startswith(("gpt-5","o4","o3")):
+        if m.startswith(("gpt-5","o4","o3","o1")):
             body.setdefault("reasoning", {"effort": "low"})
         return body
 
@@ -1166,174 +1129,6 @@ async def call_post_edit_select_batch_pyfetch(
     picked = [strip_all_newlines(s) for s in picked]
     return picked
 
-# =====（保留）第二階段：單一路徑校對 =====
-
-async def call_post_edit_batch_pyfetch(api_key:str, base_url:str, model:str,
-                                       src_masked:List[str], zh_masked:List[str]):
-    items = [{"id": i, "src": s, "zh": z} for i,(s,z) in enumerate(zip(src_masked, zh_masked))]
-
-    system_prompt = """你是嚴格的格式校對器。對每項 item：
-1) 以 src 為基準，檢查 zh 中的 ⟦MASK數字⟧、HTML 標籤/實體、%n/%L1/{0} 等佔位符是否完整且順序一致；
-2) 不得新增、刪除或改動任何這些標記；
-3) 允許修正文句與標點，將全形括號（，）改為半形 ()；
-4) 只回傳修正後的 zh，同序且等長的陣列，不要任何解釋。"""
-
-    user_prompt = "請將 items 的 zh 依據對應的 src 做格式校對。只需回傳 function 參數，不要輸出其他文字。\n" + \
-                  "items = " + json.dumps(items, ensure_ascii=False)
-
-    tools = [{
-      "type": "function",
-      "function": {
-        "name": "return_fixes",
-        "description": "回傳與輸入 items 等長、同序的修正後 zh 字串陣列",
-        "parameters": {
-          "type": "object",
-          "properties": {
-            "fixed": {"type": "array", "items": {"type": "string"}}
-          },
-          "required": ["fixed"],
-          "additionalProperties": False
-        }
-      }
-    }]
-
-    m = (model or "").lower()
-    new_family = m.startswith(("gpt-5", "gpt-4.1", "o4", "o3"))
-    tokens = min(4000, 220 * max(4, len(src_masked)))
-    chat_tokens_key = "max_completion_tokens" if new_family else "max_tokens"
-    resp_tokens_key = "max_output_tokens"
-
-    def build_chat_body():
-        body = {
-          "model": model,
-          "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user",   "content": user_prompt}
-          ],
-          "tools": tools,
-          "tool_choice": {"type": "function", "function": {"name": "return_fixes"}},
-        }
-        for k in ("max_tokens", "max_completion_tokens", "max_output_tokens"):
-            body.pop(k, None)
-        body[chat_tokens_key] = tokens
-        return body
-
-    def build_responses_body():
-        body = {
-          "model": model,
-          "input": [
-            {"role": "system", "content": [
-                {"type": "input_text", "text": system_prompt}
-            ]},
-            {"role": "user",   "content": [
-                {"type": "input_text", "text": user_prompt}
-            ]}
-          ],
-          "tools": tools,
-          "tool_choice": {"type": "function", "function": {"name": "return_fixes"}},
-        }
-        for k in ("max_tokens", "max_completion_tokens", "max_output_tokens"):
-            body.pop(k, None)
-        body[resp_tokens_key] = tokens
-        if m.startswith(("gpt-5", "o4", "o3")):
-            body.setdefault("reasoning", {"effort": "medium"})
-        return body
-
-    async def post_json(path:str, body:dict):
-        resp = await pyfetch(base_url.rstrip("/") + path,
-                             method="POST",
-                             headers={"Authorization": f"Bearer {api_key}", "Content-Type":"application/json"},
-                             body=json.dumps(body))
-        data = await resp.json()
-        return resp.status, data
-
-    tried = []
-    async def try_responses():
-        status, data = await post_json("/responses", build_responses_body())
-        tried.append(("responses", status, data))
-        if status == 400:
-            msg = (data.get("error", {}) or {}).get("message", "")
-            if "max_output_tokens" in msg and "Unsupported" in msg:
-                body = build_responses_body()
-                body.pop(resp_tokens_key, None)
-                body["max_completion_tokens"] = tokens
-                return await post_json("/responses", body)
-            if "reasoning" in msg.lower():
-                body = build_responses_body()
-                body.pop("reasoning", None)
-                return await post_json("/responses", body)
-        return status, data
-
-    async def try_chat():
-        status, data = await post_json("/chat/completions", build_chat_body())
-        tried.append(("chat", status, data))
-        if status == 400:
-            msg = (data.get("error", {}) or {}).get("message", "")
-            if ("Unsupported parameter" in msg or "not supported" in msg) and "max_tokens" in msg:
-                body = build_chat_body()
-                if chat_tokens_key == "max_completion_tokens":
-                    body.pop("max_completion_tokens", None); body["max_tokens"] = tokens
-                else:
-                    body.pop("max_tokens", None); body["max_completion_tokens"] = tokens
-                return await post_json("/chat/completions", body)
-            if "not compatible with the chat.completions" in msg.lower():
-                return await try_responses()
-        return status, data
-
-    if new_family:
-        status, data = await try_responses()
-        if status >= 400:
-            status2, data2 = await try_chat()
-            if status2 >= 400:
-                raise RuntimeError(f"API Error {status2}: {data2}")
-            status, data = status2, data2
-    else:
-        status, data = await try_chat()
-        if status >= 400:
-            status2, data2 = await try_responses()
-            if status2 >= 400:
-                raise RuntimeError(f"API Error {status2}: {data2}")
-            status, data = status2, data2
-
-    def _extract_tool_args_from_chat(obj:dict)->Optional[str]:
-        try:
-            msg = obj["choices"][0]["message"]
-            tcalls = msg.get("tool_calls") or []
-            if not tcalls: return None
-            return tcalls[0]["function"]["arguments"]
-        except Exception:
-            return None
-
-    def _deep_find_arguments(o):
-        if isinstance(o, dict):
-            if "arguments" in o and isinstance(o["arguments"], str):
-                return o["arguments"]
-            for v in o.values():
-                r = _deep_find_arguments(v)
-                if r is not None: return r
-        elif isinstance(o, list):
-            for v in o:
-                r = _deep_find_arguments(v)
-                if r is not None: return r
-        return None
-
-    args_raw = _extract_tool_args_from_chat(data)
-    if args_raw is None and "output" in data:
-        args_raw = _deep_find_arguments(data["output"])
-    if args_raw is None and "response" in data:
-        args_raw = _deep_find_arguments(data["response"])
-
-    if not args_raw:
-        raise ValueError("模型未呼叫 function（找不到結構化輸出）。")
-
-    parsed = json.loads(args_raw)
-    arr = parsed.get("fixed")
-    if not (isinstance(arr, list) and all(isinstance(x, str) for x in arr)):
-        raise ValueError("function 參數不符合 {fixed: string[]} 格式")
-    if len(arr) != len(src_masked):
-        raise ValueError(f"JSON 陣列長度不符，期待 {len(src_masked)}，得到 {len(arr)}")
-    return arr
-
 # ===== 主流程（加入第二模型校對 / 兩候選擇優） =====
 
 async def read_glossaries_from_file_input(input_id: str) -> List[Tuple[str,str]]:
@@ -1402,15 +1197,19 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
             masked, mp = _mask_text(src_text)
             masked_texts.append(masked); maps.append(mp)
 
-        # --- 第一階段：若啟用第二階段，先產生兩個候選；否則單一路徑 ---
+        # --- 第一階段：若啟用第二階段，先產生兩個候選（平行執行）；否則單一路徑 ---
         try:
             if use_model2 and model2:
-                zh_list_a = await call_chat_completions_batch_pyfetch(
+                # [優化] 使用 asyncio.gather 平行執行 A/B
+                task_a = call_chat_completions_batch_pyfetch(
                     api_key, base_url, model1, masked_texts, glossaries, temperature=0.2
                 )
-                zh_list_b = await call_chat_completions_batch_pyfetch(
+                task_b = call_chat_completions_batch_pyfetch(
                     api_key, base_url, model1, masked_texts, glossaries, temperature=0.8
                 )
+                
+                zh_list_a, zh_list_b = await asyncio.gather(task_a, task_b)
+                
                 zh_list = await call_post_edit_select_batch_pyfetch(
                     api_key, base_url, model2, masked_texts, zh_list_a, zh_list_b
                 )
@@ -1420,28 +1219,42 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
                 )
                 zh_list = [strip_all_newlines(z) for z in zh_list]
         except Exception:
-            # 逐筆退避（相同邏輯）
+            # 逐筆退避
             zh_list = []
             for masked, g in zip(masked_texts, glossaries):
                 if use_model2 and model2:
-                    one_a = await call_chat_completions_batch_pyfetch(
-                        api_key, base_url, model1, [masked], [g], temperature=0.2
-                    )
-                    one_b = await call_chat_completions_batch_pyfetch(
-                        api_key, base_url, model1, [masked], [g], temperature=0.8
-                    )
-                    one = await call_post_edit_select_batch_pyfetch(
-                        api_key, base_url, model2, [masked], one_a, one_b
-                    )
-                    zh_list.append(one[0])
+                    try:
+                         # [優化] 退避機制也平行執行
+                        t_a = call_chat_completions_batch_pyfetch(
+                            api_key, base_url, model1, [masked], [g], temperature=0.2
+                        )
+                        t_b = call_chat_completions_batch_pyfetch(
+                            api_key, base_url, model1, [masked], [g], temperature=0.8
+                        )
+                        one_a, one_b = await asyncio.gather(t_a, t_b)
+
+                        one = await call_post_edit_select_batch_pyfetch(
+                            api_key, base_url, model2, [masked], one_a, one_b
+                        )
+                        zh_list.append(one[0])
+                    except Exception as e:
+                        # 失敗時塞回空字串，避免全倒
+                        print(f"Fallback failed: {e}")
+                        zh_list.append("") 
                 else:
-                    one = await call_chat_completions_batch_pyfetch(
-                        api_key, base_url, model1, [masked], [g], temperature=0.2
-                    )
-                    zh_list.append(strip_all_newlines(one[0]))
+                    try:
+                        one = await call_chat_completions_batch_pyfetch(
+                            api_key, base_url, model1, [masked], [g], temperature=0.2
+                        )
+                        zh_list.append(strip_all_newlines(one[0]))
+                    except Exception:
+                        zh_list.append("")
 
         # --- 寫回 XML + 對照 + 進度 ---
         for (m, src_text, is_num), zh_raw, mp in zip(batch, zh_list, maps):
+            if not zh_raw: # 跳過失敗的
+                continue
+                
             trans = m.find("translation")
             if trans is None:
                 trans = ET.SubElement(m, "translation")
@@ -1517,7 +1330,7 @@ async def _on_click(evt=None):
 
         pairs = await read_glossaries_from_file_input("glsFile")
 
-        _set_ui_msg("⏳ 連線中…")
+        _set_ui_msg("連線中…")
         xml_bytes = await run_translation_pipeline_async(
             api_key=api, base_url=base_url, model1=model1,
             ts_text=ts_text, glossary_pairs=pairs,
@@ -1527,7 +1340,7 @@ async def _on_click(evt=None):
 
         out_name = "qgis_zh-Hant.ts"
         b64 = base64.b64encode(xml_bytes).decode("ascii")
-        link=f'<a download="{out_name}" href="data:application/octet-stream;base64,{b64}">⬇️ 下載 {out_name}</a>'
+        link=f'<a download="{out_name}" href="data:application/octet-stream;base64,{b64}">下載 {out_name}</a>'
         _set_ui_msg(link + "　<span style='color:#0a0'>完成！</span>")
     except Exception as e:
         _set_ui_msg(f"<span style='color:#b00'>發生錯誤：{html.escape(str(e))}</span>")
@@ -1543,4 +1356,3 @@ document.getElementById("run-btn").addEventListener("click", _BTN_PROXY)
   $msg.innerHTML = `<span style="color:#b00">Python 載入失敗：${String(e)}</span>`;
 }
 </script>
-
