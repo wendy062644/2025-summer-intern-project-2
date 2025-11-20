@@ -3,650 +3,1062 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI 翻譯工具 (專業版)</title>
+<title>API</title>
 <style>
-  :root {
-    --bg: #f9fafb; --surface: #ffffff; --border: #e5e7eb;
-    --text: #111827; --muted: #6b7280; --accent: #2563eb; --on-accent: #ffffff;
-    --err: #dc2626; --ok: #059669;
+  .bd-sidebar-secondary { display: none !important; }
+  .bd-content,
+  .bd-article-container,
+  .tex2jax_ignore.mathjax_ignore {
+    max-width: 100% !important;
+    width: 100% !important;
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0f1115; --surface: #1a1d21; --border: #2b2f36;
-      --text: #e7eaf0; --muted: #9ca3af; --accent: #3b82f6;
+  /* —— 全部樣式只限制在 #ts-ui —— */
+  #ts-ui{
+    --ts-gap: 12px;
+    --ts-pad: 14px;
+    --ts-radius: 12px;
+    --ts-border: #e5e7eb;
+    --ts-bg: #fff;
+    --ts-muted: #6b7280;
+    --ts-text: #111827;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    line-height: 1.35; margin: 8px 0 16px; color: var(--ts-text);
+  }
+  @media (prefers-color-scheme: dark){
+    #ts-ui{
+      --ts-border: #2b2f36;
+      --ts-bg: #111418;
+      --ts-muted: #9aa3af;
+      --ts-text: #e5e7eb;
     }
   }
-  body {
-    background: var(--bg); color: var(--text); margin: 0; padding: 20px;
-    font-family: system-ui, -apple-system, sans-serif; line-height: 1.5; font-size: 14px;
+  #ts-ui *, #ts-ui *::before, #ts-ui *::after{ box-sizing: border-box; }
+  #ts-ui .ts-card{
+    border:1px solid var(--ts-border); background:var(--ts-bg);
+    border-radius: var(--ts-radius); padding:16px; box-shadow:0 1px 2px rgba(0,0,0,.04);
   }
-  .container { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
-  .card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 8px; padding: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  #ts-ui .ts-title{ font-size:1.05rem; font-weight:600; margin:2px 0 10px; }
+  #ts-ui .ts-grid{
+    display:grid; grid-template-columns: 160px 1fr; gap:10px 14px; align-items:center;
   }
-  h1, h2 { margin: 0 0 12px; font-weight: 600; letter-spacing: -0.01em; }
-  h1 { font-size: 1.25rem; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-  h2 { font-size: 1rem; color: var(--text); }
-  
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .full { grid-column: 1 / -1; }
-  @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+  #ts-ui .ts-label{ color:var(--ts-muted); font-size:.95rem; white-space:nowrap; }
+  #ts-ui .ts-input input,
+  #ts-ui .ts-input select{
+    width:100%; padding:8px 10px; border:1px solid var(--ts-border);
+    border-radius:10px; background:transparent; font-size:.95rem;
+  }
+  #ts-ui .ts-input select{
+    appearance:none; -webkit-appearance:none; -moz-appearance:none;
+  }
+  #ts-ui .ts-input input[type="file"]{ padding:6px; }
+  #ts-ui .ts-inline{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  #ts-ui .ts-hint{ color:var(--ts-muted); font-size:.9rem; }
+  #ts-ui .ts-toolbar{ margin-top:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  #ts-ui .ts-btn-primary{
+    appearance:none; border:1px solid var(--ts-border);
+    background:#111827; color:#fff; border-radius:10px; padding:8px 14px; font-weight:600; cursor:pointer;
+  }
+  @media (prefers-color-scheme: dark){ #ts-ui .ts-btn-primary{ background:#e5e7eb; color:#111418; } }
+  #ts-ui .ts-btn-primary:hover{ filter:brightness(0.95); }
+  #ts-ui .ts-divider{ height:1px; background:var(--ts-border); margin:12px 0; border:0; }
 
-  label { display: block; color: var(--muted); font-size: 0.85rem; margin-bottom: 4px; font-weight: 500; }
-  input, select {
-    width: 100%; padding: 8px 10px; border-radius: 6px;
-    border: 1px solid var(--border); background: var(--bg); color: var(--text);
-    font-size: 0.9rem; outline: none; box-sizing: border-box;
-  }
-  input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(37,99,235,0.1); }
-  
-  button {
-    background: var(--text); color: var(--bg); border: 1px solid var(--text);
-    padding: 10px 16px; border-radius: 6px; font-weight: 600; cursor: pointer;
-    transition: opacity 0.2s; width: 100%; font-size: 0.9rem;
-  }
-  button.primary { background: var(--accent); color: var(--on-accent); border: 1px solid var(--accent); }
-  button:hover { opacity: 0.9; }
-  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  /* 附屬區塊 */
+  #ts-ui #ts-progress-wrap{ margin:12px 0; }
 
-  .hint { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
-  
-  /* Checkbox Styling */
-  .chk-group { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; border: 1px solid var(--border); padding: 10px; border-radius: 6px; }
-  .chk-group input { width: auto; margin: 0; }
-  .chk-desc { display: flex; flex-direction: column; }
-  .chk-desc strong { font-size: 0.9rem; }
-  .chk-desc small { font-size: 0.75rem; color: var(--muted); }
-
-  /* Progress & Logs */
-  #progress-wrap { margin-top: 16px; display: none; }
-  progress { width: 100%; height: 6px; border-radius: 3px; overflow: hidden; appearance: none; }
-  progress::-webkit-progress-bar { background: var(--border); }
-  progress::-webkit-progress-value { background: var(--accent); }
-  
-  #compare-box { margin-top: 16px; overflow: auto; max-height: 500px; border: 1px solid var(--border); border-radius: 6px; display: none; }
-  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-  th { background: var(--bg); position: sticky; top: 0; text-align: left; padding: 8px; border-bottom: 1px solid var(--border); font-weight: 600; z-index: 10; }
-  td { padding: 8px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.4; }
-  
-  .tag {
-    display: inline-block; font-size: 0.7rem; padding: 1px 4px;
-    border-radius: 3px; margin-bottom: 2px; margin-right: 4px; font-family: monospace;
+  #ts-ui #compare-box{
+    border:1px solid var(--ts-border);
+    border-radius:12px;
+    padding:8px 12px;
+    margin-top:8px;
+    background:var(--ts-bg);
   }
-  .tag-ctx { background: var(--bg); border: 1px solid var(--border); color: var(--muted); }
-  .tag-err { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; font-weight: bold; }
+
+  #ts-ui #compare-box table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:.95rem;
+    table-layout: fixed;
+  }
+
+  #ts-ui #compare-box th,
+  #ts-ui #compare-box td{
+    padding:6px 6px;
+    border-bottom:1px solid var(--ts-border);
+    text-align:left;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  #ts-ui #compare-box thead th{ font-weight:600; }
+
+  #ts-ui #ts-ui-msg{
+    color:var(--ts-muted);
+    font-size:.95rem;
+    margin-top:8px;
+  }
+
+  @media (max-width: 640px){
+    #ts-ui .ts-grid{ grid-template-columns: 1fr; }
+    #ts-ui .ts-label{ margin-top:6px; }
+  }
+
+  #ts-ui .ts-row-2{
+    display: grid;
+    grid-template-columns: var(--ts-col1, 1fr) var(--ts-col2, 1fr);
+    gap: 10px 14px;
+    align-items: center;
+  }
+  #ts-ui .ts-6-4{ --ts-col1: 6fr; --ts-col2: 4fr; }
+  #ts-ui .ts-4-6{ --ts-col1: 4fr; --ts-col2: 6fr; }
+
+  #ts-ui .ts-field{
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  #ts-ui .ts-field .ts-label{ margin: 0; }
+
+  @media (max-width: 640px){
+    #ts-ui .ts-row-2{ grid-template-columns: 1fr; }
+  }
+
+  #ts-ui .ts-row-3{
+    display: grid;
+    grid-template-columns: var(--ts-col1, 1fr) var(--ts-col2, 1fr) var(--ts-col3, 1fr);
+    gap: 10px 14px;
+    align-items: center;
+  }
+  #ts-ui .ts-3-4-3{ --ts-col1: 3fr; --ts-col2: 4fr; --ts-col3: 3fr; }
+
+  @media (max-width: 640px){
+    #ts-ui .ts-row-3{ grid-template-columns: 1fr; }
+  }
+  #ts-ui .left-col{ grid-column: 1 / 3; }
   
-  #msg { margin-top: 12px; font-size: 0.9rem; }
-  .status-ok { color: var(--ok); font-weight: 500; }
-  .status-err { color: var(--err); font-weight: 500; }
-  a.dl-link { color: var(--accent); text-decoration: underline; font-weight: bold; cursor: pointer; }
+  @media (max-width:640px){
+    #ts-ui{ grid-template-columns: 1fr; }
+    #ts-ui .left-col,
+    #ts-ui .right-col{ grid-column: 1 / -1; }
+  }
+
+  @media (prefers-color-scheme: dark){
+    #ts-ui{
+      --ts-bg: #0f1115;
+      --ts-surface: #111418;
+      --ts-surface-2: #0b0f14;
+      --ts-input-bg: #0b0f14;
+      --ts-border: #2b2f36;
+      --ts-text: #e7eaf0;
+      --ts-muted: #a6afbd;
+      --ts-link: #8ab4ff;
+      --ts-code-bg: #0b0f14;
+      --ts-code-fg: #e7eaf0;
+      --ts-accent: #3b82f6;
+      --ts-on-accent: #0b0f14;
+      --ts-focus: 0 0 0 2px rgba(59,130,246,.35);
+      --ts-progress-bg: #1a1f29;
+      --ts-table-head-bg: #121621;
+    }
+  }
+  html[data-theme="dark"] #ts-ui{
+    --ts-bg: #0f1115;
+    --ts-surface: #111418;
+    --ts-surface-2: #0b0f14;
+    --ts-input-bg: #0b0f14;
+    --ts-border: #2b2f36;
+    --ts-text: #e7eaf0;
+    --ts-muted: #a6afbd;
+    --ts-link: #8ab4ff;
+    --ts-code-bg: #0b0f14;
+    --ts-code-fg: #e7eaf0;
+    --ts-accent: #3b82f6;
+    --ts-on-accent: #0b0f14;
+    --ts-focus: 0 0 0 2px rgba(59,130,246,.35);
+    --ts-progress-bg: #1a1f29;
+    --ts-table-head-bg: #121621;
+  }
+
+  #ts-ui .ts-card{
+    background: var(--ts-surface);
+    border-color: var(--ts-border);
+    color: var(--ts-text);
+  }
+
+  #ts-ui .ts-label{ color: var(--ts-muted); }
+  #ts-ui .ts-hint{ color: var(--ts-muted); }
+
+  #ts-ui .ts-input input,
+  #ts-ui .ts-input select{
+    background: var(--ts-input-bg);
+    color: var(--ts-text);
+    border-color: var(--ts-border);
+  }
+  #ts-ui .ts-input input:focus,
+  #ts-ui .ts-input select:focus{
+    outline: none;
+    box-shadow: var(--ts-focus);
+    border-color: color-mix(in oklab, var(--ts-accent) 60%, var(--ts-border));
+  }
+
+  #ts-ui .ts-btn-primary{
+    background: var(--ts-accent);
+    color: var(--ts-on-accent);
+    border: 1px solid var(--ts-border);
+  }
+  #ts-ui .ts-btn-primary:hover{ filter: brightness(1.06); }
+  #ts-ui .ts-btn-primary:focus{ outline: none; box-shadow: var(--ts-focus); }
+
+  #ts-ui #compare-box{
+    background: var(--ts-surface);
+    border-color: var(--ts-border);
+  }
+  #ts-ui #compare-box thead th{
+    background: var(--ts-table-head-bg);
+    color: var(--ts-text);
+  }
+  #ts-ui #compare-box td,
+  #ts-ui #compare-box th{
+    border-bottom: 1px solid var(--ts-border);
+  }
+
+  #ts-ui progress{ width:100%; height: 14px; background: var(--ts-progress-bg); border-radius: 8px; overflow: hidden; }
+  #ts-ui progress::-webkit-progress-bar{ background: var(--ts-progress-bg); }
+  #ts-ui progress::-webkit-progress-value{ background: var(--ts-accent); }
+  #ts-ui progress::-moz-progress-bar{ background: var(--ts-accent); }
+
+  #ts-ui code{
+    background: var(--ts-code-bg);
+    color: var(--ts-code-fg);
+    padding: .1em .35em;
+    border-radius: .35em;
+    border: 1px solid var(--ts-border);
+  }
+  #ts-ui a{ color: var(--ts-link); text-underline-offset: 2px; }
+  #ts-ui ::selection{
+    background: color-mix(in oklab, var(--ts-accent) 35%, transparent);
+  }
+
+  @media (max-width:640px){
+    html[data-theme="dark"] #ts-ui .ts-card,
+    #ts-ui .ts-card{
+      background: var(--ts-surface);
+    }
+  }
+  #ts-ui .ts-field:has(#useModel2){
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+  #ts-ui .ts-field:has(#useModel2) .ts-label{ margin: 0 6px 0 0; }
+  #ts-ui .ts-field:has(#useModel2) .ts-input{
+    display: flex; align-items: center; gap: 10px;
+  }
+  #ts-ui #useModel2{
+    width: 16px; height: 16px; margin: 0; vertical-align: middle;
+  }
+  @media (max-width:640px){
+    #ts-ui .ts-field:has(#useModel2){
+      flex-direction: column; align-items: stretch;
+    }
+  }
 </style>
-</head>
-<body>
 
-<div class="container">
-  <div class="card">
-    <h1>AI 翻譯工具 (Qt .ts)</h1>
-    
-    <div class="grid">
-      <div class="full">
-        <label>OpenAI API Key</label>
+<div id="ts-ui">
+  <div class="ts-card">
+    <div class="ts-title">API 設定</div>
+    <div class="ts-field" style="margin-bottom:10px;">
+      <label class="ts-label" for="apiKey">API Key</label>
+      <div class="ts-input">
         <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
       </div>
-      
-      <div>
-        <label>API Base URL</label>
-        <input type="text" id="baseUrl" value="https://api.openai.com/v1">
-      </div>
-      
-      <div>
-        <label>Model 1 (翻譯)</label>
-        <select id="modelSel">
-          <option value="gpt-4o-mini" selected>gpt-4o-mini (推薦)</option>
-          <option value="gpt-4o">gpt-4o</option>
-          <option value="o1-mini">o1-mini</option>
-          <option value="__custom__">自訂...</option>
-        </select>
-        <input id="modelCustom" type="text" placeholder="輸入模型名稱" style="display:none; margin-top:4px;">
-      </div>
     </div>
-
-    <div style="margin: 16px 0; border-top: 1px solid var(--border);"></div>
-
-    <div class="grid">
-      <div class="full">
-        <label class="chk-group">
-          <input type="checkbox" id="useModel2" checked>
-          <div class="chk-desc">
-            <strong>啟用雙重校對 (Parallel A/B Check)</strong>
-            <small>同時生成兩版譯文並進行平行比對，修正格式錯誤與幻覺 (推薦)</small>
+    <div class="ts-row-2 ts-6-4" style="margin-top:10px;">
+      <div class="ts-field">
+        <label class="ts-label" for="baseUrl">Base URL</label>
+        <div class="ts-input">
+          <input type="text" id="baseUrl" value="https://api.openai.com/v1">
+        </div>
+      </div>
+      <div class="ts-field">
+        <label class="ts-label" for="modelSel">Model-1（翻譯）</label>
+        <div class="ts-input">
+          <div class="ts-inline" style="width:100%;">
+            <select id="modelSel" style="flex:1;min-width:220px;">
+              <optgroup label="GPT-5">
+                <option value="gpt-5">gpt-5</option>
+                <option value="gpt-5-mini">gpt-5-mini</option>
+                <option value="gpt-5-nano">gpt-5-nano</option>
+              </optgroup>
+              <optgroup label="GPT-4.1">
+                <option value="gpt-4.1">gpt-4.1</option>
+                <option value="gpt-4.1-mini" selected>gpt-4.1-mini</option>
+                <option value="gpt-4.1-nano">gpt-4.1-nano</option>
+              </optgroup>
+              <optgroup label="GPT-4o">
+                <option value="gpt-4o">gpt-4o</option>
+                <option value="gpt-4o-mini">gpt-4o-mini</option>
+              </optgroup>
+              <optgroup label="Reasoning">
+                <option value="o1-mini">o1-mini</option>
+                <option value="o3-mini">o3-mini</option>
+              </optgroup>
+              <optgroup label="Legacy">
+                <option value="gpt-4-turbo">gpt-4-turbo</option>
+                <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+              </optgroup>
+              <optgroup label="自訂">
+                <option value="__custom__">其他</option>
+              </optgroup>
+            </select>
+            <input id="modelCustom" type="text" placeholder="例如：my-org/gpt-xy" style="display:none;flex:1;">
           </div>
-        </label>
-      </div>
-      
-      <div>
-        <label>Model 2 (校對)</label>
-        <select id="modelSel2">
-          <option value="gpt-4o-mini" selected>gpt-4o-mini (推薦)</option>
-          <option value="gpt-4o">gpt-4o</option>
-          <option value="__custom__">自訂...</option>
-        </select>
-        <input id="modelCustom2" type="text" placeholder="輸入模型名稱" style="display:none; margin-top:4px;">
-      </div>
-      
-      <div>
-        <label>Batch Size</label>
-        <input type="number" id="batch" value="32" min="1" max="100">
+        </div>
       </div>
     </div>
-  </div>
-
-  <div class="card">
-    <h2>檔案處理</h2>
-    <div class="grid">
-      <div>
-        <label>.ts 來源檔 (Qt Linguist)</label>
-        <input type="file" id="tsFile" accept=".ts">
-        <div class="hint" id="tsInfo">尚未選擇</div>
+    <div class="ts-row-2 ts-6-4" style="margin-top:10px;">
+      <div class="ts-field">
+        <div class="ts-input ts-inline">
+          <label for="useModel2" class="ts-inline" style="gap:8px; align-items:center; white-space:nowrap;">
+            <input type="checkbox" id="useModel2" checked>
+            <span class="ts-label" style="margin:0;">第二模型（校對 / 對齊）</span>
+          </label>
+          <span class="ts-hint" style="margin-left:8px; font-size: 12px">產生 A/B 兩版譯文，交給此模型擇優修復</span>
+        </div>
       </div>
-      <div>
-        <label>術語表 (CSV/ODS)</label>
-        <input type="file" id="glsFile" accept=".csv,.ods" multiple>
-        <div class="hint">格式: en, zh (第一列為標題)</div>
-      </div>
-      <div class="full">
-        <label>處理筆數限制 (0 = 全部)</label>
-        <input type="number" id="limitN" value="0" placeholder="例如: 100">
+      <div class="ts-field">
+        <label class="ts-label" for="modelSel2">Model-2（校對）</label>
+        <div class="ts-input">
+          <div class="ts-inline" style="width:100%;">
+            <select id="modelSel2" style="flex:1;min-width:220px;">
+              <optgroup label="GPT-5">
+                <option value="gpt-5">gpt-5</option>
+                <option value="gpt-5-mini" selected>gpt-5-mini</option>
+                <option value="gpt-5-nano">gpt-5-nano</option>
+              </optgroup>
+              <optgroup label="GPT-4.1">
+                <option value="gpt-4.1">gpt-4.1</option>
+                <option value="gpt-4.1-mini">gpt-4.1-mini</option>
+                <option value="gpt-4.1-nano">gpt-4.1-nano</option>
+              </optgroup>
+              <optgroup label="GPT-4o">
+                <option value="gpt-4o">gpt-4o</option>
+                <option value="gpt-4o-mini">gpt-4o-mini</option>
+              </optgroup>
+              <optgroup label="Reasoning">
+                <option value="o1-mini">o1-mini</option>
+                <option value="o3-mini">o3-mini</option>
+              </optgroup>
+              <optgroup label="Legacy">
+                <option value="gpt-4-turbo">gpt-4-turbo</option>
+                <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+              </optgroup>
+              <optgroup label="自訂">
+                <option value="__custom__">其他</option>
+              </optgroup>
+            </select>
+            <input id="modelCustom2" type="text" placeholder="例如：my-org/gpt-xy" style="display:none;flex:1;">
+          </div>
+        </div>
       </div>
     </div>
-    
-    <div style="margin-top: 20px;">
-      <button id="run-btn" class="primary">開始翻譯</button>
-    </div>
-
-    <div id="progress-wrap">
-      <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:0.8rem; color:var(--muted);">
-        <span>處理進度</span>
-        <span id="progress-txt">0 / 0</span>
+    <hr class="ts-divider">
+    <div class="ts-title">處理參數</div>
+    <div class="ts-row-3 ts-3-4-3">
+      <div class="ts-field">
+        <label class="ts-label" for="batch">Batch</label>
+        <div class="ts-input">
+          <input type="number" id="batch" value="32" min="1" max="64">
+        </div>
       </div>
-      <progress id="p-bar" value="0" max="100"></progress>
+      <div class="ts-field">
+        <label class="ts-label" for="limitN">處理筆數上限</label>
+        <div class="ts-input ts-inline">
+          <input type="number" id="limitN" value="0" style="max-width:220px;">
+          <span id="countInfo" class="ts-hint"> / 0</span>
+        </div>
+      </div>
+      <div class="ts-field">
+        <label class="ts-label" for="tsFile">.ts 檔（上傳）</label>
+        <div class="ts-input">
+          <input type="file" id="tsFile" accept=".ts">
+        </div>
+      </div>
     </div>
-    
-    <div id="msg"></div>
-  </div>
-
-  <div id="compare-box">
-    <table>
-      <thead><tr><th style="width:45%">Context & Source</th><th>Translation</th></tr></thead>
-      <tbody id="compare-body"></tbody>
-    </table>
+    <hr class="ts-divider">
+    <div class="ts-title">輸入檔案</div>
+    <div class="ts-row-2" style="--ts-col1: 7fr; --ts-col2: 3fr;">
+      <div class="ts-field">
+        <label class="ts-label" for="glsFile">glossary（CSV / ODS）</label>
+        <div class="ts-input">
+          <input type="file" id="glsFile" accept=".csv,.ods" multiple>
+        </div>
+      </div>
+      <div class="ts-field">
+        <label class="ts-label" style="visibility:hidden;">執行翻譯</label>
+        <div class="ts-input">
+          <button id="run-btn" class="ts-btn-primary" style="width:100%;">執行翻譯</button>
+        </div>
+      </div>
+      <div class="ts-hint right-col" style="margin-top:6px;">
+        欄位：<code>en, zh</code> 或 <code>英文名稱, 中文名稱</code>
+      </div>
+    </div>
+    <div id="ts-progress-wrap" style="display:none;">
+      <div class="ts-inline">
+        <progress id="ts-progress" value="0" max="100" style="width:100%;"></progress>
+        <span id="ts-progress-label" style="font-variant-numeric: tabular-nums;">0 / 0</span>
+      </div>
+    </div>
+    <div id="compare-box" style="display:none;">
+      <div style="font-size:0.95rem;color:var(--ts-text);margin-bottom:4px;">翻譯對照（即時刷新）</div>
+      <div style="max-height: 360px; overflow:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:50%;">原文 (Context)</th>
+              <th style="width:50%;">譯文</th>
+            </tr>
+          </thead>
+          <tbody id="compare-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div id="ts-ui-msg"></div>
   </div>
 </div>
 
 <script type="module">
 import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.mjs";
+const pyodide = await loadPyodide();
+await pyodide.loadPackage("micropip");
 
-const $ = id => document.getElementById(id);
-let pyodide = null;
-
-async function initPyodide() {
-  $('msg').innerHTML = '<span style="color:var(--muted)">正在載入 Python 引擎...</span>';
-  try {
-    pyodide = await loadPyodide();
-    await pyodide.loadPackage("micropip");
-    $('msg').innerHTML = '';
-  } catch(e) {
-    $('msg').innerHTML = '<span class="status-err">Python 載入失敗，請重新整理頁面。</span>';
+(function setupTsCounter(){
+  const tsFile   = document.getElementById('tsFile');
+  const limitN   = document.getElementById('limitN');
+  const countInfo= document.getElementById('countInfo');
+  countInfo.textContent = ' / 0';
+  function needsTranslationJS(text){
+    if (!text) return false;
+    const t = String(text).trim();
+    if (!t) return false;
+    if (/^[\s\d\W%{}]+$/u.test(t)) return false;
+    return true;
   }
-
-  // File info listener
-  $('tsFile').addEventListener('change', async (e) => {
-    const f = e.target.files[0];
-    if(!f) { $('tsInfo').textContent="尚未選擇"; return; }
-    const txt = await f.text();
-    // Simple rough count
-    const matches = txt.match(/<source>/g);
-    const count = matches ? matches.length : 0;
-    $('tsInfo').textContent = `檔案: ${f.name} (約 ${count} 筆)`;
-    if(count > 0) $('limitN').placeholder = `最大 ${count}`;
-  });
-
-  // Custom model toggle
-  const toggleCustom = (selId, inpId) => {
-    const sel = $(selId), inp = $(inpId);
-    sel.addEventListener('change', () => inp.style.display = sel.value === '__custom__' ? 'block' : 'none');
-  };
-  toggleCustom('modelSel', 'modelCustom');
-  toggleCustom('modelSel2', 'modelCustom2');
-}
-
-initPyodide();
-
-$('run-btn').addEventListener('click', async () => {
-  if (!pyodide) return alert("Python 尚未載入完成，請稍候。");
-  const apiKey = $('apiKey').value;
-  const tsFile = $('tsFile').files[0];
-  
-  if (!apiKey) return alert("請輸入 API Key");
-  if (!tsFile) return alert("請選擇 .ts 檔案");
-
-  const getVal = (sel, inp) => $(sel).value === '__custom__' ? $(inp).value : $(sel).value;
-  
-  // UI Reset
-  $('run-btn').disabled = true;
-  $('run-btn').textContent = "處理中...";
-  $('msg').innerHTML = "";
-  $('compare-box').style.display = "none";
-  $('compare-body').innerHTML = "";
-  $('progress-wrap').style.display = "block";
-
-  try {
-    await pyodide.runPythonAsync(PYTHON_SCRIPT);
-    
-    // Bind JS functions for Python to call
-    self.py_update_progress = (done, total) => {
-        $('p-bar').max = total; $('p-bar').value = done;
-        $('progress-txt').textContent = `${done} / ${total}`;
-    };
-    self.py_add_row = (src, trans, ctx, isErr) => {
-        $('compare-box').style.display = "block";
-        const row = $('compare-body').insertRow();
-        
-        const c1 = row.insertCell();
-        if(ctx) c1.innerHTML += `<span class="tag tag-ctx">${ctx}</span><br>`;
-        c1.appendChild(document.createTextNode(src));
-        
-        const c2 = row.insertCell();
-        if(isErr) c2.innerHTML += `<span class="tag tag-err">Var Error</span>`;
-        c2.appendChild(document.createTextNode(trans));
-        
-        // Auto scroll
-        const box = $('compare-box');
-        if(box.scrollHeight - box.scrollTop < box.clientHeight + 100) {
-             box.scrollTop = box.scrollHeight;
+  async function handleTsChange(){
+    const file = tsFile.files && tsFile.files[0];
+    if (!file){ countInfo.textContent = ' / 0'; limitN.removeAttribute('max'); return; }
+    try{
+      const txt = await file.text();
+      let total = 0;
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(txt, 'application/xml');
+      const hasErr = xmlDoc.getElementsByTagName('parsererror').length > 0;
+      if (!hasErr){
+        const sources = xmlDoc.getElementsByTagName('source');
+        for (let i = 0; i < sources.length; i++){
+          const s = sources[i].textContent || '';
+          if (needsTranslationJS(s)) total++;
         }
-    };
-    self.py_log = (html) => $('msg').innerHTML = html;
-
-    // Execute Python Main Process
-    await pyodide.globals.get('main_process')(
-      apiKey,
-      $('baseUrl').value,
-      getVal('modelSel', 'modelCustom'),
-      getVal('modelSel2', 'modelCustom2'),
-      $('useModel2').checked,
-      parseInt($('batch').value),
-      parseInt($('limitN').value)
-    );
-
-  } catch (e) {
-    console.error(e);
-    $('msg').innerHTML = `<span class="status-err">系統錯誤: ${e.message}</span>`;
-  } finally {
-    $('run-btn').disabled = false;
-    $('run-btn').textContent = "開始翻譯";
+      } else {
+        const matches = txt.match(/<source>([\s\S]*?)<\/source>/g) || [];
+        for (const m of matches){
+          const inner = m.replace(/^<source>|<\/source>$/g, '');
+          if (needsTranslationJS(inner)) total++;
+        }
+      }
+      if (total > 0){
+        limitN.value = total;
+        limitN.max   = String(total);
+        if (Number(limitN.value) < 1) limitN.value = 1;
+        countInfo.textContent = ` / ${total}`;
+      } else {
+        countInfo.textContent = ' / 0';
+        limitN.removeAttribute('max');
+      }
+    } catch(e){
+      console.error(e);
+      countInfo.textContent = ' / 0';
+      limitN.removeAttribute('max');
+    }
   }
-});
+  function clampLimit(){
+    const max = Number(limitN.max || '0');
+    let v = Number(limitN.value || '0');
+    if (max){
+      if (v > max) v = max;
+      if (v < 0) v = 0;
+      limitN.value = v;
+    } else if (v < 0){
+      limitN.value = 0;
+    }
+  }
+  tsFile.addEventListener('change', handleTsChange);
+  limitN.addEventListener('input', clampLimit);
+})();
 
-const PYTHON_SCRIPT = String.raw`
-import asyncio, json, re, io, base64, html, zipfile, csv
+(function setupModelCustom(){
+  const sel = document.getElementById('modelSel');
+  const custom = document.getElementById('modelCustom');
+  function sync(){ custom.style.display = (sel.value === '__custom__') ? 'block' : 'none'; }
+  sel.addEventListener('change', sync);
+  sync();
+})();
+
+(function setupModelCustom2(){
+  const sel = document.getElementById('modelSel2');
+  const custom = document.getElementById('modelCustom2');
+  function sync(){ custom.style.display = (sel.value === '__custom__') ? 'block' : 'none'; }
+  sel.addEventListener('change', sync);
+  sync();
+})();
+
+const $msg = document.getElementById("ts-ui-msg");
+try {
+  await pyodide.runPythonAsync(String.raw`
+import asyncio, json, re, io, base64, traceback, html, csv, zipfile
+from typing import List, Tuple, Dict, Optional
 from xml.etree import ElementTree as ET
-from js import document, self, Uint8Array, File
+from js import document
 from pyodide.http import pyfetch
+from pyodide.ffi import create_proxy
 
-# Install Dependencies
 try:
     from opencc import OpenCC
-except ImportError:
+except ModuleNotFoundError:
     import micropip
     await micropip.install("opencc-python-reimplemented==0.1.7")
     from opencc import OpenCC
 
 _OPENCC = OpenCC("s2twp")
-# Terms protected from OpenCC conversion (GIS specifics)
-_TW_PROTECT = ["演算法", "專案", "圖層", "外掛", "巨集", "快取", "佈局", "拓撲", "向量", "網格", "波段"]
-_MASK_PAT = re.compile(r'(</?[A-Za-z][^>]*>|&lt;/?[A-Za-z][^&]*?&gt;|%L\d+|%\d+|%[sdn]|\{\d+\}|&(?!\s)[A-Za-z#x0-9]+;)', re.IGNORECASE)
+_TW_PROTECT_TERMS = ["演算法", "專案", "圖層", "外掛", "巨集", "快取", "佈局", "拓撲", "向量", "網格", "波段"]
+
+_COORD_RE = re.compile(r"坐標")
+_MASK_PAT = re.compile(
+    r'(</?[A-Za-z][^>]*>|&lt;/?[A-Za-z][^&]*?&gt;|%L\d+|%\d+|%[sdn]|\{\d+\}|&(?!\s)[A-Za-z#x0-9]+;)',
+    re.IGNORECASE
+)
 _SEP_RE = re.compile(r"[-\s/_.\\]+")
 
-# ================= LCS & Glossary Logic =================
+# ====== 基本工具 ======
 
-def soft_norm(s): 
-    return _SEP_RE.sub(" ", s.lower()).strip()
-
-class LCSMatcher:
-    def __init__(self, pairs, min_len=4):
-        self.rows = []
-        for en, zh in pairs:
-            e = (en or "").strip(); z = (zh or "").strip()
-            if e and z: 
-                self.rows.append({"e":e, "z":z, "norm": soft_norm(e)})
-        
-    def build_glossary(self, text, limit=5):
-        # Find terms in source text that match glossary entries
-        g = {}
-        norm_text = soft_norm(text)
-        count = 0
-        # Sort by length desc to match longest terms first
-        sorted_rows = sorted(self.rows, key=lambda x: len(x["norm"]), reverse=True)
-        
-        for r in sorted_rows:
-            if count >= limit: break
-            if r["norm"] in norm_text:
-                # Avoid sub-string matching for very short words if possible
-                if len(r["norm"]) < 4 and f" {r['norm']} " not in f" {norm_text} ":
-                    continue
-                if r["e"] not in g:
-                    g[r["e"]] = r["z"]
-                    count += 1
-        return g
-
-def load_glossary_csv(text):
+def to_zh_tw(s: Optional[str]) -> str:
+    if not s: return ""
+    text = s
+    placeholders = {}
+    for i, term in enumerate(_TW_PROTECT_TERMS):
+        key = f"⟦TP{i}⟧"
+        placeholders[key] = term
+        text = text.replace(term, key)
     try:
-        r = csv.DictReader(io.StringIO(text))
-        if not r.fieldnames: return []
-        # Flexible column matching
-        headers = [h.strip().lower() for h in r.fieldnames]
-        en_key = next((r.fieldnames[i] for i,h in enumerate(headers) if h in ("en", "英文", "source")), None)
-        zh_key = next((r.fieldnames[i] for i,h in enumerate(headers) if h in ("zh", "中文", "target", "zh-tw")), None)
-        
-        if not en_key or not zh_key: return []
-        return [(row[en_key], row[zh_key]) for row in r if row.get(en_key) and row.get(zh_key)]
-    except: return []
+        text = _OPENCC.convert(text)
+    except Exception: pass
+    for key, term in placeholders.items():
+        text = text.replace(key, term)
+    return text
 
-def load_glossary_ods(data):
-    try:
-        with zipfile.ZipFile(io.BytesIO(data)) as z: xml = z.read("content.xml")
-        ns = {"text":"urn:oasis:names:tc:opendocument:xmlns:text:1.0", "table":"urn:oasis:names:tc:opendocument:xmlns:table:1.0"}
-        root = ET.fromstring(xml)
-        rows = root.findall(".//table:table-row", ns)
-        pairs = []
-        if not rows: return []
-        
-        def get_txt(cell):
-            return "".join("".join(p.itertext()) for p in cell.findall(".//text:p", ns)).strip()
-            
-        headers = [get_txt(c).lower() for c in rows[0].findall("table:table-cell", ns)]
-        try:
-            ei = next(i for i,h in enumerate(headers) if h in ("en", "英文", "source"))
-            zi = next(i for i,h in enumerate(headers) if h in ("zh", "中文", "target", "zh-tw"))
-        except: return []
-        
-        for r in rows[1:]:
-            cells = r.findall("table:table-cell", ns)
-            if len(cells) > max(ei, zi):
-                en = get_txt(cells[ei]); zh = get_txt(cells[zi])
-                if en and zh: pairs.append((en, zh))
-        return pairs
-    except: return []
+def normalize_zh(s: Optional[str]) -> str:
+    if not s: return ""
+    try: return _COORD_RE.sub("座標", s)
+    except Exception: return s
 
-# ================= Helper Functions =================
+def fix_zh_punct(s: Optional[str]) -> str:
+    if not s: return ""
+    return s.replace("（","(").replace("）",")").replace("：", ": ").strip()
 
-def to_zh_tw(text):
-    if not text: return ""
-    ph = {}
-    # Protect special terms
-    for i, t in enumerate(_TW_PROTECT):
-        k = f"⟦TP{i}⟧"; ph[k] = t; text = text.replace(t, k)
-    
-    try: text = _OPENCC.convert(text)
-    except: pass
-    
-    for k, v in ph.items(): text = text.replace(k, v)
-    # Manual fixes
-    return text.replace("坐標", "座標").replace("軟件", "軟體").replace("通過", "透過").replace("文件", "檔案").replace("項目", "專案")
+def strip_all_newlines(s: Optional[str]) -> str:
+    if not s: return ""
+    return s.replace("\\n", "").replace("\\r", "").replace("\n", "").replace("\r", "")
 
-def fix_punct(text):
-    if not text: return ""
-    # Convert full-width parens to half-width used in UI
-    return text.replace("（", "(").replace("）", ")").replace("：", ": ").strip()
-
-def validate_vars(src, trans):
-    # Regex to find variables like %s, %1, {0}
+# ====== 強制變數檢查 (New) ======
+def validate_placeholders(src: str, trans: str) -> bool:
     pat = re.compile(r"(%\d|%[sdn]|{\d+})")
-    src_vars = sorted(pat.findall(src))
-    trans_vars = sorted(pat.findall(trans))
-    return src_vars == trans_vars
+    src_set = sorted(pat.findall(src))
+    trans_set = sorted(pat.findall(trans))
+    return src_set == trans_set
 
-def mask_text(s):
-    m = {}; i = 0
-    def r(x): nonlocal i; k=f"⟦M{i}⟧"; m[k]=x.group(0); i+=1; return k
-    return _MASK_PAT.sub(r, s), m
+# ====== UI Functions ======
 
-def unmask_text(s, m):
-    for k, v in m.items(): s = s.replace(k, v)
+def _set_ui_msg(msg_html: str):
+    document.getElementById("ts-ui-msg").innerHTML = msg_html
+
+def _progress_setup(total:int):
+    wrap = document.getElementById("ts-progress-wrap")
+    bar = document.getElementById("ts-progress")
+    lab = document.getElementById("ts-progress-label")
+    wrap.style.display = "block"
+    bar.value = 0
+    bar.max = max(1, total)
+    lab.innerText = f"0 / {total}"
+
+def _progress_tick(done:int, total:int):
+    bar = document.getElementById("ts-progress")
+    lab = document.getElementById("ts-progress-label")
+    bar.value = done
+    lab.innerText = f"{done} / {total}"
+
+def _compare_reset():
+    box = document.getElementById("compare-box")
+    box.style.display = "block"
+    tbody = document.getElementById("compare-tbody")
+    while tbody.firstChild: tbody.removeChild(tbody.firstChild)
+
+def _compare_add(src_text:str, zh_text:str, context_info:str=""):
+    box = document.getElementById("compare-box")
+    box.style.display = "block"
+    tbody = document.getElementById("compare-tbody")
+    tr = document.createElement("tr")
+    
+    def _td(txt, is_html=False):
+        td = document.createElement("td")
+        td.style.padding = "4px"
+        td.style.borderBottom = "1px solid #eee"
+        if is_html: td.innerHTML = txt
+        else: td.textContent = txt
+        return td
+
+    # 顯示 Context (若有)
+    display_src = src_text
+    if context_info:
+        display_src = f"<div style='font-size:0.8em; color:#666; margin-bottom:2px; padding:1px 4px; background:#f3f4f6; border-radius:4px; display:inline-block;'>{html.escape(context_info)}</div><br>{html.escape(src_text)}"
+        tr.appendChild(_td(display_src, is_html=True))
+    else:
+        tr.appendChild(_td(src_text))
+
+    tr.appendChild(_td(zh_text))
+    tbody.appendChild(tr)
+    try:
+        scroller = box.children.item(1)
+        if scroller: scroller.scrollTop = scroller.scrollHeight
+    except Exception: pass
+
+# ====== 遮罩與 LCS ======
+
+def _mask_text(s:str):
+    idx=0; mapping={}
+    def _repl(m):
+        nonlocal idx
+        k=f"⟦M{idx}⟧"; mapping[k]=m.group(0); idx+=1; return k
+    return _MASK_PAT.sub(_repl, s), mapping
+
+def _unmask_text(s:str, mapping:Dict[str,str])->str:
+    for k,v in mapping.items(): s = s.replace(k,v)
     return s
 
-# ================= API Logic =================
+def _et_ready(s:str)->str:
+    try: return html.unescape(s)
+    except Exception: return s
+
+def needs_translation(en_text: Optional[str]) -> bool:
+    if not en_text or not en_text.strip(): return False
+    if re.fullmatch(r"[\\s\\d\\W%{}]+", en_text): return False
+    return True
+
+def soft_norm(s:str)->str: return _SEP_RE.sub(" ", s.lower()).strip()
+
+class LCSMatcher:
+    def __init__(self, pairs: List[Tuple[str,str]], min_token_len:int=4, min_lcs_len:int=4):
+        rows = []
+        for en, zh in pairs:
+            en = (en or "").strip(); zh = (zh or "").strip()
+            if en and zh:
+                en_norm = en.lower()
+                charset = set(re.sub(r"\\s+", "", en_norm))
+                rows.append({"en":en, "zh":zh, "en_norm":en_norm, "charset":charset})
+        self.rows = rows
+        self.min_token_len = min_token_len
+        self.min_lcs_len = min_lcs_len
+        self.soft_index = {}
+        self.max_soft_len = 1
+        for r in rows:
+            key = soft_norm(r["en"])
+            if key and key not in self.soft_index:
+                self.soft_index[key] = (r["en"], r["zh"])
+                self.max_soft_len = max(self.max_soft_len, len(key.split()))
+
+    def _topk_for_word(self, token:str, k:int=3)->List[Dict]:
+        t_norm = token.lower()
+        if len(t_norm) < self.min_token_len: return []
+        t_chars = set(t_norm)
+        cand = [r for r in self.rows if len(t_chars & r["charset"])>0]
+        res=[]
+        def anchored_prefix_sub_in(token_norm:str, cand_norm:str):
+            if not token_norm or not cand_norm: return 0,""
+            max_k = min(len(token_norm), len(cand_norm))
+            for kk in range(max_k,0,-1):
+                sub = token_norm[:kk]
+                if sub in cand_norm: return kk, sub
+            return 0,""
+        for r in cand:
+            kk, sub = anchored_prefix_sub_in(t_norm, r["en_norm"])
+            if kk >= self.min_lcs_len:
+                res.append({"token":token,"en":r["en"],"zh":r["zh"],"lcs_len":kk})
+        res.sort(key=lambda d: (-d["lcs_len"], len(d["en"])) )
+        return res[:k]
+
+    def build_glossary_sentence_first(self, text:str, *, limit:int=12, per_word_k:int=3, min_lcs_len:int=4)->Dict[str,str]:
+        text_clean = _MASK_PAT.sub(" ", text)
+        tokens = _TOKEN_RE.findall(text_clean)
+        toks_lc = [t.lower() for t in tokens]
+        n=len(toks_lc); covered=[False]*n; glossary={}
+        def _mark(i,j):
+            for k in range(i,j): covered[k]=True
+        win_max = min(n, self.max_soft_len)
+        for w in range(win_max, 0, -1):
+            if len(glossary)>=limit: break
+            for i in range(0, n-w+1):
+                if any(covered[k] for k in range(i,i+w)): continue
+                phrase=" ".join(toks_lc[i:i+w]); key=soft_norm(phrase)
+                if key in self.soft_index:
+                    en, zh = self.soft_index[key]
+                    if en not in glossary:
+                        glossary[en]=zh; _mark(i,i+w)
+                        if len(glossary)>=limit: break
+        for idx, tok in enumerate(tokens):
+            if len(glossary)>=limit: break
+            if covered[idx]: continue
+            if len(tok) < min_lcs_len: continue
+            for r in self._topk_for_word(tok, k=per_word_k):
+                if r["lcs_len"]>=min_lcs_len and r["en"] not in glossary:
+                    glossary[r["en"]] = r["zh"]; covered[idx]=True
+                    if len(glossary)>=limit: break
+        return glossary
+
+# ===== 讀 CSV / ODS =====
+
+def load_glossary_csv_text(csv_text: Optional[str]) -> List[Tuple[str,str]]:
+    if not csv_text: return []
+    rdr = csv.DictReader(io.StringIO(csv_text))
+    if not rdr.fieldnames: return []
+    col_en = col_zh = None
+    for c in rdr.fieldnames or []:
+        cc = (c or "").strip().lower()
+        if cc in ("en", "英文名稱"): col_en = c
+        if cc in ("zh", "中文名稱"): col_zh = c
+    if not col_en or not col_zh: return []
+    pairs, seen = [], set()
+    for row in rdr:
+        en = (row.get(col_en) or "").strip()
+        zh = (row.get(col_zh) or "").strip()
+        if en and zh and en not in seen:
+            zh = normalize_zh(to_zh_tw(zh))
+            pairs.append((en, zh)); seen.add(en)
+    return pairs
+
+def load_glossary_ods_bytes(ods_bytes: bytes)->List[Tuple[str,str]]:
+    with zipfile.ZipFile(io.BytesIO(ods_bytes)) as z: xml = z.read("content.xml")
+    ns = {"office":"urn:oasis:names:tc:opendocument:xmlns:office:1.0","table":"urn:oasis:names:tc:opendocument:xmlns:table:1.0","text":"urn:oasis:names:tc:opendocument:xmlns:text:1.0"}
+    root = ET.fromstring(xml)
+    table = root.find(".//table:table", ns)
+    if table is None: return []
+    rows = table.findall("table:table-row", ns)
+    def cell_text(cell):
+        parts=[]; 
+        for p in cell.findall(".//text:p", ns): parts.append("".join(p.itertext()))
+        return (parts[0] if parts else "").strip()
+    if not rows: return []
+    header_cells = rows[0].findall("table:table-cell", ns)
+    headers = [cell_text(c) for c in header_cells]
+    def _find_idx(names:set):
+        for i,h in enumerate(headers):
+            if (h or "").strip().lower() in names: return i
+        return -1
+    idx_en = _find_idx({"英文名稱","en"}); idx_zh = _find_idx({"中文名稱","zh"})
+    if idx_en<0 or idx_zh<0: return []
+    pairs=[]; seen=set()
+    for r in rows[1:]:
+        cells = r.findall("table:table-cell", ns)
+        if idx_en>=len(cells) or idx_zh>=len(cells): continue
+        en = cell_text(cells[idx_en]).strip(); zh = cell_text(cells[idx_zh]).strip()
+        if en and zh and en not in seen:
+            zh = normalize_zh(to_zh_tw(zh)); pairs.append((en, zh)); seen.add(en)
+    return pairs
+
+# ===== OpenAI API 呼叫 (整合版) =====
 
 async def call_api(api_key, base_url, model, payload, retries=1):
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
-    url = base_url.rstrip("/") + "/chat/completions"
+    url = base_url.rstrip("/") + ("/chat/completions" if "chat" in base_url or True else "/chat/completions")
     
-    # O1/O3 model compatibility
+    # O1 模型相容性處理
     if model.lower().startswith(("o1", "o3")):
         new_msgs = []
         for m in payload.get("messages", []):
             if m["role"] == "system":
-                new_msgs.append({"role": "user", "content": f"System Instruction:\n{m['content']}"})
-            else: new_msgs.append(m)
+                new_msgs.append({"role": "user", "content": f"[System Instruction]\n{m['content']}"})
+            else:
+                new_msgs.append(m)
         payload["messages"] = new_msgs
         payload.pop("temperature", None)
         payload["max_completion_tokens"] = payload.pop("max_tokens", 4000)
     
     for _ in range(retries + 1):
         try:
-            r = await pyfetch(url, method="POST", headers=headers, body=json.dumps(payload))
-            d = await r.json()
-            if r.status >= 400: raise Exception(d.get("error", {}).get("message"))
+            resp = await pyfetch(url, method="POST", headers=headers, body=json.dumps(payload))
+            data = await resp.json()
+            if resp.status >= 400:
+                raise Exception(f"API Error {resp.status}: {data.get('error', {}).get('message')}")
             
-            ch = d["choices"][0]["message"]
-            # Return Tool Calls or Content
-            if ch.get("tool_calls"): return json.loads(ch["tool_calls"][0]["function"]["arguments"])
-            if ch.get("content"): return json.loads(ch["content"])
+            choice = data["choices"][0]
+            if choice["message"].get("tool_calls"):
+                arg_str = choice["message"]["tool_calls"][0]["function"]["arguments"]
+                return json.loads(arg_str)
+            if choice["message"].get("content"):
+                return json.loads(choice["message"]["content"])
+                
         except Exception as e:
             if _ == retries: return None
             await asyncio.sleep(1)
     return None
 
-# ================= Main Process =================
+# ===== 主流程 =====
 
-async def main_process(api_key, base_url, m1, m2, use_m2, batch_size, limit_n):
-    # 1. Read TS File
-    ts_input = document.getElementById("tsFile")
-    if not ts_input.files.length: return
-    ts_text = (await ts_input.files.item(0).arrayBuffer()).decode("utf-8")
-    
-    # 2. Read Glossaries
-    gl_input = document.getElementById("glsFile")
-    gl_pairs = []
-    if gl_input.files.length:
-        self.py_log("讀取術語表中...")
-        for i in range(gl_input.files.length):
-            f = gl_input.files.item(i)
-            b = await f.arrayBuffer()
-            if f.name.endswith(".csv"): gl_pairs += load_glossary_csv(b.decode("utf-8","ignore"))
-            elif f.name.endswith(".ods"): gl_pairs += load_glossary_ods(b)
-    
-    matcher = LCSMatcher(gl_pairs) if gl_pairs else None
-    
-    # 3. Parse XML with Context Extraction
-    self.py_log("解析 XML 結構與 Context...")
-    # Keep DOCTYPE if exists
-    doctype = ""
-    dt_match = re.search(r'<!DOCTYPE[^>]+>', ts_text)
-    if dt_match: doctype = dt_match.group(0)
+async def read_glossaries_from_file_input(input_id: str) -> List[Tuple[str,str]]:
+    files = document.getElementById(input_id).files
+    if not files or files.length == 0: return []
+    pairs_all: List[Tuple[str,str]] = []
+    for i in range(files.length):
+        f = files.item(i); name = (f.name or "").lower()
+        try:
+            buf = await f.arrayBuffer(); raw = buf.to_py()
+            b = raw if isinstance(raw, (bytes, bytearray)) else bytes(raw)
+            if name.endswith(".ods"): pairs_all.extend(load_glossary_ods_bytes(b))
+            elif name.endswith(".csv"): pairs_all.extend(load_glossary_csv_text(b.decode("utf-8","ignore")))
+        except Exception as e: print(f"Glossary error: {e}")
+    seen, dedup = set(), []
+    for en, zh in pairs_all:
+        if en not in seen: dedup.append((en, zh)); seen.add(en)
+    return dedup
 
+async def _read_file_text(input_id: str)->Optional[str]:
+    files = document.getElementById(input_id).files
+    if not files or files.length==0: return None
+    buf = await files.item(0).arrayBuffer()
+    return bytes(buf.to_py()).decode("utf-8", "ignore")
+
+async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
+                                         ts_text:str, glossary_pairs:List[Tuple[str,str]],
+                                         batch_size:int=32, limit_n:int=0,
+                                         use_model2:bool=False, model2:str="") -> bytes:
+    doctype = _read_doctype(ts_text)
     root = ET.fromstring(ts_text)
-    tasks = []
-    
+    matcher = LCSMatcher(glossary_pairs, min_token_len=4, min_lcs_len=4)
+
+    # === 解析 XML 與 Context (New) ===
+    tasks=[]
     for ctx in root.findall("context"):
-        c_name = ctx.find("name").text or ""
+        ctx_name_node = ctx.find("name")
+        ctx_name = ctx_name_node.text if (ctx_name_node is not None) else ""
         
-        for msg in ctx.findall("message"):
-            src = msg.find("source")
-            # Skip empty or technical-only strings
-            if src is None or not src.text or not src.text.strip(): continue
-            if re.match(r'^[0-9\W]+$', src.text): continue
+        for m in ctx.findall("message"):
+            src = m.find("source")
+            if src is None or src.text is None: continue
             
-            # Build Context String
-            info = []
-            if c_name: info.append(f"UI: {c_name}")
-            if msg.find("comment") is not None: info.append(f"Note: {msg.find('comment').text}")
-            if msg.find("extracomment") is not None: info.append(f"Extra: {msg.find('extracomment').text}")
+            # 抓取註釋
+            extras = []
+            if ctx_name: extras.append(f"介面: {ctx_name}")
+            cmt = m.find("comment")
+            if cmt is not None and cmt.text: extras.append(f"註釋: {cmt.text}")
+            ext = m.find("extracomment")
+            if ext is not None and ext.text: extras.append(f"說明: {ext.text}")
             
-            ctx_str = " | ".join(info)
+            ctx_str = " | ".join(extras)
             
-            tasks.append({"node": msg, "src": src.text, "ctx": ctx_str})
-            
+            if needs_translation(src.text):
+                tasks.append({
+                    "node": m, "src": src.text, "context": ctx_str, 
+                    "numerus": m.get("numerus")=="yes"
+                })
             if limit_n > 0 and len(tasks) >= limit_n: break
         if limit_n > 0 and len(tasks) >= limit_n: break
-        
-    total = len(tasks)
-    self.py_update_progress(0, total)
-    self.py_log(f"準備翻譯 {total} 筆資料 (含術語 {len(gl_pairs)} 筆)")
+
+    finished=0; total=len(tasks)
+    if total==0: return ET.tostring(root, encoding="utf-8")
+
+    _compare_reset()
+    _progress_setup(total)
     
-    finished = 0
-    
-    # Define Tools for structured output
-    tools = [{
+    # 定義輸出格式
+    tools_schema = [{
         "type": "function",
         "function": {
-            "name": "save_translations",
-            "description": "Save the list of translations",
+            "name": "set_results",
+            "description": "Save translations",
             "parameters": {
-                "type": "object",
-                "properties": {
-                    "results": {"type": "array", "items": {"type": "string"}}
-                },
-                "required": ["results"]
+                "type": "object", "properties": { "results": {"type": "array", "items": {"type": "string"}} }, "required": ["results"]
             }
         }
     }]
 
-    # 4. Batch Processing
-    for i in range(0, total, batch_size):
-        batch = tasks[i : i + batch_size]
+    for start in range(0, total, batch_size):
+        batch = tasks[start:start+batch_size]
+        masked_inputs = []; maps = []; context_list = []; gls_list = []
         
-        masked_list = []
-        maps_list = []
-        items_payload = []
-        
-        # Prepare items for LLM
-        for k, t in enumerate(batch):
-            m, mp = mask_text(t["src"])
-            masked_list.append(m)
-            maps_list.append(mp)
+        # 準備資料
+        for item in batch:
+            src_text = item["src"]
+            g = matcher.build_glossary_sentence_first(src_text)
+            gls_list.append([f"{k}->{v}" for k, v in g.items()])
             
-            # Get glossary matches
-            g = matcher.build_glossary(t["src"]) if matcher else {}
-            gls_str = ", ".join([f"{k}->{v}" for k,v in g.items()])
+            m_txt, mp = _mask_text(src_text)
+            masked_inputs.append(m_txt)
+            maps.append(mp)
+            context_list.append(item["context"])
             
-            items_payload.append({
-                "id": k,
-                "text": m,
-                "context": t["ctx"],
-                "glossary": gls_str
-            })
+        # 建構 Prompt
+        items_json = json.dumps([
+            {"id": k, "text": txt, "context": ctx, "glossary": gls} 
+            for k, (txt, ctx, gls) in enumerate(zip(masked_inputs, context_list, gls_list))
+        ], ensure_ascii=False)
 
-        sys_prompt = "You are a professional translator for GIS software (English to Traditional Chinese Taiwan). Use the provided Context and Glossary to resolve ambiguities (e.g. 'Open' -> '開啟', 'Band' -> '波段'). Keep variables (⟦M0⟧, %s) intact."
-        user_prompt = f"Translate the following items:\n{json.dumps(items_payload, ensure_ascii=False)}"
+        sys_prompt = "你是台灣 GIS 在地化譯者。請參考 Context 與 Glossary 進行翻譯。保留所有 ⟦M數字⟧ 變數。"
+        user_prompt = f"請逐一翻譯:\n{items_json}"
         
-        res_final = []
+        zh_list = []
         
         try:
-            if use_m2:
-                # Parallel Call A (Temp 0.2) & B (Temp 0.8)
+            if use_model2 and model2:
+                # 平行加速邏輯
                 payload_a = {
-                    "model": m1, "temperature": 0.2, "tools": tools,
-                    "tool_choice": {"type":"function", "function":{"name":"save_translations"}},
-                    "messages": [{"role":"system","content":sys_prompt},{"role":"user","content":user_prompt}]
+                    "model": model1, "temperature": 0.2, "tools": tools_schema,
+                    "tool_choice": {"type":"function", "function":{"name":"set_results"}},
+                    "messages": [{"role":"system", "content": sys_prompt}, {"role":"user", "content": user_prompt}]
                 }
-                payload_b = {**payload_a, "temperature": 0.8}
+                payload_b = {**payload_a, "temperature": 0.8} # 溫度差異化
                 
                 res_a, res_b = await asyncio.gather(
-                    call_api(api_key, base_url, m1, payload_a),
-                    call_api(api_key, base_url, m1, payload_b)
+                    call_api(api_key, base_url, model1, payload_a),
+                    call_api(api_key, base_url, model1, payload_b)
                 )
                 
-                list_a = res_a.get("results", []) if res_a else [""]*len(batch)
-                list_b = res_b.get("results", []) if res_b else [""]*len(batch)
+                list_a = res_a.get("results", []) if res_a else [""] * len(batch)
+                list_b = res_b.get("results", []) if res_b else [""] * len(batch)
                 
-                # Normalize lengths
-                list_a += [""] * (len(batch) - len(list_a))
-                list_b += [""] * (len(batch) - len(list_b))
+                # 補齊長度
+                if len(list_a) < len(batch): list_a += [""] * (len(batch)-len(list_a))
+                if len(list_b) < len(batch): list_b += [""] * (len(batch)-len(list_b))
                 
-                # Selection Phase (Model 2)
-                sel_items = []
-                for idx, (orig, a, b) in enumerate(zip(batch, list_a, list_b)):
-                    sel_items.append({"src": orig["src"], "ctx": orig["ctx"], "Option_A": a, "Option_B": b})
-                
-                sel_sys = "Select the best translation for Taiwan GIS software. Ensure variables (%s, {0}) match the source. If both are bad, provide a corrected version."
+                # 校對選擇
+                sel_items = [{"src": t["src"], "ctx": t["context"], "A": a, "B": b} for t, a, b in zip(batch, list_a, list_b)]
                 sel_payload = {
-                    "model": m2, "temperature": 0.1, "tools": tools,
-                    "tool_choice": {"type":"function", "function":{"name":"save_translations"}},
+                    "model": model2, "temperature": 0.1, "tools": tools_schema,
+                    "tool_choice": {"type":"function", "function":{"name":"set_results"}},
                     "messages": [
-                        {"role":"system","content":sel_sys},
-                        {"role":"user","content":json.dumps(sel_items, ensure_ascii=False)}
+                        {"role":"system", "content": "你是嚴格的校對員。請從 A, B 中選出變數 (%s, {0}) 正確且符合台灣 GIS 用語的譯文。若皆差請修正。"},
+                        {"role":"user", "content": json.dumps(sel_items, ensure_ascii=False)}
                     ]
                 }
-                
-                rf = await call_api(api_key, base_url, m2, sel_payload)
-                res_final = rf.get("results", []) if rf else list_a
-                
+                res_final = await call_api(api_key, base_url, model2, sel_payload)
+                zh_list = res_final.get("results", []) if res_final else list_a
             else:
-                # Single Model Mode
+                # 單一模型
                 payload = {
-                    "model": m1, "temperature": 0.2, "tools": tools,
-                    "tool_choice": {"type":"function", "function":{"name":"save_translations"}},
-                    "messages": [{"role":"system","content":sys_prompt},{"role":"user","content":user_prompt}]
+                    "model": model1, "temperature": 0.2, "tools": tools_schema,
+                    "tool_choice": {"type":"function", "function":{"name":"set_results"}},
+                    "messages": [{"role":"system", "content": sys_prompt}, {"role":"user", "content": user_prompt}]
                 }
-                r = await call_api(api_key, base_url, m1, payload)
-                res_final = r.get("results", []) if r else [""]*len(batch)
+                res = await call_api(api_key, base_url, model1, payload)
+                zh_list = res.get("results", []) if res else [""] * len(batch)
 
         except Exception as e:
-            print(f"Batch error: {e}")
-            res_final = [""] * len(batch)
-            
-        # Process Results & Write XML
-        for k, raw_trans in enumerate(res_final):
+            print(f"Batch failed: {e}")
+            zh_list = [""] * len(batch)
+
+        # 寫回 XML + UI 更新
+        for k, zh_raw in enumerate(zh_list):
             if k >= len(batch): break
-            task = batch[k]
+            item = batch[k]
             
-            # Post-processing pipeline
-            # 1. Unmask -> 2. Unescape HTML -> 3. OpenCC/Fixes -> 4. Punctuation
-            processed = unmask_text(raw_trans, maps_list[k])
-            processed = html.unescape(processed)
-            processed = to_zh_tw(fix_punct(processed))
+            if not zh_raw: continue # 跳過失敗
             
-            # Variable Validation
-            is_err = not validate_vars(task["src"], processed)
-            if is_err:
-                processed = f"[Var Error] {processed}"
+            # 還原與後處理
+            zh = _unmask_text(zh_raw, maps[k])
+            zh = _et_ready(zh)
+            zh = strip_all_newlines(zh)
+            zh = fix_zh_punct(zh)
+            zh = normalize_zh(to_zh_tw(zh))
             
-            # Write to XML Node
-            tr_node = task["node"].find("translation")
-            if tr_node is None:
-                tr_node = ET.SubElement(task["node"], "translation")
-            
-            # Handle plurals (numerus) if necessary, simplify for now
-            tr_node.text = processed
-            # Remove "unfinished" type if present
-            if "type" in tr_node.attrib: del tr_node.attrib["type"]
-            
-            self.py_add_row(task["src"], processed, task["ctx"], is_err)
-            
-        finished += len(batch)
-        self.py_update_progress(finished, total)
-        
-    # 5. Export
-    out_xml = ET.tostring(root, encoding="utf-8")
-    if doctype: out_xml = doctype.encode("utf-8") + b"\n" + out_xml
-    else: out_xml = b"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + out_xml
-    
-    b64 = base64.b64encode(out_xml).decode("ascii")
-    self.py_log(f'<span class="status-ok">翻譯完成！</span> <a class="dl-link" href="data:application/xml;base64,{b64}" download="qgis_zh-Hant.ts">點此下載翻譯結果</a>')
-`;
+            # 強制變數檢查
+            if not validate_placeholders(item["src"], zh):
+                zh = f"[變數錯誤] {zh}"
+
+            m = item["node"]
+            trans = m.find("translation")
+            if trans is None: trans = ET.SubElement(m, "translation")
+
+            if item["numerus"]:
+                forms = trans.findall("numerusform")
+                if not forms: forms=[ET.SubElement(trans, "numerusform")]
+                for f in forms: f.text = zh
+            else:
+                trans.text = zh
+            if "type" in trans.attrib: trans.attrib.pop("type", None)
+
+            # 傳入 context 顯示在 UI
+            _compare_add(item["src"], zh, item["context"])
+            finished += 1
+            _progress_tick(finished, total)
+
+        _set_ui_msg(f"處理進度：{finished}/{total}")
+
+    xml_bytes = ET.tostring(root, encoding="utf-8")
+    head = b'<?xml version="1.0" encoding="utf-8"?>'
+    if doctype: xml_bytes = head + (doctype).encode("utf-8") + xml_bytes
+    else: xml_bytes = head + b"\n" + xml_bytes
+    return xml_bytes
+
+def _read_doctype(xml_text: str) -> str:
+    m = re.search(r'<!DOCTYPE[^>]+>', xml_text)
+    return m.group(0) if m else ""
+
+# ===== 事件 =====
+_BUSY=False
+async def _on_click(evt=None):
+    global _BUSY
+    if _BUSY:
+        _set_ui_msg("<span style='color:#b00'>正在處理，請稍候...</span>"); return
+    _BUSY=True; _set_ui_msg("")
+    try:
+        api = document.getElementById("apiKey").value.strip()
+        base_url = document.getElementById("baseUrl").value.strip() or "https://api.openai.com/v1"
+        sel1 = document.getElementById("modelSel"); model1 = sel1.value
+        if model1 == "__custom__": model1 = document.getElementById("modelCustom").value.strip()
+        use2 = bool(document.getElementById("useModel2").checked)
+        sel2 = document.getElementById("modelSel2"); model2 = sel2.value
+        if model2 == "__custom__": model2 = document.getElementById("modelCustom2").value.strip()
+        batch = int(document.getElementById("batch").value or "32")
+        limitN = int(document.getElementById("limitN").value or "200")
+
+        if not api: _set_ui_msg("<span style='color:#b00'>請輸入 API Key</span>"); return
+        if not model1: _set_ui_msg("<span style='color:#b00'>請選擇或輸入 Model-1</span>"); return
+        if use2 and not model2: _set_ui_msg("<span style='color:#b00'>請選擇或輸入 Model-2</span>"); return
+
+        ts_text = await _read_file_text("tsFile")
+        if not ts_text: _set_ui_msg("<span style='color:#b00'>請上傳 .ts 檔</span>"); return
+
+        pairs = await read_glossaries_from_file_input("glsFile")
+
+        _set_ui_msg("連線中...")
+        xml_bytes = await run_translation_pipeline_async(
+            api_key=api, base_url=base_url, model1=model1,
+            ts_text=ts_text, glossary_pairs=pairs,
+            batch_size=batch, limit_n=limitN,
+            use_model2=use2, model2=model2
+        )
+
+        out_name = "qgis_zh-Hant.ts"
+        b64 = base64.b64encode(xml_bytes).decode("ascii")
+        link=f'<a download="{out_name}" href="data:application/octet-stream;base64,{b64}">下載 {out_name}</a>'
+        _set_ui_msg(link + "　<span style='color:#0a0'>完成！</span>")
+    except Exception as e:
+        _set_ui_msg(f"<span style='color:#b00'>發生錯誤：{html.escape(str(e))}</span>")
+        traceback.print_exc()
+    finally:
+        _BUSY=False
+
+_BTN_PROXY = create_proxy(lambda evt: asyncio.ensure_future(_on_click(evt)))
+document.getElementById("run-btn").addEventListener("click", _BTN_PROXY)
+`);
+} catch (e) {
+  console.error(e);
+  $msg.innerHTML = `<span style="color:#b00">Python 載入失敗：${String(e)}</span>`;
+}
 </script>
-</body>
-</html>
