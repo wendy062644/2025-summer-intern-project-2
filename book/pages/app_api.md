@@ -1123,25 +1123,17 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
                 ]
                 sel_payload = {
                     "model": model2,
-                    "temperature": 0.1, # 保持低溫，確保遵循格式
+                    "temperature": 0.1,
                     "tools": tools_schema,
                     "tool_choice": {"type":"function", "function":{"name":"set_results"}},
                     "messages": [
                         {
                             "role":"system",
                             "content": (
-                                "你是高階語言專家與校對員。請根據 `src` (原文) 審核 `A` 與 `B` 兩版譯文，"
-                                "並在 results 中直接輸出『最完美的一個最終版本』。\n\n"
-                                "審核標準：\n"
-                                "1. **修正漏翻 (Missing Translation)**：\n"
-                                "   - 若譯文仍包含未翻譯的英文單字（例如 'Algorithm' 仍顯示 'Algorithm'），必須強制翻譯成繁體中文（如 '演算法'）。\n"
-                                "   - 即使文字被 HTML 標籤包圍（如 <b>Algorithm</b>），標籤內的文字也必須翻譯（<b>演算法</b>）。\n"
-                                "2. **嚴格保留變數與格式**：\n"
-                                "   - HTML 標籤 (如 <b>, <i>, <br>)、變數 (如 %1, {0}, %s) 必須原樣保留，不可遺失或改變順序。\n"
-                                "3. **決策邏輯**：\n"
-                                "   - 若 A 或 B 其中一版符合上述標準，直接採用。\n"
-                                "   - 若兩版都有瑕疵（例如都漏翻或格式錯誤），請無視它們，直接根據 `src` 重寫出正確的譯文。\n\n"
-                                "注意：請直接輸出翻譯後的字串內容，不要回傳 'A'、'B' 或任何解釋文字。"
+                                "你是嚴格的校對員。比較 A 與 B 版譯文，"
+                                "並在 results 中『直接輸出最好的那句翻譯內容』。"
+                                "注意：請直接輸出翻譯文字，絕對不要只回傳 'A' 或 'B' 這種代號。"
+                                "若兩者皆差請直接重寫，但也要遵守 placeholder 與格式。"
                             )
                         },
                         {"role":"user", "content": json.dumps(sel_items, ensure_ascii=False)}
