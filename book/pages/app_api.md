@@ -1132,6 +1132,7 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
                             "content": (
                                 "你是嚴格的校對員。比較並參考 A 與 B 版譯文，並檢查格式是否正確"
                                 "若有漏翻或格式錯誤，則修正後再直接輸出"
+                                "若是專有名詞或英文縮寫，則維持原文"
                             )
                         },
                         {"role":"user", "content": json.dumps(sel_items, ensure_ascii=False)}
