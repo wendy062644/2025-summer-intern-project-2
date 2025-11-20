@@ -250,14 +250,17 @@ title: API
   }
   #ts-ui .ts-field:has(#useModel2) .ts-label{ margin: 0 6px 0 0; }
   #ts-ui .ts-field:has(#useModel2) .ts-input{
-    display: flex; align-items: center; gap: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
   #ts-ui #useModel2{
     width: 16px; height: 16px; margin: 0; vertical-align: middle;
   }
   @media (max-width:640px){
     #ts-ui .ts-field:has(#useModel2){
-      flex-direction: column; align-items: stretch;
+      flex-direction: column;
+      align-items: stretch;
     }
   }
 </style>
@@ -537,6 +540,7 @@ _MASK_PAT = re.compile(
     re.IGNORECASE
 )
 _SEP_RE = re.compile(r"[-\s/_.\\]+")
+_TOKEN_RE = re.compile(r"[A-Za-z0-9]+(?:[\\/_.-][A-Za-z0-9]+)*")
 
 # ====== 基本工具 ======
 
@@ -568,7 +572,7 @@ def strip_all_newlines(s: Optional[str]) -> str:
     if not s: return ""
     return s.replace("\\n", "").replace("\\r", "").replace("\n", "").replace("\r", "")
 
-# ====== 強制變數檢查 (New) ======
+# ====== 強制變數檢查 ======
 def validate_placeholders(src: str, trans: str) -> bool:
     pat = re.compile(r"(%\d|%[sdn]|{\d+})")
     src_set = sorted(pat.findall(src))
