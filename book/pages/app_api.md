@@ -444,15 +444,16 @@ import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodi
 // 1. 【優先執行】UI 設定區塊
 // 將這段移到最上面，確保一開網頁就能計算行數、切換選項
 (function setupTsCounter(){
-  const tsFile   = document.getElementById('tsFile');
-  const limitN   = document.getElementById('limitN');
-  const countInfo= document.getElementById('countInfo');
+  const tsFile    = document.getElementById('tsFile');
+  const limitN    = document.getElementById('limitN');
+  const countInfo = document.getElementById('countInfo');
   countInfo.textContent = ' / 0';
   
   function needsTranslationJS(text){
     if (!text) return false;
     const t = String(text).trim();
     if (!t) return false;
+    // 嚴格排除純數字符號
     if (/^[\s\d\W%{}]+$/u.test(t)) return false;
     return true;
   }
@@ -474,6 +475,7 @@ import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodi
           if (needsTranslationJS(s)) total++;
         }
       } else {
+        // XML 解析失敗時的備案 Regex
         const matches = txt.match(/<source>([\s\S]*?)<\/source>/g) || [];
         for (const m of matches){
           const inner = m.replace(/^<source>|<\/source>$/g, '');
@@ -556,12 +558,8 @@ try {
   pyodide = await loadPyodide();
   await pyodide.loadPackage("micropip");
   
-  // 安裝 OpenCC (在 Python 內或這裡裝都可以，這裡裝比較好掌握進度)
-  // 注意：這一步需要網路，如果 OpenCC 安裝較久，使用者可以先看 UI
-  
   runBtn.disabled = false;
   runBtn.textContent = "執行翻譯";
-  $msg.innerHTML = "<span style='color:#059669; font-size:0.9em;'>系統就緒 (Python 已載入)</span>";
 
   // 載入 Python 核心邏輯
   await pyodide.runPythonAsync(String.raw`
