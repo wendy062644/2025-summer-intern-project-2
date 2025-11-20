@@ -297,7 +297,7 @@ title: API
               <optgroup label="GPT-5">
                 <option value="gpt-5">gpt-5</option>
                 <option value="gpt-5-mini">gpt-5-mini</option>
-                <option value="gpt-5-nano" selected>gpt-5-nano</option>
+                <option value="gpt-5-nano">gpt-5-nano</option>
               </optgroup>
               <optgroup label="GPT-4.1">
                 <option value="gpt-4.1">gpt-4.1</option>
@@ -306,7 +306,7 @@ title: API
               </optgroup>
               <optgroup label="GPT-4o">
                 <option value="gpt-4o">gpt-4o</option>
-                <option value="gpt-4o-mini">gpt-4o-mini</option>
+                <option value="gpt-4o-mini" selected>gpt-4o-mini</option>
               </optgroup>
               <optgroup label="Reasoning">
                 <option value="o1-mini">o1-mini</option>
@@ -342,12 +342,12 @@ title: API
             <select id="modelSel2" style="flex:1;min-width:220px;">
               <optgroup label="GPT-5">
                 <option value="gpt-5">gpt-5</option>
-                <option value="gpt-5-mini" selected>gpt-5-mini</option>
+                <option value="gpt-5-mini">gpt-5-mini</option>
                 <option value="gpt-5-nano">gpt-5-nano</option>
               </optgroup>
               <optgroup label="GPT-4.1">
                 <option value="gpt-4.1">gpt-4.1</option>
-                <option value="gpt-4.1-mini">gpt-4.1-mini</option>
+                <option value="gpt-4.1-mini" selected>gpt-4.1-mini</option>
                 <option value="gpt-4.1-nano">gpt-4.1-nano</option>
               </optgroup>
               <optgroup label="GPT-4o">
@@ -530,10 +530,10 @@ pauseBtn.addEventListener("click", function(){
   window._TS_PAUSED = !window._TS_PAUSED;
   if(window._TS_PAUSED){
     pauseBtn.textContent = "繼續";
-    pauseBtn.style.background = "#059669"; // Green to resume
+    pauseBtn.style.background = "#059669"; // 綠色：恢復
   } else {
     pauseBtn.textContent = "暫停";
-    pauseBtn.style.background = "#d97706"; // Amber to pause
+    pauseBtn.style.background = "#d97706"; // 橘色：暫停
   }
 });
 
@@ -577,15 +577,18 @@ def to_zh_tw(s: Optional[str]) -> str:
         text = text.replace(term, key)
     try:
         text = _OPENCC.convert(text)
-    except Exception: pass
+    except Exception:
+        pass
     for key, term in placeholders.items():
         text = text.replace(key, term)
     return text
 
 def normalize_zh(s: Optional[str]) -> str:
     if not s: return ""
-    try: return _COORD_RE.sub("座標", s)
-    except Exception: return s
+    try:
+        return _COORD_RE.sub("座標", s)
+    except Exception:
+        return s
 
 def fix_zh_punct(s: Optional[str]) -> str:
     if not s: return ""
@@ -595,9 +598,40 @@ def strip_all_newlines(s: Optional[str]) -> str:
     if not s: return ""
     return s.replace("\\n", "").replace("\\r", "").replace("\n", "").replace("\r", "")
 
+# ====== 翻譯後修正：避免把 Context 當成翻譯，以及保護 enum 名稱 ======
+def fix_context_leak(src: str, zh: str, context: str) -> str:
+    """
+    - 若 zh 等於 / 以 context 開頭（例如 '介面: Animation3DWidget'），視為誤譯，改回 src
+    - 若 src 是類似 InQuad / OutInQuad 的 enum 名稱：
+      - src 為純英文/數字/底線，且 zh 沒有任何中文，就直接保留 src
+    """
+    if not zh:
+        return zh
+
+    zhs = zh.strip()
+    ctx = (context or "").strip()
+
+    # 只拿 context 的前半段（避免包含「| 註釋: ...」）
+    ctx_head = ctx.split("|", 1)[0].strip() if ctx else ""
+
+    # 1) 模型把 context 當成輸出：完全一樣或前綴
+    if ctx_head and (zhs == ctx_head or zhs.startswith(ctx_head)):
+        return src
+
+    # 2) 明顯是「介面: XXX」開頭，也當作誤譯
+    if zhs.startswith("介面:"):
+        return src
+
+    # 3) enum / 常數名（純英數底線，不含空白），且譯文完全沒有中文字：保留原文
+    #    例如 InQuad / OutInQuad / Animation3DWidget
+    if re.fullmatch(r"[A-Za-z0-9_]+", src) and not re.search(r"[\u4e00-\u9fff]", zhs):
+        return src
+
+    return zh
+
 # ====== 強制變數檢查 ======
 def validate_placeholders(src: str, trans: str) -> bool:
-    pat = re.compile(r"(%\d|%[sdn]|{\d+})")
+    pat = re.compile(r"(%\d|%[sdn]|\{\d+\})")
     src_set = sorted(pat.findall(src))
     trans_set = sorted(pat.findall(trans))
     return src_set == trans_set
@@ -626,7 +660,8 @@ def _compare_reset():
     box = document.getElementById("compare-box")
     box.style.display = "block"
     tbody = document.getElementById("compare-tbody")
-    while tbody.firstChild: tbody.removeChild(tbody.firstChild)
+    while tbody.firstChild:
+        tbody.removeChild(tbody.firstChild)
 
 def _compare_add(src_text:str, zh_text:str, context_info:str=""):
     box = document.getElementById("compare-box")
@@ -638,59 +673,70 @@ def _compare_add(src_text:str, zh_text:str, context_info:str=""):
         td = document.createElement("td")
         td.style.padding = "4px"
         td.style.borderBottom = "1px solid #eee"
-        if is_html: td.innerHTML = txt
-        else: td.textContent = txt
+        if is_html:
+            td.innerHTML = txt
+        else:
+            td.textContent = txt
         return td
 
     # 顯示 Context (若有)
     display_src = src_text
     if context_info:
-        display_src = f"<div style='font-size:0.8em; color:#666; margin-bottom:2px; padding:1px 4px; background:#f3f4f6; border-radius:4px; display:inline-block;'>{html.escape(context_info)}</div><br>{html.escape(src_text)}"
+        display_src = (
+            "<div style='font-size:0.8em; color:#666; margin-bottom:2px; "
+            "padding:1px 4px; background:#f3f4f6; border-radius:4px; display:inline-block;'>"
+            f"{html.escape(context_info)}</div><br>{html.escape(src_text)}"
+        )
         tr.appendChild(_td(display_src, is_html=True))
     else:
         tr.appendChild(_td(src_text))
 
     tr.appendChild(_td(zh_text))
     tbody.appendChild(tr)
-    
-    # === 移除自動捲動 ===
-    # try:
-    #     scroller = box.children.item(1)
-    #     if scroller: scroller.scrollTop = scroller.scrollHeight
-    # except Exception: pass
 
 # ====== 遮罩與 LCS ======
 
 def _mask_text(s:str):
-    idx=0; mapping={}
+    idx = 0
+    mapping = {}
     def _repl(m):
         nonlocal idx
-        k=f"⟦M{idx}⟧"; mapping[k]=m.group(0); idx+=1; return k
+        k = f"⟦M{idx}⟧"
+        mapping[k] = m.group(0)
+        idx += 1
+        return k
     return _MASK_PAT.sub(_repl, s), mapping
 
-def _unmask_text(s:str, mapping:Dict[str,str])->str:
-    for k,v in mapping.items(): s = s.replace(k,v)
+def _unmask_text(s:str, mapping:Dict[str,str]) -> str:
+    for k,v in mapping.items():
+        s = s.replace(k,v)
     return s
 
-def _et_ready(s:str)->str:
-    try: return html.unescape(s)
-    except Exception: return s
+def _et_ready(s:str) -> str:
+    try:
+        return html.unescape(s)
+    except Exception:
+        return s
 
 def needs_translation(en_text: Optional[str]) -> bool:
-    if not en_text or not en_text.strip(): return False
-    if re.fullmatch(r"[\\s\\d\\W%{}]+", en_text): return False
+    if not en_text or not en_text.strip():
+        return False
+    if re.fullmatch(r"[\\s\\d\\W%{}]+", en_text):
+        return False
     return True
 
-def soft_norm(s:str)->str: return _SEP_RE.sub(" ", s.lower()).strip()
+def soft_norm(s:str) -> str:
+    return _SEP_RE.sub(" ", s.lower()).strip()
 
 class LCSMatcher:
     def __init__(self, pairs: List[Tuple[str,str]], min_token_len:int=4, min_lcs_len:int=4):
         rows = []
         for en, zh in pairs:
-            en = (en or "").strip(); zh = (zh or "").strip()
+            en = (en or "").strip()
+            zh = (zh or "").strip()
             if en and zh:
                 en_norm = en.lower()
-                charset = set(re.sub(r"\\s+", "", en_norm))
+                charset = set(re.sub(r"\s+", "", en_norm))
                 rows.append({"en":en, "zh":zh, "en_norm":en_norm, "charset":charset})
         self.rows = rows
         self.min_token_len = min_token_len
@@ -703,46 +749,62 @@ class LCSMatcher:
                 self.soft_index[key] = (r["en"], r["zh"])
                 self.max_soft_len = max(self.max_soft_len, len(key.split()))
 
-    def build_glossary_sentence_first(self, text:str, *, limit:int=12, per_word_k:int=3, min_lcs_len:int=4)->Dict[str,str]:
+    def build_glossary_sentence_first(self, text:str, *, limit:int=12, per_word_k:int=3, min_lcs_len:int=4) -> Dict[str,str]:
         text_clean = _MASK_PAT.sub(" ", text)
         tokens = _TOKEN_RE.findall(text_clean)
         toks_lc = [t.lower() for t in tokens]
-        n=len(toks_lc); covered=[False]*n; glossary={}
+        n = len(toks_lc)
+        covered = [False]*n
+        glossary = {}
         def _mark(i,j):
-            for k in range(i,j): covered[k]=True
+            for k in range(i,j):
+                covered[k] = True
         win_max = min(n, self.max_soft_len)
         for w in range(win_max, 0, -1):
-            if len(glossary)>=limit: break
+            if len(glossary) >= limit:
+                break
             for i in range(0, n-w+1):
-                if any(covered[k] for k in range(i,i+w)): continue
-                phrase=" ".join(toks_lc[i:i+w]); key=soft_norm(phrase)
+                if any(covered[k] for k in range(i,i+w)):
+                    continue
+                phrase = " ".join(toks_lc[i:i+w])
+                key = soft_norm(phrase)
                 if key in self.soft_index:
                     en, zh = self.soft_index[key]
                     if en not in glossary:
-                        glossary[en]=zh; _mark(i,i+w)
-                        if len(glossary)>=limit: break
+                        glossary[en] = zh
+                        _mark(i,i+w)
+                        if len(glossary) >= limit:
+                            break
         for idx, tok in enumerate(tokens):
-            if len(glossary)>=limit: break
-            if covered[idx]: continue
-            if len(tok) < min_lcs_len: continue
+            if len(glossary) >= limit:
+                break
+            if covered[idx]:
+                continue
+            if len(tok) < min_lcs_len:
+                continue
             for r in self._topk_for_word(tok, k=per_word_k):
-                if r["lcs_len"]>=min_lcs_len and r["en"] not in glossary:
-                    glossary[r["en"]] = r["zh"]; covered[idx]=True
-                    if len(glossary)>=limit: break
+                if r["lcs_len"] >= min_lcs_len and r["en"] not in glossary:
+                    glossary[r["en"]] = r["zh"]
+                    covered[idx] = True
+                    if len(glossary) >= limit:
+                        break
         return glossary
         
-    def _topk_for_word(self, token:str, k:int=3)->List[Dict]:
+    def _topk_for_word(self, token:str, k:int=3) -> List[Dict]:
         t_norm = token.lower()
-        if len(t_norm) < self.min_token_len: return []
+        if len(t_norm) < self.min_token_len:
+            return []
         t_chars = set(t_norm)
-        cand = [r for r in self.rows if len(t_chars & r["charset"])>0]
-        res=[]
+        cand = [r for r in self.rows if len(t_chars & r["charset"]) > 0]
+        res = []
         def anchored_prefix_sub_in(token_norm:str, cand_norm:str):
-            if not token_norm or not cand_norm: return 0,""
+            if not token_norm or not cand_norm:
+                return 0,""
             max_k = min(len(token_norm), len(cand_norm))
             for kk in range(max_k,0,-1):
                 sub = token_norm[:kk]
-                if sub in cand_norm: return kk, sub
+                if sub in cand_norm:
+                    return kk, sub
             return 0,""
         for r in cand:
             kk, sub = anchored_prefix_sub_in(t_norm, r["en_norm"])
@@ -754,51 +816,74 @@ class LCSMatcher:
 # ===== 讀 CSV / ODS =====
 
 def load_glossary_csv_text(csv_text: Optional[str]) -> List[Tuple[str,str]]:
-    if not csv_text: return []
+    if not csv_text:
+        return []
     rdr = csv.DictReader(io.StringIO(csv_text))
-    if not rdr.fieldnames: return []
+    if not rdr.fieldnames:
+        return []
     col_en = col_zh = None
     for c in rdr.fieldnames or []:
         cc = (c or "").strip().lower()
-        if cc in ("en", "英文名稱"): col_en = c
-        if cc in ("zh", "中文名稱"): col_zh = c
-    if not col_en or not col_zh: return []
-    pairs, seen = [], set()
+        if cc in ("en", "英文名稱"):
+            col_en = c
+        if cc in ("zh", "中文名稱"):
+            col_zh = c
+    if not col_en or not col_zh:
+        return []
+    pairs = []
+    seen = set()
     for row in rdr:
         en = (row.get(col_en) or "").strip()
         zh = (row.get(col_zh) or "").strip()
         if en and zh and en not in seen:
             zh = normalize_zh(to_zh_tw(zh))
-            pairs.append((en, zh)); seen.add(en)
+            pairs.append((en, zh))
+            seen.add(en)
     return pairs
 
-def load_glossary_ods_bytes(ods_bytes: bytes)->List[Tuple[str,str]]:
-    with zipfile.ZipFile(io.BytesIO(ods_bytes)) as z: xml = z.read("content.xml")
-    ns = {"office":"urn:oasis:names:tc:opendocument:xmlns:office:1.0","table":"urn:oasis:names:tc:opendocument:xmlns:table:1.0","text":"urn:oasis:names:tc:opendocument:xmlns:text:1.0"}
+def load_glossary_ods_bytes(ods_bytes: bytes) -> List[Tuple[str,str]]:
+    with zipfile.ZipFile(io.BytesIO(ods_bytes)) as z:
+        xml = z.read("content.xml")
+    ns = {
+        "office":"urn:oasis:names:tc:opendocument:xmlns:office:1.0",
+        "table":"urn:oasis:names:tc:opendocument:xmlns:table:1.0",
+        "text":"urn:oasis:names:tc:opendocument:xmlns:text:1.0"
+    }
     root = ET.fromstring(xml)
     table = root.find(".//table:table", ns)
-    if table is None: return []
+    if table is None:
+        return []
     rows = table.findall("table:table-row", ns)
     def cell_text(cell):
-        parts=[]; 
-        for p in cell.findall(".//text:p", ns): parts.append("".join(p.itertext()))
+        parts = []
+        for p in cell.findall(".//text:p", ns):
+            parts.append("".join(p.itertext()))
         return (parts[0] if parts else "").strip()
-    if not rows: return []
+    if not rows:
+        return []
     header_cells = rows[0].findall("table:table-cell", ns)
     headers = [cell_text(c) for c in header_cells]
     def _find_idx(names:set):
         for i,h in enumerate(headers):
-            if (h or "").strip().lower() in names: return i
+            if (h or "").strip().lower() in names:
+                return i
         return -1
-    idx_en = _find_idx({"英文名稱","en"}); idx_zh = _find_idx({"中文名稱","zh"})
-    if idx_en<0 or idx_zh<0: return []
-    pairs=[]; seen=set()
+    idx_en = _find_idx({"英文名稱","en"})
+    idx_zh = _find_idx({"中文名稱","zh"})
+    if idx_en < 0 or idx_zh < 0:
+        return []
+    pairs = []
+    seen = set()
     for r in rows[1:]:
         cells = r.findall("table:table-cell", ns)
-        if idx_en>=len(cells) or idx_zh>=len(cells): continue
-        en = cell_text(cells[idx_en]).strip(); zh = cell_text(cells[idx_zh]).strip()
+        if idx_en >= len(cells) or idx_zh >= len(cells):
+            continue
+        en = cell_text(cells[idx_en]).strip()
+        zh = cell_text(cells[idx_zh]).strip()
         if en and zh and en not in seen:
-            zh = normalize_zh(to_zh_tw(zh)); pairs.append((en, zh)); seen.add(en)
+            zh = normalize_zh(to_zh_tw(zh))
+            pairs.append((en, zh))
+            seen.add(en)
     return pairs
 
 # ===== OpenAI API 呼叫 (整合版) =====
@@ -809,7 +894,7 @@ async def call_api(api_key, base_url, model, payload, retries=1):
 
     mname = (model or "").lower()
 
-    # === reasoning 模型相容性處理：o1 / o3 / gpt-5 系列 ===
+    # === reasoning / GPT-5 模型相容性處理 ===
     is_o1_o3   = mname.startswith("o1") or mname.startswith("o3")
     is_gpt5    = mname.startswith("gpt-5")
 
@@ -831,11 +916,10 @@ async def call_api(api_key, base_url, model, payload, retries=1):
         payload.pop("frequency_penalty", None)
         payload.pop("logit_bias", None)
 
-        # 如果你未來有用 max_tokens，就轉成 max_completion_tokens
+        # 若有 max_tokens，轉成 max_completion_tokens（新 API 參數）
         if "max_tokens" in payload and "max_completion_tokens" not in payload:
             payload["max_completion_tokens"] = payload.pop("max_tokens")
 
-    # === 後面原本的 try / retry 流程維持不變 ===
     for _ in range(retries + 1):
         try:
             resp = await pyfetch(url, method="POST", headers=headers, body=json.dumps(payload))
@@ -859,26 +943,40 @@ async def call_api(api_key, base_url, model, payload, retries=1):
 
 async def read_glossaries_from_file_input(input_id: str) -> List[Tuple[str,str]]:
     files = document.getElementById(input_id).files
-    if not files or files.length == 0: return []
+    if not files or files.length == 0:
+        return []
     pairs_all: List[Tuple[str,str]] = []
     for i in range(files.length):
-        f = files.item(i); name = (f.name or "").lower()
+        f = files.item(i)
+        name = (f.name or "").lower()
         try:
-            buf = await f.arrayBuffer(); raw = buf.to_py()
+            buf = await f.arrayBuffer()
+            raw = buf.to_py()
             b = raw if isinstance(raw, (bytes, bytearray)) else bytes(raw)
-            if name.endswith(".ods"): pairs_all.extend(load_glossary_ods_bytes(b))
-            elif name.endswith(".csv"): pairs_all.extend(load_glossary_csv_text(b.decode("utf-8","ignore")))
-        except Exception as e: print(f"Glossary error: {e}")
-    seen, dedup = set(), []
+            if name.endswith(".ods"):
+                pairs_all.extend(load_glossary_ods_bytes(b))
+            elif name.endswith(".csv"):
+                pairs_all.extend(load_glossary_csv_text(b.decode("utf-8","ignore")))
+        except Exception as e:
+            print(f"Glossary error: {e}")
+    seen = set()
+    dedup = []
     for en, zh in pairs_all:
-        if en not in seen: dedup.append((en, zh)); seen.add(en)
+        if en not in seen:
+            dedup.append((en, zh))
+            seen.add(en)
     return dedup
 
-async def _read_file_text(input_id: str)->Optional[str]:
+async def _read_file_text(input_id: str) -> Optional[str]:
     files = document.getElementById(input_id).files
-    if not files or files.length==0: return None
+    if not files or files.length == 0:
+        return None
     buf = await files.item(0).arrayBuffer()
     return bytes(buf.to_py()).decode("utf-8", "ignore")
+
+def _read_doctype(xml_text: str) -> str:
+    m = re.search(r'<!DOCTYPE[^>]+>', xml_text)
+    return m.group(0) if m else ""
 
 async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
                                          ts_text:str, glossary_pairs:List[Tuple[str,str]],
@@ -888,36 +986,46 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
     root = ET.fromstring(ts_text)
     matcher = LCSMatcher(glossary_pairs, min_token_len=4, min_lcs_len=4)
 
-    # === 解析 XML 與 Context (New) ===
-    tasks=[]
+    # === 解析 XML 與 Context ===
+    tasks = []
     for ctx in root.findall("context"):
         ctx_name_node = ctx.find("name")
         ctx_name = ctx_name_node.text if (ctx_name_node is not None) else ""
         
         for m in ctx.findall("message"):
             src = m.find("source")
-            if src is None or src.text is None: continue
+            if src is None or src.text is None:
+                continue
             
             # 抓取註釋
             extras = []
-            if ctx_name: extras.append(f"介面: {ctx_name}")
+            if ctx_name:
+                extras.append(f"介面: {ctx_name}")
             cmt = m.find("comment")
-            if cmt is not None and cmt.text: extras.append(f"註釋: {cmt.text}")
+            if cmt is not None and cmt.text:
+                extras.append(f"註釋: {cmt.text}")
             ext = m.find("extracomment")
-            if ext is not None and ext.text: extras.append(f"說明: {ext.text}")
+            if ext is not None and ext.text:
+                extras.append(f"說明: {ext.text}")
             
             ctx_str = " | ".join(extras)
             
             if needs_translation(src.text):
                 tasks.append({
-                    "node": m, "src": src.text, "context": ctx_str, 
+                    "node": m,
+                    "src": src.text,
+                    "context": ctx_str, 
                     "numerus": m.get("numerus")=="yes"
                 })
-            if limit_n > 0 and len(tasks) >= limit_n: break
-        if limit_n > 0 and len(tasks) >= limit_n: break
+            if limit_n > 0 and len(tasks) >= limit_n:
+                break
+        if limit_n > 0 and len(tasks) >= limit_n:
+            break
 
-    finished=0; total=len(tasks)
-    if total==0: return ET.tostring(root, encoding="utf-8")
+    finished = 0
+    total = len(tasks)
+    if total == 0:
+        return ET.tostring(root, encoding="utf-8")
 
     _compare_reset()
     _progress_setup(total)
@@ -929,7 +1037,14 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
             "name": "set_results",
             "description": "Save translations",
             "parameters": {
-                "type": "object", "properties": { "results": {"type": "array", "items": {"type": "string"}} }, "required": ["results"]
+                "type": "object",
+                "properties": {
+                    "results": {
+                        "type": "array",
+                        "items": {"type": "string"}
+                    }
+                },
+                "required": ["results"]
             }
         }
     }]
@@ -940,7 +1055,10 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
             await asyncio.sleep(0.2)
 
         batch = tasks[start:start+batch_size]
-        masked_inputs = []; maps = []; context_list = []; gls_list = []
+        masked_inputs = []
+        maps = []
+        context_list = []
+        gls_list = []
         
         # 準備資料
         for item in batch:
@@ -953,26 +1071,46 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
             maps.append(mp)
             context_list.append(item["context"])
             
-        # 建構 Prompt
+        # 建構 Input items
         items_json = json.dumps([
             {"id": k, "text": txt, "context": ctx, "glossary": gls} 
             for k, (txt, ctx, gls) in enumerate(zip(masked_inputs, context_list, gls_list))
         ], ensure_ascii=False)
 
-        sys_prompt = "你是台灣 GIS 在地化譯者。請參考 Context 與 Glossary 進行翻譯。保留所有 ⟦M數字⟧ 變數。"
-        user_prompt = f"請逐一翻譯:\n{items_json}"
+        sys_prompt = (
+            "你是台灣 GIS 在地化譯者。"
+            " 對於每一個項目，只翻譯 `text` 欄位中的英文內容成繁體中文（台灣用語）。"
+            " 可以參考 `context` 與 `glossary` 來判斷，但不要把 context 的文字（例如「介面: ...」「註釋: ...」）當成輸出的一部分。"
+            " 請呼叫工具 set_results，並只在 results 陣列中依序填入翻譯後的字串。"
+            " 務必保留所有 ⟦M數字⟧ 變數與 %1、{0} 這類 placeholder，不可遺失或改變順序。"
+        )
+        user_prompt = f"請逐一翻譯下列項目，僅翻譯 text 欄位內容，輸出陣列 results：\n{items_json}"
         
         zh_list = []
         
         try:
             if use_model2 and model2:
-                # 平行加速邏輯
+                # 兩次翻譯（A/B），再由第二模型選優
                 payload_a = {
-                    "model": model1, "temperature": 0.2, "tools": tools_schema,
+                    "model": model1,
+                    "temperature": 0.2,
+                    "tools": tools_schema,
                     "tool_choice": {"type":"function", "function":{"name":"set_results"}},
-                    "messages": [{"role":"system", "content": sys_prompt}, {"role":"user", "content": user_prompt}]
+                    "messages": [
+                        {"role":"system", "content": sys_prompt},
+                        {"role":"user", "content": user_prompt}
+                    ]
                 }
-                payload_b = {**payload_a, "temperature": 0.8} # 溫度差異化
+                payload_b = {
+                    "model": model1,
+                    "temperature": 0.8,
+                    "tools": tools_schema,
+                    "tool_choice": {"type":"function", "function":{"name":"set_results"}},
+                    "messages": [
+                        {"role":"system", "content": sys_prompt},
+                        {"role":"user", "content": user_prompt}
+                    ]
+                }
                 
                 res_a, res_b = await asyncio.gather(
                     call_api(api_key, base_url, model1, payload_a),
@@ -983,16 +1121,31 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
                 list_b = res_b.get("results", []) if res_b else [""] * len(batch)
                 
                 # 補齊長度
-                if len(list_a) < len(batch): list_a += [""] * (len(batch)-len(list_a))
-                if len(list_b) < len(batch): list_b += [""] * (len(batch)-len(list_b))
+                if len(list_a) < len(batch):
+                    list_a += [""] * (len(batch) - len(list_a))
+                if len(list_b) < len(batch):
+                    list_b += [""] * (len(batch) - len(list_b))
                 
                 # 校對選擇
-                sel_items = [{"src": t["src"], "ctx": t["context"], "A": a, "B": b} for t, a, b in zip(batch, list_a, list_b)]
+                sel_items = [
+                    {"src": t["src"], "ctx": t["context"], "A": a, "B": b}
+                    for t, a, b in zip(batch, list_a, list_b)
+                ]
                 sel_payload = {
-                    "model": model2, "temperature": 0.1, "tools": tools_schema,
+                    "model": model2,
+                    "temperature": 0.1,
+                    "tools": tools_schema,
                     "tool_choice": {"type":"function", "function":{"name":"set_results"}},
                     "messages": [
-                        {"role":"system", "content": "你是嚴格的校對員。請比較 A 與 B 版譯文，並『回傳最好的那句翻譯內容』。注意：請直接輸出翻譯文字，絕對不要只回傳 'A' 或 'B' 這種代號。若兩者皆差請直接重寫。"},
+                        {
+                            "role":"system",
+                            "content": (
+                                "你是嚴格的校對員。比較 A 與 B 版譯文，"
+                                "並在 results 中『直接輸出最好的那句翻譯內容』。"
+                                "注意：請直接輸出翻譯文字，絕對不要只回傳 'A' 或 'B' 這種代號。"
+                                "若兩者皆差請直接重寫，但也要遵守 placeholder 與格式。"
+                            )
+                        },
                         {"role":"user", "content": json.dumps(sel_items, ensure_ascii=False)}
                     ]
                 }
@@ -1001,9 +1154,14 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
             else:
                 # 單一模型
                 payload = {
-                    "model": model1, "temperature": 0.2, "tools": tools_schema,
+                    "model": model1,
+                    "temperature": 0.2,
+                    "tools": tools_schema,
                     "tool_choice": {"type":"function", "function":{"name":"set_results"}},
-                    "messages": [{"role":"system", "content": sys_prompt}, {"role":"user", "content": user_prompt}]
+                    "messages": [
+                        {"role":"system", "content": sys_prompt},
+                        {"role":"user", "content": user_prompt}
+                    ]
                 }
                 res = await call_api(api_key, base_url, model1, payload)
                 zh_list = res.get("results", []) if res else [""] * len(batch)
@@ -1014,10 +1172,12 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
 
         # 寫回 XML + UI 更新
         for k, zh_raw in enumerate(zh_list):
-            if k >= len(batch): break
+            if k >= len(batch):
+                break
             item = batch[k]
             
-            if not zh_raw: continue # 跳過失敗
+            if not zh_raw:
+                continue  # 跳過失敗
             
             # 還原與後處理
             zh = _unmask_text(zh_raw, maps[k])
@@ -1025,6 +1185,9 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
             zh = strip_all_newlines(zh)
             zh = fix_zh_punct(zh)
             zh = normalize_zh(to_zh_tw(zh))
+
+            # ★ 新增：避免 context 被當成翻譯 + 保護 enum 名稱 ★
+            zh = fix_context_leak(item["src"], zh, item["context"])
             
             # 強制變數檢查
             if not validate_placeholders(item["src"], zh):
@@ -1032,17 +1195,20 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
 
             m = item["node"]
             trans = m.find("translation")
-            if trans is None: trans = ET.SubElement(m, "translation")
+            if trans is None:
+                trans = ET.SubElement(m, "translation")
 
             if item["numerus"]:
                 forms = trans.findall("numerusform")
-                if not forms: forms=[ET.SubElement(trans, "numerusform")]
-                for f in forms: f.text = zh
+                if not forms:
+                    forms = [ET.SubElement(trans, "numerusform")]
+                for f in forms:
+                    f.text = zh
             else:
                 trans.text = zh
-            if "type" in trans.attrib: trans.attrib.pop("type", None)
+            if "type" in trans.attrib:
+                trans.attrib.pop("type", None)
 
-            # 傳入 context 顯示在 UI
             _compare_add(item["src"], zh, item["context"])
             finished += 1
             _progress_tick(finished, total)
@@ -1051,21 +1217,22 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
 
     xml_bytes = ET.tostring(root, encoding="utf-8")
     head = b'<?xml version="1.0" encoding="utf-8"?>'
-    if doctype: xml_bytes = head + (doctype).encode("utf-8") + xml_bytes
-    else: xml_bytes = head + b"\n" + xml_bytes
+    if doctype:
+        xml_bytes = head + doctype.encode("utf-8") + xml_bytes
+    else:
+        xml_bytes = head + b"\n" + xml_bytes
     return xml_bytes
 
-def _read_doctype(xml_text: str) -> str:
-    m = re.search(r'<!DOCTYPE[^>]+>', xml_text)
-    return m.group(0) if m else ""
+# ===== 事件入口 =====
+_BUSY = False
 
-# ===== 事件 =====
-_BUSY=False
 async def _on_click(evt=None):
     global _BUSY
     if _BUSY:
-        _set_ui_msg("<span style='color:#b00'>正在處理，請稍候...</span>"); return
-    _BUSY=True; _set_ui_msg("")
+        _set_ui_msg("<span style='color:#b00'>正在處理，請稍候...</span>")
+        return
+    _BUSY = True
+    _set_ui_msg("")
     
     # 顯示暫停按鈕
     document.getElementById("pause-btn").style.display = "block"
@@ -1073,42 +1240,59 @@ async def _on_click(evt=None):
     try:
         api = document.getElementById("apiKey").value.strip()
         base_url = document.getElementById("baseUrl").value.strip() or "https://api.openai.com/v1"
-        sel1 = document.getElementById("modelSel"); model1 = sel1.value
-        if model1 == "__custom__": model1 = document.getElementById("modelCustom").value.strip()
+        sel1 = document.getElementById("modelSel")
+        model1 = sel1.value
+        if model1 == "__custom__":
+            model1 = document.getElementById("modelCustom").value.strip()
         use2 = bool(document.getElementById("useModel2").checked)
-        sel2 = document.getElementById("modelSel2"); model2 = sel2.value
-        if model2 == "__custom__": model2 = document.getElementById("modelCustom2").value.strip()
+        sel2 = document.getElementById("modelSel2")
+        model2 = sel2.value
+        if model2 == "__custom__":
+            model2 = document.getElementById("modelCustom2").value.strip()
         batch = int(document.getElementById("batch").value or "32")
         limitN = int(document.getElementById("limitN").value or "200")
 
-        if not api: _set_ui_msg("<span style='color:#b00'>請輸入 API Key</span>"); return
-        if not model1: _set_ui_msg("<span style='color:#b00'>請選擇或輸入 Model-1</span>"); return
-        if use2 and not model2: _set_ui_msg("<span style='color:#b00'>請選擇或輸入 Model-2</span>"); return
+        if not api:
+            _set_ui_msg("<span style='color:#b00'>請輸入 API Key</span>")
+            return
+        if not model1:
+            _set_ui_msg("<span style='color:#b00'>請選擇或輸入 Model-1</span>")
+            return
+        if use2 and not model2:
+            _set_ui_msg("<span style='color:#b00'>請選擇或輸入 Model-2</span>")
+            return
 
         ts_text = await _read_file_text("tsFile")
-        if not ts_text: _set_ui_msg("<span style='color:#b00'>請上傳 .ts 檔</span>"); return
+        if not ts_text:
+            _set_ui_msg("<span style='color:#b00'>請上傳 .ts 檔</span>")
+            return
 
         pairs = await read_glossaries_from_file_input("glsFile")
 
         _set_ui_msg("連線中...")
         xml_bytes = await run_translation_pipeline_async(
-            api_key=api, base_url=base_url, model1=model1,
-            ts_text=ts_text, glossary_pairs=pairs,
-            batch_size=batch, limit_n=limitN,
-            use_model2=use2, model2=model2
+            api_key=api,
+            base_url=base_url,
+            model1=model1,
+            ts_text=ts_text,
+            glossary_pairs=pairs,
+            batch_size=batch,
+            limit_n=limitN,
+            use_model2=use2,
+            model2=model2
         )
 
         out_name = "qgis_zh-Hant.ts"
         b64 = base64.b64encode(xml_bytes).decode("ascii")
-        link=f'<a download="{out_name}" href="data:application/octet-stream;base64,{b64}">下載 {out_name}</a>'
+        link = f'<a download="{out_name}" href="data:application/octet-stream;base64,{b64}">下載 {out_name}</a>'
         _set_ui_msg(link + "　<span style='color:#0a0'>完成！</span>")
-        document.getElementById("pause-btn").style.display = "none" # 完成後隱藏
+        document.getElementById("pause-btn").style.display = "none"
     except Exception as e:
         _set_ui_msg(f"<span style='color:#b00'>發生錯誤：{html.escape(str(e))}</span>")
         traceback.print_exc()
         document.getElementById("pause-btn").style.display = "none"
     finally:
-        _BUSY=False
+        _BUSY = False
 
 _BTN_PROXY = create_proxy(lambda evt: asyncio.ensure_future(_on_click(evt)))
 document.getElementById("run-btn").addEventListener("click", _BTN_PROXY)
