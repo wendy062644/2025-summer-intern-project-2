@@ -297,11 +297,11 @@ title: API
               <optgroup label="GPT-5">
                 <option value="gpt-5">gpt-5</option>
                 <option value="gpt-5-mini">gpt-5-mini</option>
-                <option value="gpt-5-nano">gpt-5-nano</option>
+                <option value="gpt-5-nano" selected>gpt-5-nano</option>
               </optgroup>
               <optgroup label="GPT-4.1">
                 <option value="gpt-4.1">gpt-4.1</option>
-                <option value="gpt-4.1-mini" selected>gpt-4.1-mini</option>
+                <option value="gpt-4.1-mini">gpt-4.1-mini</option>
                 <option value="gpt-4.1-nano">gpt-4.1-nano</option>
               </optgroup>
               <optgroup label="GPT-4o">
@@ -805,10 +805,16 @@ def load_glossary_ods_bytes(ods_bytes: bytes)->List[Tuple[str,str]]:
 
 async def call_api(api_key, base_url, model, payload, retries=1):
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
-    url = base_url.rstrip("/") + ("/chat/completions" if "chat" in base_url or True else "/chat/completions")
-    
-    # O1 模型相容性處理
-    if model.lower().startswith(("o1", "o3")):
+    url = base_url.rstrip("/") + "/chat/completions"
+
+    mname = (model or "").lower()
+
+    # === reasoning 模型相容性處理：o1 / o3 / gpt-5 系列 ===
+    is_o1_o3   = mname.startswith("o1") or mname.startswith("o3")
+    is_gpt5    = mname.startswith("gpt-5")
+
+    if is_o1_o3:
+        # o1 / o3 不能用 system，用 user 包起來
         new_msgs = []
         for m in payload.get("messages", []):
             if m["role"] == "system":
@@ -816,25 +822,36 @@ async def call_api(api_key, base_url, model, payload, retries=1):
             else:
                 new_msgs.append(m)
         payload["messages"] = new_msgs
+
+    if is_o1_o3 or is_gpt5:
+        # 這些 reasoning 模型都不吃 temperature / penalty 等參數
         payload.pop("temperature", None)
-        payload["max_completion_tokens"] = payload.pop("max_tokens", 4000)
-    
+        payload.pop("top_p", None)
+        payload.pop("presence_penalty", None)
+        payload.pop("frequency_penalty", None)
+        payload.pop("logit_bias", None)
+
+        # 如果你未來有用 max_tokens，就轉成 max_completion_tokens
+        if "max_tokens" in payload and "max_completion_tokens" not in payload:
+            payload["max_completion_tokens"] = payload.pop("max_tokens")
+
+    # === 後面原本的 try / retry 流程維持不變 ===
     for _ in range(retries + 1):
         try:
             resp = await pyfetch(url, method="POST", headers=headers, body=json.dumps(payload))
             data = await resp.json()
             if resp.status >= 400:
                 raise Exception(f"API Error {resp.status}: {data.get('error', {}).get('message')}")
-            
+
             choice = data["choices"][0]
             if choice["message"].get("tool_calls"):
                 arg_str = choice["message"]["tool_calls"][0]["function"]["arguments"]
                 return json.loads(arg_str)
             if choice["message"].get("content"):
                 return json.loads(choice["message"]["content"])
-                
         except Exception as e:
-            if _ == retries: return None
+            if _ == retries:
+                return None
             await asyncio.sleep(1)
     return None
 
