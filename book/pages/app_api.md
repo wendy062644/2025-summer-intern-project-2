@@ -448,13 +448,16 @@ await pyodide.loadPackage("micropip");
   const limitN   = document.getElementById('limitN');
   const countInfo= document.getElementById('countInfo');
   countInfo.textContent = ' / 0';
+  
   function needsTranslationJS(text){
     if (!text) return false;
     const t = String(text).trim();
     if (!t) return false;
+    // 嚴格排除純數字符號
     if (/^[\s\d\W%{}]+$/u.test(t)) return false;
     return true;
   }
+
   async function handleTsChange(){
     const file = tsFile.files && tsFile.files[0];
     if (!file){ countInfo.textContent = ' / 0'; limitN.removeAttribute('max'); return; }
@@ -464,6 +467,7 @@ await pyodide.loadPackage("micropip");
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(txt, 'application/xml');
       const hasErr = xmlDoc.getElementsByTagName('parsererror').length > 0;
+      
       if (!hasErr){
         const sources = xmlDoc.getElementsByTagName('source');
         for (let i = 0; i < sources.length; i++){
@@ -471,12 +475,14 @@ await pyodide.loadPackage("micropip");
           if (needsTranslationJS(s)) total++;
         }
       } else {
+        // XML 解析失敗時的備案 Regex
         const matches = txt.match(/<source>([\s\S]*?)<\/source>/g) || [];
         for (const m of matches){
           const inner = m.replace(/^<source>|<\/source>$/g, '');
           if (needsTranslationJS(inner)) total++;
         }
       }
+      
       if (total > 0){
         limitN.value = total;
         limitN.max   = String(total);
@@ -492,6 +498,7 @@ await pyodide.loadPackage("micropip");
       limitN.removeAttribute('max');
     }
   }
+
   function clampLimit(){
     const max = Number(limitN.max || '0');
     let v = Number(limitN.value || '0');
@@ -523,21 +530,22 @@ await pyodide.loadPackage("micropip");
   sync();
 })();
 
-// === 暫停邏輯 ===
+// 暫停邏輯
 window._TS_PAUSED = false;
 const pauseBtn = document.getElementById("pause-btn");
 pauseBtn.addEventListener("click", function(){
   window._TS_PAUSED = !window._TS_PAUSED;
   if(window._TS_PAUSED){
     pauseBtn.textContent = "繼續";
-    pauseBtn.style.background = "#059669"; // 綠色：恢復
+    pauseBtn.style.background = "#059669"; 
   } else {
     pauseBtn.textContent = "暫停";
-    pauseBtn.style.background = "#d97706"; // 橘色：暫停
+    pauseBtn.style.background = "#d97706"; 
   }
 });
 
 const $msg = document.getElementById("ts-ui-msg");
+let pyodide;
 try {
   await pyodide.runPythonAsync(String.raw`
 import asyncio, json, re, io, base64, traceback, html, csv, zipfile
