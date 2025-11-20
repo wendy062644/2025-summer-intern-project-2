@@ -440,9 +440,9 @@ title: API
 
 <script type="module">
 import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.mjs";
-const pyodide = await loadPyodide();
-await pyodide.loadPackage("micropip");
 
+// 1. 【優先執行】UI 設定區塊
+// 將這段移到最上面，確保一開網頁就能計算行數、切換選項
 (function setupTsCounter(){
   const tsFile   = document.getElementById('tsFile');
   const limitN   = document.getElementById('limitN');
@@ -453,7 +453,6 @@ await pyodide.loadPackage("micropip");
     if (!text) return false;
     const t = String(text).trim();
     if (!t) return false;
-    // 嚴格排除純數字符號
     if (/^[\s\d\W%{}]+$/u.test(t)) return false;
     return true;
   }
@@ -475,7 +474,6 @@ await pyodide.loadPackage("micropip");
           if (needsTranslationJS(s)) total++;
         }
       } else {
-        // XML 解析失敗時的備案 Regex
         const matches = txt.match(/<source>([\s\S]*?)<\/source>/g) || [];
         for (const m of matches){
           const inner = m.replace(/^<source>|<\/source>$/g, '');
@@ -544,9 +542,28 @@ pauseBtn.addEventListener("click", function(){
   }
 });
 
+// 2. 【後續執行】載入 Pyodide
 const $msg = document.getElementById("ts-ui-msg");
-let pyodide;
+let pyodide; // 統一在這裡宣告
+
+// 初始化按鈕狀態，避免使用者在 Python 沒載好前就按
+const runBtn = document.getElementById("run-btn");
+runBtn.disabled = true;
+runBtn.textContent = "環境載入中...";
+
 try {
+  // 這裡才開始跑 await，不會卡住上面的 UI 事件綁定
+  pyodide = await loadPyodide();
+  await pyodide.loadPackage("micropip");
+  
+  // 安裝 OpenCC (在 Python 內或這裡裝都可以，這裡裝比較好掌握進度)
+  // 注意：這一步需要網路，如果 OpenCC 安裝較久，使用者可以先看 UI
+  
+  runBtn.disabled = false;
+  runBtn.textContent = "執行翻譯";
+  $msg.innerHTML = "<span style='color:#059669; font-size:0.9em;'>系統就緒 (Python 已載入)</span>";
+
+  // 載入 Python 核心邏輯
   await pyodide.runPythonAsync(String.raw`
 import asyncio, json, re, io, base64, traceback, html, csv, zipfile
 from typing import List, Tuple, Dict, Optional
@@ -555,12 +572,10 @@ from js import document, window
 from pyodide.http import pyfetch
 from pyodide.ffi import create_proxy
 
-try:
-    from opencc import OpenCC
-except ModuleNotFoundError:
-    import micropip
-    await micropip.install("opencc-python-reimplemented==0.1.7")
-    from opencc import OpenCC
+# 安裝 opencc
+import micropip
+await micropip.install("opencc-python-reimplemented==0.1.7")
+from opencc import OpenCC
 
 _OPENCC = OpenCC("s2twp")
 _TW_PROTECT_TERMS = ["演算法", "專案", "圖層", "外掛", "巨集", "快取", "佈局", "拓撲", "向量", "網格", "波段"]
@@ -608,33 +623,18 @@ def strip_all_newlines(s: Optional[str]) -> str:
 
 # ====== 翻譯後修正：避免把 Context 當成翻譯，以及保護 enum 名稱 ======
 def fix_context_leak(src: str, zh: str, context: str) -> str:
-    """
-    - 若 zh 等於 / 以 context 開頭（例如 '介面: Animation3DWidget'），視為誤譯，改回 src
-    - 若 src 是類似 InQuad / OutInQuad 的 enum 名稱：
-      - src 為純英文/數字/底線，且 zh 沒有任何中文，就直接保留 src
-    """
     if not zh:
         return zh
-
     zhs = zh.strip()
     ctx = (context or "").strip()
-
-    # 只拿 context 的前半段（避免包含「| 註釋: ...」）
     ctx_head = ctx.split("|", 1)[0].strip() if ctx else ""
 
-    # 1) 模型把 context 當成輸出：完全一樣或前綴
     if ctx_head and (zhs == ctx_head or zhs.startswith(ctx_head)):
         return src
-
-    # 2) 明顯是「介面: XXX」開頭，也當作誤譯
     if zhs.startswith("介面:"):
         return src
-
-    # 3) enum / 常數名（純英數底線，不含空白），且譯文完全沒有中文字：保留原文
-    #    例如 InQuad / OutInQuad / Animation3DWidget
     if re.fullmatch(r"[A-Za-z0-9_]+", src) and not re.search(r"[\u4e00-\u9fff]", zhs):
         return src
-
     return zh
 
 # ====== 強制變數檢查 ======
@@ -687,7 +687,6 @@ def _compare_add(src_text:str, zh_text:str, context_info:str=""):
             td.textContent = txt
         return td
 
-    # 顯示 Context (若有)
     display_src = src_text
     if context_info:
         display_src = (
@@ -901,13 +900,10 @@ async def call_api(api_key, base_url, model, payload, retries=1):
     url = base_url.rstrip("/") + "/chat/completions"
 
     mname = (model or "").lower()
-
-    # === reasoning / GPT-5 模型相容性處理 ===
     is_o1_o3   = mname.startswith("o1") or mname.startswith("o3")
     is_gpt5    = mname.startswith("gpt-5")
 
     if is_o1_o3:
-        # o1 / o3 不能用 system，用 user 包起來
         new_msgs = []
         for m in payload.get("messages", []):
             if m["role"] == "system":
@@ -917,14 +913,11 @@ async def call_api(api_key, base_url, model, payload, retries=1):
         payload["messages"] = new_msgs
 
     if is_o1_o3 or is_gpt5:
-        # 這些 reasoning 模型都不吃 temperature / penalty 等參數
         payload.pop("temperature", None)
         payload.pop("top_p", None)
         payload.pop("presence_penalty", None)
         payload.pop("frequency_penalty", None)
         payload.pop("logit_bias", None)
-
-        # 若有 max_tokens，轉成 max_completion_tokens（新 API 參數）
         if "max_tokens" in payload and "max_completion_tokens" not in payload:
             payload["max_completion_tokens"] = payload.pop("max_tokens")
 
@@ -994,7 +987,6 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
     root = ET.fromstring(ts_text)
     matcher = LCSMatcher(glossary_pairs, min_token_len=4, min_lcs_len=4)
 
-    # === 解析 XML 與 Context ===
     tasks = []
     for ctx in root.findall("context"):
         ctx_name_node = ctx.find("name")
@@ -1005,7 +997,6 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
             if src is None or src.text is None:
                 continue
             
-            # 抓取註釋
             extras = []
             if ctx_name:
                 extras.append(f"介面: {ctx_name}")
@@ -1038,7 +1029,6 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
     _compare_reset()
     _progress_setup(total)
     
-    # 定義輸出格式
     tools_schema = [{
         "type": "function",
         "function": {
@@ -1058,7 +1048,6 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
     }]
 
     for start in range(0, total, batch_size):
-        # === 暫停檢測 ===
         while window._TS_PAUSED:
             await asyncio.sleep(0.2)
 
@@ -1068,7 +1057,6 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
         context_list = []
         gls_list = []
         
-        # 準備資料
         for item in batch:
             src_text = item["src"]
             g = matcher.build_glossary_sentence_first(src_text)
@@ -1079,7 +1067,6 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
             maps.append(mp)
             context_list.append(item["context"])
             
-        # 建構 Input items
         items_json = json.dumps([
             {"id": k, "text": txt, "context": ctx, "glossary": gls} 
             for k, (txt, ctx, gls) in enumerate(zip(masked_inputs, context_list, gls_list))
@@ -1087,8 +1074,8 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
 
         sys_prompt = (
             "你是台灣 GIS 在地化譯者。"
-            " 對於每一個項目，只翻譯 `text` 欄位中的英文內容成繁體中文（台灣用語）。"
-            " 可以參考 `context` 與 `glossary` 來判斷，但不要把 context 的文字（例如「介面: ...」「註釋: ...」）當成輸出的一部分。"
+            " 對於每一個項目，只翻譯 \`text\` 欄位中的英文內容成繁體中文（台灣用語）。"
+            " 可以參考 \`context\` 與 \`glossary\` 來判斷，但不要把 context 的文字（例如「介面: ...」「註釋: ...」）當成輸出的一部分。"
             " 請呼叫工具 set_results，並只在 results 陣列中依序填入翻譯後的字串。"
             " 務必保留所有 ⟦M數字⟧ 變數與 %1、{0} 這類 placeholder，不可遺失或改變順序。"
         )
@@ -1098,7 +1085,6 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
         
         try:
             if use_model2 and model2:
-                # 兩次翻譯（A/B），再由第二模型選優
                 payload_a = {
                     "model": model1,
                     "temperature": 0.2,
@@ -1128,13 +1114,11 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
                 list_a = res_a.get("results", []) if res_a else [""] * len(batch)
                 list_b = res_b.get("results", []) if res_b else [""] * len(batch)
                 
-                # 補齊長度
                 if len(list_a) < len(batch):
                     list_a += [""] * (len(batch) - len(list_a))
                 if len(list_b) < len(batch):
                     list_b += [""] * (len(batch) - len(list_b))
                 
-                # 校對選擇
                 sel_items = [
                     {"src": t["src"], "ctx": t["context"], "A": a, "B": b}
                     for t, a, b in zip(batch, list_a, list_b)
@@ -1160,7 +1144,6 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
                 res_final = await call_api(api_key, base_url, model2, sel_payload)
                 zh_list = res_final.get("results", []) if res_final else list_a
             else:
-                # 單一模型
                 payload = {
                     "model": model1,
                     "temperature": 0.2,
@@ -1178,26 +1161,21 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
             print(f"Batch failed: {e}")
             zh_list = [""] * len(batch)
 
-        # 寫回 XML + UI 更新
         for k, zh_raw in enumerate(zh_list):
             if k >= len(batch):
                 break
             item = batch[k]
             
             if not zh_raw:
-                continue  # 跳過失敗
+                continue
             
-            # 還原與後處理
             zh = _unmask_text(zh_raw, maps[k])
             zh = _et_ready(zh)
             zh = strip_all_newlines(zh)
             zh = fix_zh_punct(zh)
             zh = normalize_zh(to_zh_tw(zh))
-
-            # ★ 新增：避免 context 被當成翻譯 + 保護 enum 名稱 ★
             zh = fix_context_leak(item["src"], zh, item["context"])
             
-            # 強制變數檢查
             if not validate_placeholders(item["src"], zh):
                 zh = f"[變數錯誤] {zh}"
 
@@ -1241,8 +1219,6 @@ async def _on_click(evt=None):
         return
     _BUSY = True
     _set_ui_msg("")
-    
-    # 顯示暫停按鈕
     document.getElementById("pause-btn").style.display = "block"
     
     try:
@@ -1304,7 +1280,7 @@ async def _on_click(evt=None):
 
 _BTN_PROXY = create_proxy(lambda evt: asyncio.ensure_future(_on_click(evt)))
 document.getElementById("run-btn").addEventListener("click", _BTN_PROXY)
-`);
+  `);
 } catch (e) {
   console.error(e);
   $msg.innerHTML = `<span style="color:#b00">Python 載入失敗：${String(e)}</span>`;
