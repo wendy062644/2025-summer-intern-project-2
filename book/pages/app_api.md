@@ -1,9 +1,9 @@
-<!DOCTYPE html>
-<html lang="zh-TW" data-theme="light">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>API</title>
+---
+title: API
+---
+
+# ChatGPT API 翻譯
+
 <style>
   .bd-sidebar-secondary { display: none !important; }
   .bd-content,
@@ -674,26 +674,6 @@ class LCSMatcher:
                 self.soft_index[key] = (r["en"], r["zh"])
                 self.max_soft_len = max(self.max_soft_len, len(key.split()))
 
-    def _topk_for_word(self, token:str, k:int=3)->List[Dict]:
-        t_norm = token.lower()
-        if len(t_norm) < self.min_token_len: return []
-        t_chars = set(t_norm)
-        cand = [r for r in self.rows if len(t_chars & r["charset"])>0]
-        res=[]
-        def anchored_prefix_sub_in(token_norm:str, cand_norm:str):
-            if not token_norm or not cand_norm: return 0,""
-            max_k = min(len(token_norm), len(cand_norm))
-            for kk in range(max_k,0,-1):
-                sub = token_norm[:kk]
-                if sub in cand_norm: return kk, sub
-            return 0,""
-        for r in cand:
-            kk, sub = anchored_prefix_sub_in(t_norm, r["en_norm"])
-            if kk >= self.min_lcs_len:
-                res.append({"token":token,"en":r["en"],"zh":r["zh"],"lcs_len":kk})
-        res.sort(key=lambda d: (-d["lcs_len"], len(d["en"])) )
-        return res[:k]
-
     def build_glossary_sentence_first(self, text:str, *, limit:int=12, per_word_k:int=3, min_lcs_len:int=4)->Dict[str,str]:
         text_clean = _MASK_PAT.sub(" ", text)
         tokens = _TOKEN_RE.findall(text_clean)
@@ -721,6 +701,26 @@ class LCSMatcher:
                     glossary[r["en"]] = r["zh"]; covered[idx]=True
                     if len(glossary)>=limit: break
         return glossary
+        
+    def _topk_for_word(self, token:str, k:int=3)->List[Dict]:
+        t_norm = token.lower()
+        if len(t_norm) < self.min_token_len: return []
+        t_chars = set(t_norm)
+        cand = [r for r in self.rows if len(t_chars & r["charset"])>0]
+        res=[]
+        def anchored_prefix_sub_in(token_norm:str, cand_norm:str):
+            if not token_norm or not cand_norm: return 0,""
+            max_k = min(len(token_norm), len(cand_norm))
+            for kk in range(max_k,0,-1):
+                sub = token_norm[:kk]
+                if sub in cand_norm: return kk, sub
+            return 0,""
+        for r in cand:
+            kk, sub = anchored_prefix_sub_in(t_norm, r["en_norm"])
+            if kk >= self.min_lcs_len:
+                res.append({"token":token,"en":r["en"],"zh":r["zh"],"lcs_len":kk})
+        res.sort(key=lambda d: (-d["lcs_len"], len(d["en"])) )
+        return res[:k]
 
 # ===== 讀 CSV / ODS =====
 
