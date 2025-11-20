@@ -946,7 +946,7 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
                     "model": model2, "temperature": 0.1, "tools": tools_schema,
                     "tool_choice": {"type":"function", "function":{"name":"set_results"}},
                     "messages": [
-                        {"role":"system", "content": "你是嚴格的校對員。請從 A, B 中選出變數 (%s, {0}) 正確且符合台灣 GIS 用語的譯文。若皆差請修正。"},
+                        {"role":"system", "content": "你是嚴格的校對員。請比較 A 與 B 版譯文，並『回傳最好的那句翻譯內容』。注意：請直接輸出翻譯文字，絕對不要只回傳 'A' 或 'B' 這種代號。若兩者皆差請直接重寫。"},
                         {"role":"user", "content": json.dumps(sel_items, ensure_ascii=False)}
                     ]
                 }
