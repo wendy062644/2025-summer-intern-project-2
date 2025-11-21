@@ -580,7 +580,7 @@ _TW_PROTECT_TERMS = ["演算法", "專案", "圖層", "外掛", "巨集", "快�
 
 _COORD_RE = re.compile(r"坐標")
 _MASK_PAT = re.compile(
-    r'(</?[A-Za-z][^>]*>|&lt;/?[A-Za-z][^&]*?&gt;|%L\d+|%\d+|%[sdn]|\{\d+\}|&(?!\s)[A-Za-z#x0-9]+;)',
+    r'(</?[A-Za-z][^>]*>|&lt;/?[A-Za-z][^&]*?&gt;|&(?!\s)[A-Za-z#x0-9]+;)',
     re.IGNORECASE
 )
 _SEP_RE = re.compile(r"[-\s/_.\\]+")
@@ -634,6 +634,29 @@ def fix_context_leak(src: str, zh: str, context: str) -> str:
     if re.fullmatch(r"[A-Za-z0-9_]+", src) and not re.search(r"[\u4e00-\u9fff]", zhs):
         return src
     return zh
+
+def repair_placeholders(src: str, trans: str) -> tuple[str, bool]:
+    pat = re.compile(r"(%L\d+|%\d+|%[sdn]|\{\d+\})")
+
+    src_list = pat.findall(src)
+    tr_list  = pat.findall(trans)
+
+    # 完全沒有 placeholder，當作 OK
+    if not src_list and not tr_list:
+        return trans, True
+
+    # 數量不一樣，基本上修不了，只能回報錯誤
+    if len(src_list) != len(tr_list):
+        return trans, False
+
+    fixed = trans
+    # 依照出現順序，把翻譯裡的 placeholder 換成原始的形式
+    for s_ph, t_ph in zip(src_list, tr_list):
+        if s_ph != t_ph:
+            fixed = fixed.replace(t_ph, s_ph, 1)
+
+    # 再檢查一次
+    return fixed, (pat.findall(fixed) == src_list)
 
 # ====== 強制變數檢查 ======
 def validate_placeholders(src: str, trans: str) -> bool:
@@ -1173,9 +1196,10 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
             zh = strip_all_newlines(zh)
             zh = fix_zh_punct(zh)
             zh = normalize_zh(to_zh_tw(zh))
+            zh, ok_ph = repair_placeholders(item["src"], zh)
             zh = fix_context_leak(item["src"], zh, item["context"])
             
-            if not validate_placeholders(item["src"], zh):
+            if not ok_ph:
                 zh = f"[變數錯誤] {zh}"
 
             m = item["node"]
