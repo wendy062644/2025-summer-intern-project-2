@@ -665,6 +665,20 @@ def validate_placeholders(src: str, trans: str) -> bool:
     trans_set = sorted(pat.findall(trans))
     return src_set == trans_set
 
+# ====== 結構符號強制修復 ======
+def restore_leading_symbols(src: str, trans: str) -> str:
+    m = re.match(r"^([)\]};:,.|]+)", src)
+    if not m:
+        return trans
+    head = m.group(1)
+    if trans.startswith(head):
+        return trans
+    for i in range(len(head)):
+        suffix = head[i:]
+        if trans.startswith(suffix):
+            return head[:i] + trans
+    return head + trans
+
 # ====== UI Functions ======
 
 def _set_ui_msg(msg_html: str):
@@ -1199,6 +1213,7 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
             zh = normalize_zh(to_zh_tw(zh))
             zh, ok_ph = repair_placeholders(item["src"], zh)
             zh = fix_context_leak(item["src"], zh, item["context"])
+            zh = restore_leading_symbols(item["src"], zh)
             
             if not ok_ph:
                 zh = f"[變數錯誤] {zh}"
