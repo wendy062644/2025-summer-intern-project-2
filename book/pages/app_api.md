@@ -1076,7 +1076,7 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
             " 可以參考 \`context\` 與 \`glossary\` 來判斷，但不要把 context 的文字（例如「介面: ...」「註釋: ...」）當成輸出的一部分"
             " 請呼叫工具 set_results，並只在 results 陣列中依序填入翻譯後的字串"
             " 務必保留所有 ⟦M數字⟧ 變數與 %1、{0} 這類 placeholder，不可遺失或改變順序"
-            " 若字串看起來是常數、enum 名稱或函式名稱，優先保留英文原文不翻"
+            " 若字串看起來是常數、enum 名稱、函式名稱、人名或英文縮寫，優先保留原文不翻，例如: InCirC、shepard 則保持原文"
             " 若沒有合適或確定的中文翻譯，寧可保留英文原文，不要亂造詞"
         )
         user_prompt = f"請逐一翻譯下列項目，僅翻譯 text 欄位內容，輸出陣列 results：\n{items_json}"
