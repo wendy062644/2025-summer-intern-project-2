@@ -1158,7 +1158,7 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
                             "role":"system",
                             "content": (
                                 "你是嚴格的校對員。比較並參考 A 與 B 版譯文，並檢查格式是否與原文正確"
-                                "若有漏翻、特殊符號缺漏、全形符號或格式錯誤，則修正或補上後再輸出"
+                                "若有漏翻、特殊符號缺漏、全形符號或格式錯誤，則修正或補上後再輸出，即使只有一個右括號"
                                 "並檢查其翻譯是否正確，若非 GIS 軟體用法，則輸出原文"
                             )
                         },
