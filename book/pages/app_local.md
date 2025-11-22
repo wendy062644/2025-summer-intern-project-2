@@ -7,6 +7,30 @@ thebe: false
 
 ```{raw} html
 <style>
+  #ts-ui{
+    --ts-gap: 12px;
+    --ts-pad: 14px;
+    --ts-radius: 12px;
+    --ts-border: #e5e7eb;
+    --ts-bg: #fff;
+    --ts-muted: #6b7280;
+    --ts-text: #111827;
+    --ts-accent: #2563eb;
+    --ts-on-accent: #ffffff;
+    --ts-progress-bg: #e5e7eb;
+    --ts-table-head-bg: #f3f4f6;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    line-height: 1.35; margin: 8px 0 16px; color: var(--ts-text);
+  }
+  @media (prefers-color-scheme: dark){
+    #ts-ui{
+      --ts-border: #2b2f36;
+      --ts-bg: #111418;
+      --ts-muted: #9aa3af;
+      --ts-text: #e5e7eb;
+    }
+  }
+
   .nbui *{box-sizing:border-box}
   .nbui{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans","PingFang TC","Microsoft JhengHei",sans-serif;line-height:1.45}
   .nbui h2{margin:.5rem 0 0.25rem}

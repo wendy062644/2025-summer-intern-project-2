@@ -18,16 +18,27 @@ title: Edit
 <style>
   /* —— 全部樣式限制在 #ts-ui —— */
   #ts-ui{
-    --ts-gap: 12px; --ts-pad: 14px; --ts-radius: 12px;
-    --ts-border:#e5e7eb; --ts-bg:#fff; --ts-surface:#fff; --ts-surface-2:#f9fafb;
-    --ts-text:#111827; --ts-muted:#6b7280; --ts-accent:#3b82f6; --ts-on-accent:#fff;
-    --ts-head-bg:#f8fafc; --ts-focus:0 0 0 2px rgba(59,130,246,.35);
+    --ts-gap: 12px;
+    --ts-pad: 14px;
+    --ts-radius: 12px;
+    --ts-border: #e5e7eb;
+    --ts-bg: #fff;
+    --ts-muted: #6b7280;
+    --ts-text: #111827;
+    --ts-accent: #2563eb;
+    --ts-on-accent: #ffffff;
+    --ts-progress-bg: #e5e7eb;
+    --ts-table-head-bg: #f3f4f6;
     font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", "PingFang TC", "Microsoft JhengHei", sans-serif;
-    line-height:1.35; color:var(--ts-text);
-    margin:18px auto; max-width:100%; width:100%; padding:0 10px;
+    line-height: 1.35; margin: 8px 0 16px; color: var(--ts-text);
   }
   @media (prefers-color-scheme: dark){
-    #ts-ui{ --ts-border:#2b2f36; --ts-bg:#0f1115; --ts-surface:#111418; --ts-surface-2:#0b0f14; --ts-text:#e7eaf0; --ts-muted:#a6afbd; --ts-accent:#8ab4ff; --ts-on-accent:#0b0f14; --ts-head-bg:#121621; }
+    #ts-ui{
+      --ts-border: #2b2f36;
+      --ts-bg: #111418;
+      --ts-muted: #9aa3af;
+      --ts-text: #e5e7eb;
+    }
   }
   #ts-ui *, #ts-ui *::before, #ts-ui *::after{ box-sizing:border-box; }
   .ts-card{ border:1px solid var(--ts-border); background:var(--ts-surface); border-radius:var(--ts-radius); padding:16px; box-shadow:0 1px 2px rgba(0,0,0,.04); }
