@@ -9,16 +9,6 @@ title: merge
 
 ```{raw} html
 <style>
-  .bd-sidebar-secondary { display: none !important; }
-  .bd-content,
-  .bd-article-container,
-  .tex2jax_ignore.mathjax_ignore {
-    max-width: 100% !important;
-    width: 100% !important;
-  }
-</style>
-
-<style>
   #ts-ui .row-label {
     white-space: pre-wrap;
     overflow-wrap: anywhere;
@@ -41,51 +31,120 @@ title: merge
   }
 
   #ts-ui table#grid {
-    box-sizing: b
-    order-box;
+    box-sizing: border-box; /* 修正打字錯誤 */
   }
+
+  /* ===== 顏色變數（和 API 那頁風格對齊） ===== */
   #ts-ui{
     --ts-gap: 12px;
     --ts-pad: 14px;
     --ts-radius: 12px;
     --ts-border: #e5e7eb;
     --ts-bg: #fff;
-    --ts-muted: #6b7280;
+    --ts-surface: #fff;
+    --ts-input-bg: #fff;
     --ts-text: #111827;
+    --ts-muted: #6b7280;
     --ts-accent: #2563eb;
     --ts-on-accent: #ffffff;
+    --ts-focus: 0 0 0 2px rgba(37,99,235,.25);
     --ts-progress-bg: #e5e7eb;
     --ts-table-head-bg: #f3f4f6;
     font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", "PingFang TC", "Microsoft JhengHei", sans-serif;
-    line-height: 1.35; margin: 8px 0 16px; color: var(--ts-text);
+    line-height: 1.35;
+    margin: 8px 0 16px;
+    color: var(--ts-text);
   }
+
   @media (prefers-color-scheme: dark){
     #ts-ui{
       --ts-border: #2b2f36;
-      --ts-bg: #111418;
-      --ts-muted: #9aa3af;
+      --ts-bg: #0f1115;
+      --ts-surface: #111418;
+      --ts-input-bg: #0b0f14;
       --ts-text: #e5e7eb;
+      --ts-muted: #9aa3af;
+      --ts-progress-bg: #1a1f29;
+      --ts-table-head-bg: #121621;
     }
   }
+
+  /* 文字選取顏色（和 API 頁相同邏輯） */
+  #ts-ui ::selection{
+    background: color-mix(in oklab, var(--ts-accent, #2563eb) 35%, transparent);
+  }
+
   #ts-ui *, #ts-ui *::before, #ts-ui *::after{ box-sizing:border-box; }
-  .ts-card{ border:1px solid var(--ts-border); background:var(--ts-surface); border-radius:var(--ts-radius); padding:16px; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+
+  .ts-card{
+    border:1px solid var(--ts-border);
+    background:var(--ts-surface);
+    border-radius:var(--ts-radius);
+    padding:16px;
+    box-shadow:0 1px 2px rgba(0,0,0,.04);
+  }
   .ts-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
   .ts-field{ display:flex; flex-direction:column; gap:6px; }
   .ts-label{ color:var(--ts-muted); font-size:.95rem; }
-  .ts-input input{ width:100%; padding:8px 10px; border:1px solid var(--ts-border); border-radius:10px; background:transparent; color:var(--ts-text); }
-  .ts-input input:focus{ outline:none; box-shadow:var(--ts-focus); border-color:color-mix(in oklab, var(--ts-accent) 60%, var(--ts-border)); }
-  .ts-btn{ appearance:none; border:1px solid var(--ts-border); background:var(--ts-accent); color:var(--ts-on-accent); border-radius:10px; padding:8px 14px; font-weight:700; cursor:pointer; }
+
+  .ts-input input{
+    width:100%;
+    padding:8px 10px;
+    border:1px solid var(--ts-border);
+    border-radius:10px;
+    background:var(--ts-input-bg);
+    color:var(--ts-text);
+  }
+  .ts-input input:focus{
+    outline:none;
+    box-shadow:var(--ts-focus);
+    border-color:color-mix(in oklab, var(--ts-accent) 60%, var(--ts-border));
+  }
+
+  .ts-btn{
+    appearance:none;
+    border:1px solid var(--ts-border);
+    background:var(--ts-accent);
+    color:var(--ts-on-accent);
+    border-radius:10px;
+    padding:8px 14px;
+    font-weight:700;
+    cursor:pointer;
+  }
   .ts-btn:disabled{ opacity:.55; cursor:not-allowed; }
-  .toolbar{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:8px; }
+
+  .toolbar{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
+    margin-top:8px;
+  }
   .kpi{ color:var(--ts-muted); font-variant-numeric:tabular-nums; }
-  .ts-divider{ height:1px; background:var(--ts-border); border:0; margin:12px 0; }
+
+  .ts-divider{
+    height:1px;
+    background:var(--ts-border);
+    border:0;
+    margin:12px 0;
+  }
 
   #ts-ui table{
     width:100%;
-    border-collapse:separate; border-spacing:0;
+    border-collapse:separate;
+    border-spacing:0;
     table-layout: fixed;
   }
-  thead th{ position:sticky; top:0; z-index:3; background:var(--ts-head-bg); border-bottom:1px solid var(--ts-border); padding:10px; text-align:left; font-weight:700; }
+  thead th{
+    position:sticky;
+    top:0;
+    z-index:3;
+    background:var(--ts-table-head-bg); /* 改用已定義的變數 */
+    border-bottom:1px solid var(--ts-border);
+    padding:10px;
+    text-align:left;
+    font-weight:700;
+  }
   tbody td, tbody th{ border-bottom:1px solid var(--ts-border); }
   th, td{ padding:8px 10px; vertical-align:top; }
   .cell-content{ white-space:pre-wrap; word-break:break-word; }

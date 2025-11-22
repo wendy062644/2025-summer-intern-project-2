@@ -7,153 +7,265 @@ thebe: false
 
 ```{raw} html
 <style>
+  /* 讓內容拉滿、隱藏右側 sidebar（和其它頁一致） */
+  .bd-sidebar-secondary { display: none !important; }
+  .bd-content,
+  .bd-article-container,
+  .tex2jax_ignore.mathjax_ignore {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* #ts-ui 主題變數（整體色系 / 字體） */
   #ts-ui{
     --ts-gap: 12px;
     --ts-pad: 14px;
     --ts-radius: 12px;
     --ts-border: #e5e7eb;
-    --ts-bg: #fff;
-    --ts-muted: #6b7280;
+
+    --ts-bg: #ffffff;
+    --ts-surface: #ffffff;
+    --ts-input-bg: #ffffff;
+
     --ts-text: #111827;
+    --ts-muted: #6b7280;
+
     --ts-accent: #2563eb;
     --ts-on-accent: #ffffff;
+    --ts-focus: 0 0 0 2px rgba(37,99,235,.25);
+
     --ts-progress-bg: #e5e7eb;
     --ts-table-head-bg: #f3f4f6;
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", "PingFang TC", "Microsoft JhengHei", sans-serif;
-    line-height: 1.35; margin: 8px 0 16px; color: var(--ts-text);
+    --ts-head-bg: var(--ts-table-head-bg);
+
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans",
+                 "PingFang TC", "Microsoft JhengHei", sans-serif;
+    line-height: 1.35;
+    margin: 8px 0 16px;
+    color: var(--ts-text);
   }
   @media (prefers-color-scheme: dark){
     #ts-ui{
       --ts-border: #2b2f36;
-      --ts-bg: #111418;
-      --ts-muted: #9aa3af;
+
+      --ts-bg: #0f1115;
+      --ts-surface: #111418;
+      --ts-input-bg: #0b0f14;
+
       --ts-text: #e5e7eb;
+      --ts-muted: #9aa3af;
+
+      --ts-progress-bg: #1a1f29;
+      --ts-table-head-bg: #121621;
+      --ts-head-bg: var(--ts-table-head-bg);
     }
   }
 
-  .nbui *{box-sizing:border-box}
-  .nbui{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans","PingFang TC","Microsoft JhengHei",sans-serif;line-height:1.45}
-  .nbui h2{margin:.5rem 0 0.25rem}
-  .nbui .card{border:1px solid #e5e7eb;border-radius:12px;padding:14px;background:#fff;margin:12px 0}
-  .nbui .muted{color:#6b7280;font-size:13px}
-  .nbui .grid{display:grid;gap:12px}
-  .nbui .grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
-  .nbui .grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+  #ts-ui ::selection{
+    background: color-mix(in oklab, var(--ts-accent, #2563eb) 35%, transparent);
+  }
+  #ts-ui *, #ts-ui *::before, #ts-ui *::after{
+    box-sizing: border-box;
+  }
+
+  /* ===== Local LLM 設定 UI（.nbui） ===== */
+  .nbui{
+    font-family: inherit;
+    line-height: 1.45;
+    color: var(--ts-text);
+  }
+  .nbui *{
+    box-sizing: border-box;
+  }
+  .nbui h2{
+    margin: .5rem 0 0.25rem;
+  }
+
+  .nbui .card{
+    border: 1px solid var(--ts-border);
+    border-radius: var(--ts-radius);
+    padding: var(--ts-pad);
+    background: var(--ts-surface);
+    margin: 12px 0;
+    box-shadow: 0 1px 2px rgba(0,0,0,.04);
+  }
+
+  .nbui .muted{
+    color: var(--ts-muted);
+    font-size: 13px;
+  }
+
+  .nbui .grid{
+    display: grid;
+    gap: 12px;
+  }
+  .nbui .grid-2{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 12px;
+  }
+  .nbui .grid-3{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+  }
   /* 固定三欄：1:1:1 並排 */
-  .nbui .grid-3-fixed{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-  @media (max-width:900px){ .nbui .grid-3-fixed{grid-template-columns:1fr 1fr} }
-  @media (max-width:640px){ .nbui .grid-3-fixed{grid-template-columns:1fr} }
-
-  .nbui label{font-size:14px;color:#374151;display:flex;flex-direction:column;gap:6px}
-  .nbui input[type="text"], .nbui input[type="number"], .nbui select{
-    padding:10px 12px;border:1px solid #d1d5db;border-radius:10px;min-width:200px
+  .nbui .grid-3-fixed{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
   }
-  .nbui button{padding:10px 14px;border:1px solid #d1d5db;border-radius:10px;background:#fff;cursor:pointer}
-  .nbui button:hover{background:#f3f4f6}
-  .nbui pre.preview{white-space:pre-wrap;background:#f9fafb;border:1px solid #e5e7eb;padding:10px;border-radius:10px;margin-top:10px;display:none}
-  .nbui .section{display:block;margin:6px 0 2px}
-  .nbui .section h3{margin:.25rem 0 .25rem;font-size:15px;color:#374151;font-weight:600}
-  .nbui .btn-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-
-  .nbui button{ color:#111827; }
-
-  @media (prefers-color-scheme: dark){
-    .nbui label{ color:#f0f1f3; }
-    .nbui .section h3{ color:#f5f6f7; }
-    .nbui .muted{ color:#c7ced8; }
-    .nbui .card{ background:#111418; border-color:#2b2f36; color:#e5e7eb; }
-    .nbui button{ background:#111418; border-color:#2b2f36; color:#e5e7eb; }
-    .nbui button:hover{ background:#0b0f14; }
-    .nbui pre.preview{ background:#0b0f14; border-color:#2b2f36; color:#e5e7eb; }
-    .nbui input[type="text"], .nbui input[type="number"], .nbui select{
-      background:#0b0f14; border-color:#2b2f36; color:#e5e7eb;
-    }
+  @media (max-width: 900px){
+    .nbui .grid-3-fixed{ grid-template-columns: 1fr 1fr; }
   }
-  html[data-theme="dark"] .nbui label{ color:#f0f1f3; }
-  html[data-theme="dark"] .nbui .section h3{ color:#f5f6f7; }
-  html[data-theme="dark"] .nbui .muted{ color:#c7ced8; }
-  html[data-theme="dark"] .nbui .card{ background:#111418; border-color:#2b2f36; color:#e5e7eb; }
-  html[data-theme="dark"] .nbui button{ background:#111418; border-color:#2b2f36; color:#e5e7eb; }
-  html[data-theme="dark"] .nbui button:hover{ background:#0b0f14; }
-  html[data-theme="dark"] .nbui pre.preview{ background:#0b0f14; border-color:#2b2f36; color:#e5e7eb; }
-  html[data-theme="dark"] .nbui input[type="text"],
-  html[data-theme="dark"] .nbui input[type="number"],
-  html[data-theme="dark"] .nbui select{
-    background:#0b0f14; border-color:#2b2f36; color:#e5e7eb;
+  @media (max-width: 640px){
+    .nbui .grid-3-fixed{ grid-template-columns: 1fr; }
+  }
+
+  .nbui label{
+    font-size: 14px;
+    color: var(--ts-text);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .nbui input[type="text"],
+  .nbui input[type="number"],
+  .nbui select{
+    padding: 10px 12px;
+    border: 1px solid var(--ts-border);
+    border-radius: 10px;
+    min-width: 200px;
+    background: var(--ts-input-bg);
+    color: var(--ts-text);
+  }
+  .nbui input[type="text"]:focus,
+  .nbui input[type="number"]:focus,
+  .nbui select:focus{
+    outline: none;
+    border-color: color-mix(in oklab, var(--ts-accent) 60%, var(--ts-border));
+    box-shadow: var(--ts-focus);
+  }
+
+  .nbui button{
+    padding: 10px 14px;
+    border: 1px solid var(--ts-border);
+    border-radius: 10px;
+    background: var(--ts-surface);
+    cursor: pointer;
+    color: var(--ts-text);
+    transition: background .15s ease, transform .1s ease;
+  }
+  .nbui button:hover{
+    background: color-mix(in oklab, var(--ts-accent) 8%, var(--ts-surface));
+  }
+  .nbui button:active{
+    transform: translateY(1px);
+  }
+
+  .nbui pre.preview{
+    white-space: pre-wrap;
+    background: var(--ts-input-bg);
+    border: 1px solid var(--ts-border);
+    padding: 10px;
+    border-radius: 10px;
+    margin-top: 10px;
+    display: none;
+    color: var(--ts-text);
+  }
+
+  .nbui .section{
+    display: block;
+    margin: 6px 0 2px;
+  }
+  .nbui .section h3{
+    margin: .25rem 0 .25rem;
+    font-size: 15px;
+    color: var(--ts-text);
+    font-weight: 600;
+  }
+
+  .nbui .btn-row{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
   }
 </style>
+<div id="ts-ui">
+  <div class="nbui" id="nbui">
+    <div class="card">
+      <!-- 檔案 / 輸入輸出 -->
+      <div class="section">
+        <h3>檔案與輸入 / 輸出</h3>
+        <div class="grid-3-fixed">
+          <label>輸入檔名
+            <input id="inputFile" type="text" placeholder="qgis_en.ts">
+          </label>
+          <label>輸出檔名（不需副檔名）
+            <input id="fname" type="text" value="qgis_zh-Hant">
+          </label>
+          <label>字典資料夾位置（ODS_DIR）
+            <input id="odsDir" type="text" value="data" placeholder="data">
+          </label>
+        </div>
+      </div>
 
-<div class="nbui" id="nbui">
-  <div class="card">
-    <!-- 檔案 / 輸入輸出 -->
-    <div class="section">
-      <h3>檔案與輸入 / 輸出</h3>
-      <div class="grid-3-fixed">
-        <label>輸入檔名
-          <input id="inputFile" type="text" placeholder="qgis_en.ts">
-        </label>
-        <label>輸出檔名（不需副檔名）
-          <input id="fname" type="text" value="qgis_zh-Hant">
-        </label>
-        <label>字典資料夾位置（ODS_DIR）
-          <input id="odsDir" type="text" value="data" placeholder="data">
-        </label>
+      <!-- 模型設定 與 API -->
+      <div class="section">
+        <h3>模型設定</h3>
+        <div class="grid-2">
+          <label>模型（Model）
+            <select id="model">
+              <option value="taide/Gemma-3-TAIDE-12B-Chat" selected>taide/Gemma-3-TAIDE-12B-Chat</option>
+              <option value="taide/Llama-3.1-TAIDE-LX-8B-Chat">taide/Llama-3.1-TAIDE-LX-8B-Chat</option>
+              <option value="taide/TAIDE-Gemma-2-9B-Chat">taide/TAIDE-Gemma-2-9B-Chat</option>
+              <option value="Qwen/Qwen3-7B-Instruct">Qwen/Qwen3-7B-Instruct</option>
+              <option value="Qwen/Qwen2.5-7B-Instruct">Qwen/Qwen2.5-7B-Instruct</option>
+              <option value="Qwen/Qwen2.5-14B-Instruct">Qwen/Qwen2.5-14B-Instruct</option>
+              <option value="THUDM/glm-4-9b-chat">THUDM/glm-4-9b-chat</option>
+              <option value="google/gemma-2-9b-it">google/gemma-2-9b-it</option>
+              <option value="meta-llama/Meta-Llama-3.1-8B-Instruct">meta-llama/Meta-Llama-3.1-8B-Instruct</option>
+            </select>
+          </label>
+          <label>備用模型（FALLBACK_MODEL）
+            <input id="fallbackModel" type="text" placeholder="可留空，主要模型失敗時改用（例如 Qwen/Qwen2.5-7B-Instruct）">
+          </label>
+          <label>API Key or Token（可留空）
+            <input id="apiKey" type="text" placeholder="sk-...">
+          </label>
+          <label>API Base URL
+            <input id="apiBase" type="text" value="https://api.openai.com/v1">
+          </label>
+        </div>
+        <div class="muted" style="margin-top:6px">提醒：若不希望把 API Key 寫進 notebook，留空即可；也可在執行環境用環境變數配置。</div>
+      </div>
+
+      <!-- 參數設定 -->
+      <div class="section">
+        <h3>參數設定</h3>
+        <div class="grid-3">
+          <label>Batch
+            <input id="batch" type="number" min="1" value="4">
+          </label>
+          <label>Max Tokens
+            <input id="maxTokens" type="number" min="1" value="1024">
+          </label>
+          <label>Min Tokens
+            <input id="minTokens" type="number" min="1" value="4">
+          </label>
+        </div>
       </div>
     </div>
 
-    <!-- 模型設定 與 API -->
-    <div class="section">
-      <h3>模型設定</h3>
-      <div class="grid-2">
-        <label>模型（Model）
-          <select id="model">
-            <option value="taide/Gemma-3-TAIDE-12B-Chat" selected>taide/Gemma-3-TAIDE-12B-Chat</option>
-            <option value="taide/Llama-3.1-TAIDE-LX-8B-Chat">taide/Llama-3.1-TAIDE-LX-8B-Chat</option>
-            <option value="taide/TAIDE-Gemma-2-9B-Chat">taide/TAIDE-Gemma-2-9B-Chat</option>
-            <option value="Qwen/Qwen3-7B-Instruct">Qwen/Qwen3-7B-Instruct</option>
-            <option value="Qwen/Qwen2.5-7B-Instruct">Qwen/Qwen2.5-7B-Instruct</option>
-            <option value="Qwen/Qwen2.5-14B-Instruct">Qwen/Qwen2.5-14B-Instruct</option>
-            <option value="THUDM/glm-4-9b-chat">THUDM/glm-4-9b-chat</option>
-            <option value="google/gemma-2-9b-it">google/gemma-2-9b-it</option>
-            <option value="meta-llama/Meta-Llama-3.1-8B-Instruct">meta-llama/Meta-Llama-3.1-8B-Instruct</option>
-          </select>
-        </label>
-        <label>備用模型（FALLBACK_MODEL）
-          <input id="fallbackModel" type="text" placeholder="可留空，主要模型失敗時改用（例如 Qwen/Qwen2.5-7B-Instruct）">
-        </label>
-        <label>API Key or Token（可留空）
-          <input id="apiKey" type="text" placeholder="sk-...">
-        </label>
-        <label>API Base URL
-          <input id="apiBase" type="text" value="https://api.openai.com/v1">
-        </label>
+    <div class="card">
+      <div class="btn-row">
+        <button id="btn-download">下載 .ipynb 檔</button>
+        <button id="btn-preview">預覽 Config cell</button>
       </div>
-      <div class="muted" style="margin-top:6px">提醒：若不希望把 API Key 寫進 notebook，留空即可；也可在執行環境用環境變數配置。</div>
+      <pre id="preview" class="preview muted"></pre>
     </div>
-
-    <!-- 參數設定 -->
-    <div class="section">
-      <h3>參數設定</h3>
-      <div class="grid-3">
-        <label>Batch
-          <input id="batch" type="number" min="1" value="4">
-        </label>
-        <label>Max Tokens
-          <input id="maxTokens" type="number" min="1" value="1024">
-        </label>
-        <label>Min Tokens
-          <input id="minTokens" type="number" min="1" value="4">
-        </label>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="btn-row">
-      <button id="btn-download">下載 .ipynb 檔</button>
-      <button id="btn-preview">預覽 Config cell</button>
-    </div>
-    <pre id="preview" class="preview muted"></pre>
   </div>
 </div>
 
