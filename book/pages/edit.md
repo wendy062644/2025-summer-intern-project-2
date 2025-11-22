@@ -6,7 +6,7 @@ title: Edit
 
 ```{raw} html
 <style>
-  /* —— 全部樣式限制在 #ts-ui —— */
+  /* ===== 共用 ts-ui 主題（與其他頁一致） ===== */
   #ts-ui{
     --ts-gap: 12px;
     --ts-pad: 14px;
@@ -14,9 +14,13 @@ title: Edit
     --ts-border: #e5e7eb;
     --ts-bg: #fff;
     --ts-surface: #fff;
+    --ts-surface-2: #f9fafb;
     --ts-input-bg: #fff;
     --ts-text: #111827;
     --ts-muted: #6b7280;
+    --ts-link: #2563eb;
+    --ts-code-bg: #f9fafb;
+    --ts-code-fg: #111827;
     --ts-accent: #2563eb;
     --ts-on-accent: #ffffff;
     --ts-focus: 0 0 0 2px rgba(37,99,235,.25);
@@ -30,37 +34,78 @@ title: Edit
 
   @media (prefers-color-scheme: dark){
     #ts-ui{
-      --ts-border: #2b2f36;
       --ts-bg: #0f1115;
       --ts-surface: #111418;
+      --ts-surface-2: #0b0f14;
       --ts-input-bg: #0b0f14;
-      --ts-text: #e5e7eb;
-      --ts-muted: #9aa3af;
+      --ts-border: #2b2f36;
+      --ts-text: #e7eaf0;
+      --ts-muted: #a6afbd;
+      --ts-link: #8ab4ff;
+      --ts-code-bg: #0b0f14;
+      --ts-code-fg: #e7eaf0;
+      --ts-accent: #3b82f6;
+      --ts-on-accent: #0b0f14;
+      --ts-focus: 0 0 0 2px rgba(59,130,246,.35);
       --ts-progress-bg: #1a1f29;
       --ts-table-head-bg: #121621;
     }
   }
-
-  /* 文字反白選取顏色（和其他頁一致） */
-  #ts-ui ::selection{
-    background: color-mix(in oklab, var(--ts-accent, #2563eb) 35%, transparent);
+  html[data-theme="dark"] #ts-ui{
+    --ts-bg: #0f1115;
+    --ts-surface: #111418;
+    --ts-surface-2: #0b0f14;
+    --ts-input-bg: #0b0f14;
+    --ts-border: #2b2f36;
+    --ts-text: #e7eaf0;
+    --ts-muted: #a6afbd;
+    --ts-link: #8ab4ff;
+    --ts-code-bg: #0b0f14;
+    --ts-code-fg: #e7eaf0;
+    --ts-accent: #3b82f6;
+    --ts-on-accent: #0b0f14;
+    --ts-focus: 0 0 0 2px rgba(59,130,246,.35);
+    --ts-progress-bg: #1a1f29;
+    --ts-table-head-bg: #121621;
   }
 
   #ts-ui *, #ts-ui *::before, #ts-ui *::after{ box-sizing:border-box; }
 
-  .ts-card{
+  /* 文字反白選取顏色 */
+  #ts-ui ::selection{
+    background: color-mix(in oklab, var(--ts-accent, #2563eb) 35%, transparent);
+  }
+
+  /* 卡片與基本 layout */
+  #ts-ui .ts-card{
     border:1px solid var(--ts-border);
     background:var(--ts-surface);
     border-radius:var(--ts-radius);
     padding:16px;
     box-shadow:0 1px 2px rgba(0,0,0,.04);
+    color: var(--ts-text);
   }
-  .ts-title{ font-weight:800; font-size:1.1rem; margin:2px 0 10px; }
-  .ts-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
-  .ts-field{ display:flex; flex-direction:column; gap:6px; }
-  .ts-label{ color:var(--ts-muted); font-size:.95rem; }
+  #ts-ui .ts-title{
+    font-weight:800;
+    font-size:1.1rem;
+    margin:2px 0 10px;
+  }
+  #ts-ui .ts-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:12px;
+  }
+  #ts-ui .ts-field{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  #ts-ui .ts-label{
+    color:var(--ts-muted);
+    font-size:.95rem;
+  }
 
-  .ts-input input{
+  #ts-ui .ts-input input{
     width:100%;
     padding:8px 10px;
     border:1px solid var(--ts-border);
@@ -68,13 +113,14 @@ title: Edit
     background:var(--ts-input-bg);
     color:var(--ts-text);
   }
-  .ts-input input:focus{
+  #ts-ui .ts-input input:focus{
     outline:none;
     box-shadow:var(--ts-focus);
     border-color:color-mix(in oklab, var(--ts-accent) 60%, var(--ts-border));
   }
 
-  .ts-btn{
+  /* 按鈕 */
+  #ts-ui .ts-btn{
     appearance:none;
     border:1px solid var(--ts-border);
     background:var(--ts-accent);
@@ -84,37 +130,65 @@ title: Edit
     font-weight:700;
     cursor:pointer;
   }
-  .ts-btn:disabled{ opacity:.55; cursor:not-allowed; }
+  #ts-ui .ts-btn:disabled{
+    opacity:.55;
+    cursor:not-allowed;
+  }
+  #ts-ui .ts-btn:hover{ filter:brightness(1.06); }
+  #ts-ui .ts-btn:focus{
+    outline:none;
+    box-shadow:var(--ts-focus);
+  }
 
-  .toolbar{
+  #ts-ui .toolbar{
     display:flex;
     gap:10px;
     align-items:center;
     flex-wrap:wrap;
     margin-top:8px;
   }
-  .kpi{ color:var(--ts-muted); font-variant-numeric:tabular-nums; }
-  .ts-divider{
+  #ts-ui .kpi{
+    color:var(--ts-muted);
+    font-variant-numeric:tabular-nums;
+  }
+  #ts-ui .ts-divider{
     height:1px;
     background:var(--ts-border);
     border:0;
     margin:12px 0;
   }
 
-  /* 表格（網格）*/
-  #table-wrap{
+  /* 小工具列 */
+  #ts-ui .tools{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+  #ts-ui .tools label{
+    display:flex;
+    gap:6px;
+    align-items:center;
+    color:var(--ts-muted);
+  }
+
+  /* 表格（網格） */
+  #ts-ui #table-wrap{
     border:1px solid var(--ts-border);
     border-radius:12px;
     overflow:auto;
     max-height:70vh;
+    background: var(--ts-surface); /* dark 模式下也用卡片背景色 */
   }
+
   #ts-ui table{
-    width:100%;                     /* JS 會在 >4 欄時改為 25%×欄數 */
+    width:100%;
     border-collapse:separate;
     border-spacing:0;
-    table-layout: fixed;            /* 讓 colgroup 寬度生效、平均分配 */
+    table-layout: fixed;
   }
-  thead th{
+
+  #ts-ui thead th{
     position:sticky;
     top:0;
     z-index:3;
@@ -123,69 +197,84 @@ title: Edit
     padding:10px;
     text-align:left;
     font-weight:700;
+    color: var(--ts-text);
   }
-  tbody td, tbody th{ border-bottom:1px solid var(--ts-border); }
-  th, td{ padding:8px 10px; vertical-align:top; }
+  #ts-ui tbody td,
+  #ts-ui tbody th{
+    border-bottom:1px solid var(--ts-border);
+  }
+  #ts-ui th,
+  #ts-ui td{
+    padding:8px 10px;
+    vertical-align:top;
+    color: var(--ts-text);
+  }
 
-  .sticky-left{
+  #ts-ui .sticky-left{
     position:sticky;
     left:0;
     z-index:2;
     background:var(--ts-surface);
   }
 
-  /* 取消固定寬，交給 colgroup 控制；讓「原文」也能等比參與 */
-  .row-label{ width:auto; max-width:none; }
-  .row-label .ctx{ color:var(--ts-muted); font-size:.85rem; margin-top:2px; }
+  /* 原文欄 */
+  #ts-ui .row-label{
+    width:auto;
+    max-width:none;
+  }
+  #ts-ui .row-label .ctx{
+    color:var(--ts-muted);
+    font-size:.85rem;
+    margin-top:2px;
+  }
 
-  /* 取消欄寬上限，否則等比不會生效 */
-  .pick-cell{
+  /* 每個翻譯版本的格子 */
+  #ts-ui .pick-cell{
     min-width:0;
     max-width:none;
     border-left:1px solid var(--ts-border);
     cursor:pointer;
   }
-  .pick-cell.missing{
+  #ts-ui .pick-cell.missing{
     color:var(--ts-muted);
     font-style:italic;
     cursor:not-allowed;
   }
-  .cell-box{ display:flex; gap:8px; }
-  .cell-index{ color:var(--ts-muted); font-size:.85rem; min-width:1.5rem; text-align:right; }
-  .cell-content{ white-space:pre-wrap; word-break:break-word; }
+  #ts-ui .cell-box{
+    display:flex;
+    gap:8px;
+  }
+  #ts-ui .cell-index{
+    color:var(--ts-muted);
+    font-size:.85rem;
+    min-width:1.5rem;
+    text-align:right;
+  }
+  #ts-ui .cell-content{
+    white-space:pre-wrap;
+    word-break:break-word;
+  }
 
   /* 被選取的格子 */
-  .pick-cell.selected{
+  #ts-ui .pick-cell.selected{
     outline:2px solid color-mix(in oklab, var(--ts-accent) 70%, #0000);
     outline-offset:-2px;
     background:color-mix(in oklab, var(--ts-accent) 14%, var(--ts-surface));
   }
 
   /* 表頭第一欄（原文）*/
-  .head-left{
+  #ts-ui .head-left{
     position:sticky;
     left:0;
     z-index:4;
     background:var(--ts-table-head-bg);
   }
-  .head-col{ white-space:nowrap; }
-
-  /* 小工具列 */
-  .tools{
-    display:flex;
-    gap:10px;
-    align-items:center;
-    flex-wrap:wrap;
-  }
-  .tools label{
-    display:flex;
-    gap:6px;
-    align-items:center;
-    color:var(--ts-muted);
+  #ts-ui .head-col{
+    white-space:nowrap;
   }
 
   @media (max-width: 860px){
-    .cell-index{ display:none; }
+    #ts-ui .cell-index{ display:none; }
   }
 </style>
 

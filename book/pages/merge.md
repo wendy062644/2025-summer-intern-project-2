@@ -9,32 +9,7 @@ title: merge
 
 ```{raw} html
 <style>
-  #ts-ui .row-label {
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-    word-break: break-word;
-  }
-  #ts-ui col:nth-child(1),
-  #ts-ui col:nth-child(2),
-  #ts-ui col:nth-child(3) { width: calc((100% - 150px) / 3); }
-  #ts-ui col:nth-child(4) { width: 150px; }
-
-  #ts-ui td.will { white-space: pre-line; }
-
-  #table-wrap{
-    border:1px solid var(--ts-border);
-    border-radius:12px;
-    overflow-x:auto;
-    overflow-y:auto;
-    scrollbar-gutter:stable;
-    max-height:70vh;
-  }
-
-  #ts-ui table#grid {
-    box-sizing: border-box; /* 修正打字錯誤 */
-  }
-
-  /* ===== 顏色變數（和 API 那頁風格對齊） ===== */
+  /* ===== 共用 ts-ui 主題（與 Local / API 頁一致） ===== */
   #ts-ui{
     --ts-gap: 12px;
     --ts-pad: 14px;
@@ -42,9 +17,13 @@ title: merge
     --ts-border: #e5e7eb;
     --ts-bg: #fff;
     --ts-surface: #fff;
+    --ts-surface-2: #f9fafb;
     --ts-input-bg: #fff;
     --ts-text: #111827;
     --ts-muted: #6b7280;
+    --ts-link: #2563eb;
+    --ts-code-bg: #f9fafb;
+    --ts-code-fg: #111827;
     --ts-accent: #2563eb;
     --ts-on-accent: #ffffff;
     --ts-focus: 0 0 0 2px rgba(37,99,235,.25);
@@ -58,36 +37,70 @@ title: merge
 
   @media (prefers-color-scheme: dark){
     #ts-ui{
-      --ts-border: #2b2f36;
       --ts-bg: #0f1115;
       --ts-surface: #111418;
+      --ts-surface-2: #0b0f14;
       --ts-input-bg: #0b0f14;
-      --ts-text: #e5e7eb;
-      --ts-muted: #9aa3af;
+      --ts-border: #2b2f36;
+      --ts-text: #e7eaf0;
+      --ts-muted: #a6afbd;
+      --ts-link: #8ab4ff;
+      --ts-code-bg: #0b0f14;
+      --ts-code-fg: #e7eaf0;
+      --ts-accent: #3b82f6;
+      --ts-on-accent: #0b0f14;
+      --ts-focus: 0 0 0 2px rgba(59,130,246,.35);
       --ts-progress-bg: #1a1f29;
       --ts-table-head-bg: #121621;
     }
   }
-
-  /* 文字選取顏色（和 API 頁相同邏輯） */
-  #ts-ui ::selection{
-    background: color-mix(in oklab, var(--ts-accent, #2563eb) 35%, transparent);
+  html[data-theme="dark"] #ts-ui{
+    --ts-bg: #0f1115;
+    --ts-surface: #111418;
+    --ts-surface-2: #0b0f14;
+    --ts-input-bg: #0b0f14;
+    --ts-border: #2b2f36;
+    --ts-text: #e7eaf0;
+    --ts-muted: #a6afbd;
+    --ts-link: #8ab4ff;
+    --ts-code-bg: #0b0f14;
+    --ts-code-fg: #e7eaf0;
+    --ts-accent: #3b82f6;
+    --ts-on-accent: #0b0f14;
+    --ts-focus: 0 0 0 2px rgba(59,130,246,.35);
+    --ts-progress-bg: #1a1f29;
+    --ts-table-head-bg: #121621;
   }
 
   #ts-ui *, #ts-ui *::before, #ts-ui *::after{ box-sizing:border-box; }
 
-  .ts-card{
+  #ts-ui .ts-card{
     border:1px solid var(--ts-border);
     background:var(--ts-surface);
     border-radius:var(--ts-radius);
     padding:16px;
     box-shadow:0 1px 2px rgba(0,0,0,.04);
+    color: var(--ts-text);
   }
-  .ts-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
-  .ts-field{ display:flex; flex-direction:column; gap:6px; }
-  .ts-label{ color:var(--ts-muted); font-size:.95rem; }
 
-  .ts-input input{
+  #ts-ui .ts-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:12px;
+  }
+
+  #ts-ui .ts-field{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+
+  #ts-ui .ts-label{
+    color:var(--ts-muted);
+    font-size:.95rem;
+  }
+
+  #ts-ui .ts-input input{
     width:100%;
     padding:8px 10px;
     border:1px solid var(--ts-border);
@@ -95,13 +108,15 @@ title: merge
     background:var(--ts-input-bg);
     color:var(--ts-text);
   }
-  .ts-input input:focus{
+  #ts-ui .ts-input input:focus{
     outline:none;
     box-shadow:var(--ts-focus);
     border-color:color-mix(in oklab, var(--ts-accent) 60%, var(--ts-border));
   }
 
-  .ts-btn{
+  /* 按鈕：沿用共用 primary 風格，並讓 ts-btn 也吃到 */
+  #ts-ui .ts-btn,
+  #ts-ui .ts-btn-primary{
     appearance:none;
     border:1px solid var(--ts-border);
     background:var(--ts-accent);
@@ -111,22 +126,71 @@ title: merge
     font-weight:700;
     cursor:pointer;
   }
-  .ts-btn:disabled{ opacity:.55; cursor:not-allowed; }
+  #ts-ui .ts-btn:disabled,
+  #ts-ui .ts-btn-primary:disabled{
+    opacity:.55;
+    cursor:not-allowed;
+  }
+  #ts-ui .ts-btn:hover,
+  #ts-ui .ts-btn-primary:hover{ filter:brightness(1.06); }
+  #ts-ui .ts-btn:focus,
+  #ts-ui .ts-btn-primary:focus{
+    outline:none;
+    box-shadow:var(--ts-focus);
+  }
 
-  .toolbar{
+  #ts-ui .toolbar{
     display:flex;
     gap:10px;
     align-items:center;
     flex-wrap:wrap;
     margin-top:8px;
   }
-  .kpi{ color:var(--ts-muted); font-variant-numeric:tabular-nums; }
 
-  .ts-divider{
+  #ts-ui .kpi{
+    color:var(--ts-muted);
+    font-variant-numeric:tabular-nums;
+  }
+
+  #ts-ui .ts-divider{
     height:1px;
     background:var(--ts-border);
     border:0;
     margin:12px 0;
+  }
+
+  #ts-ui ::selection{
+    background: color-mix(in oklab, var(--ts-accent) 35%, transparent);
+  }
+
+  @media (max-width:640px){
+    #ts-ui .ts-grid{
+      grid-template-columns:1fr;
+    }
+  }
+
+  /* ===== merge 頁面專用 table 設定 ===== */
+  #ts-ui .row-label {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  #ts-ui col:nth-child(1),
+  #ts-ui col:nth-child(2),
+  #ts-ui col:nth-child(3) { width: calc((100% - 150px) / 3); }
+  #ts-ui col:nth-child(4) { width: 150px; }
+
+  #ts-ui td.will { white-space: pre-line; }
+
+  #ts-ui #table-wrap{
+    border:1px solid var(--ts-border);
+    border-radius:12px;
+    overflow-x:auto;
+    overflow-y:auto;
+    scrollbar-gutter:stable;
+    max-height:70vh;
+    background: var(--ts-surface); /* 和卡片一致，dark mode 不會顏色跳掉 */
   }
 
   #ts-ui table{
@@ -135,22 +199,42 @@ title: merge
     border-spacing:0;
     table-layout: fixed;
   }
-  thead th{
+
+  #ts-ui table#grid{
+    box-sizing:border-box;
+  }
+
+  #ts-ui thead th{
     position:sticky;
     top:0;
     z-index:3;
-    background:var(--ts-table-head-bg); /* 改用已定義的變數 */
+    background:var(--ts-table-head-bg);
+    color:var(--ts-text);
     border-bottom:1px solid var(--ts-border);
     padding:10px;
     text-align:left;
     font-weight:700;
   }
-  tbody td, tbody th{ border-bottom:1px solid var(--ts-border); }
-  th, td{ padding:8px 10px; vertical-align:top; }
-  .cell-content{ white-space:pre-wrap; word-break:break-word; }
-  .will{ font-weight:700; }
-  .ok { color:#059669; }
-  .skip{ color:#ef4444; }
+
+  #ts-ui tbody td,
+  #ts-ui tbody th{
+    border-bottom:1px solid var(--ts-border);
+  }
+
+  #ts-ui th,
+  #ts-ui td{
+    padding:8px 10px;
+    vertical-align:top;
+  }
+
+  #ts-ui .cell-content{
+    white-space:pre-wrap;
+    word-break:break-word;
+  }
+
+  #ts-ui .will{ font-weight:700; }
+  #ts-ui .ok { color:#059669; }
+  #ts-ui .skip{ color:#ef4444; }
 </style>
 
 <div id="ts-ui">

@@ -44,6 +44,8 @@ thebe: false
     margin: 8px 0 16px;
     color: var(--ts-text);
   }
+
+  /* 依系統偏好自動 dark（備用） */
   @media (prefers-color-scheme: dark){
     #ts-ui{
       --ts-border: #2b2f36;
@@ -59,6 +61,22 @@ thebe: false
       --ts-table-head-bg: #121621;
       --ts-head-bg: var(--ts-table-head-bg);
     }
+  }
+
+  /* Jupyter Book 主題切到 dark 時，強制使用暗色變數 */
+  html[data-theme="dark"] #ts-ui{
+    --ts-border: #2b2f36;
+
+    --ts-bg: #0f1115;
+    --ts-surface: #111418;
+    --ts-input-bg: #0b0f14;
+
+    --ts-text: #e5e7eb;
+    --ts-muted: #9aa3af;
+
+    --ts-progress-bg: #1a1f29;
+    --ts-table-head-bg: #121621;
+    --ts-head-bg: var(--ts-table-head-bg);
   }
 
   #ts-ui ::selection{
@@ -88,6 +106,7 @@ thebe: false
     background: var(--ts-surface);
     margin: 12px 0;
     box-shadow: 0 1px 2px rgba(0,0,0,.04);
+    color: var(--ts-text);
   }
 
   .nbui .muted{
@@ -164,6 +183,15 @@ thebe: false
     transform: translateY(1px);
   }
 
+  /* 如果之後有主要動作按鈕，可以額外加這個 */
+  .nbui .btn-primary{
+    background: var(--ts-accent);
+    color: var(--ts-on-accent);
+  }
+  .nbui .btn-primary:hover{
+    background: color-mix(in oklab, var(--ts-accent) 110%, #0000);
+  }
+
   .nbui pre.preview{
     white-space: pre-wrap;
     background: var(--ts-input-bg);
@@ -193,6 +221,7 @@ thebe: false
     align-items: center;
   }
 </style>
+
 <div id="ts-ui">
   <div class="nbui" id="nbui">
     <div class="card">
