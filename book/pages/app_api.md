@@ -381,7 +381,7 @@ title: API
       <div class="ts-field">
         <label class="ts-label" for="batch">Batch</label>
         <div class="ts-input">
-          <input type="number" id="batch" value="32" min="1" max="64">
+          <input type="number" id="batch" value="12" min="1" max="64">
         </div>
       </div>
       <div class="ts-field">
