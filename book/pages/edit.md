@@ -6,6 +6,13 @@ title: Edit
 
 ```{raw} html
 <style>
+  .bd-sidebar-secondary { display: none !important; }
+  .bd-content,
+  .bd-article-container,
+  .tex2jax_ignore.mathjax_ignore {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
   /* ===== 共用 ts-ui 主題（與其他頁一致） ===== */
   #ts-ui{
     --ts-gap: 12px;
