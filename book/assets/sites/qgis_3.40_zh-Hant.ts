@@ -1536,7 +1536,7 @@ Open the results dialog to check it.</source>
     </message>
     <message>
         <source>Threshold (0-1, where 1 is equivalent with Convex Hull)</source>
-        <translation>閾值 (0-1，1 等同於凸殼)</translation>
+        <translation>閾值 (0-1，1 等同於凸包)</translation>
     </message>
     <message>
         <source>Allow holes</source>
@@ -9215,7 +9215,7 @@ Shows placeholders for labels which could not be placed, e.g. due to overlaps wi
     </message>
     <message>
         <source>Convex Hull</source>
-        <translation>凸殼</translation>
+        <translation>凸包</translation>
     </message>
     <message>
         <source>Input layer</source>
@@ -9239,7 +9239,7 @@ Shows placeholders for labels which could not be placed, e.g. due to overlaps wi
     </message>
     <message>
         <source>bounding,box,bounds,envelope,minimum,oriented,rectangle,enclosing,circle,convex,hull,generalization</source>
-        <translation>包封、外接盒、範圍、最小、定向矩形、包圍圓、凸殼、概括化</translation>
+        <translation>包封、外接盒、範圍、最小、定向矩形、包圍圓、凸包、概括化</translation>
     </message>
 </context>
 <context>
@@ -21647,32 +21647,32 @@ The attributes associated to each point in the output layer are the same ones as
     <message>
         <location filename="../src/analysis/processing/qgsalgorithmconvexhull.cpp" line="29" />
         <source>Convex hull</source>
-        <translation>凸殼</translation>
+        <translation>凸包</translation>
     </message>
     <message>
         <location filename="../src/analysis/processing/qgsalgorithmconvexhull.cpp" line="34" />
         <source>convex,hull,bounds,bounding</source>
-        <translation>凸殼, 凸殼, 邊界, 外接</translation>
+        <translation>凸包, 凸包, 邊界, 外接</translation>
     </message>
     <message>
         <location filename="../src/analysis/processing/qgsalgorithmconvexhull.cpp" line="49" />
         <source>Convex hulls</source>
-        <translation>凸殼</translation>
+        <translation>凸包</translation>
     </message>
     <message>
         <location filename="../src/analysis/processing/qgsalgorithmconvexhull.cpp" line="54" />
         <source>This algorithm calculates the convex hull for each feature in an input layer.</source>
-        <translation>此演算法計算輸入圖層中每個圖徵的凸殼。</translation>
+        <translation>此演算法計算輸入圖層中每個圖徵的凸包。</translation>
     </message>
     <message>
         <location filename="../src/analysis/processing/qgsalgorithmconvexhull.cpp" line="56" />
         <source>See the 'Minimum bounding geometry' algorithm for a convex hull calculation which covers the whole layer or grouped subsets of features.</source>
-        <translation>請參見 '最小外包幾何' 演算法以計算覆蓋整個圖層或分組子集圖徵的凸殼。</translation>
+        <translation>請參見 '最小外包幾何' 演算法以計算覆蓋整個圖層或分組子集圖徵的凸包。</translation>
     </message>
     <message>
         <location filename="../src/analysis/processing/qgsalgorithmconvexhull.cpp" line="80" />
         <source>Cannot calculate convex hull for a single Point feature (try 'Minimum bounding geometry' algorithm instead).</source>
-        <translation>無法計算單一點圖徵的凸殼(請改用 '最小外包幾何' 演算法)。</translation>
+        <translation>無法計算單一點圖徵的凸包(請改用 '最小外包幾何' 演算法)。</translation>
     </message>
     <message>
         <location filename="../src/analysis/processing/qgsalgorithmdissolve.cpp" line="210" />
@@ -146416,7 +146416,7 @@ Check the processing framework log to look for errors.</source>
     </message>
     <message>
         <source>Delaunay triangulation, Voronoi diagram and convex hull</source>
-        <translation>迪勞內三角法、沃羅諾伊圖和凸殼</translation>
+        <translation>迪勞內三角法、沃羅諾伊圖和凸包</translation>
     </message>
     <message>
         <source>Delete category values</source>
