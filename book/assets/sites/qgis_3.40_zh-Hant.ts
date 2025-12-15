@@ -6287,7 +6287,7 @@ Please, check that GRASS is correctly installed and available on your system.</s
     <message>
         <location filename="../src/ui/qgisapp.ui" />
         <source>Vect&amp;or</source>
-        <translation>向量(&amp;o)(&amp;O)</translation>
+        <translation>向量</translation>
     </message>
     <message>
         <location filename="../src/ui/qgisapp.ui" />
