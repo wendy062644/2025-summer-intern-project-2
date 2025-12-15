@@ -12,12 +12,12 @@ title: QGIS 翻譯檔下載
 
 ---
 ## Latest Release
-### QGIS 3.44
-- [下載 TS 檔](../assets/sites/qgis_3.40_zh-Hant.ts)  
-- [下載 QM 檔](../assets/sites/qgis_3.40_zh-Hant.qm)  
+### QGIS 3.44 (尚未完成)
+- [下載 TS 檔](../assets/sites/qgis_3.44_zh-Hant.ts)  
+- [下載 QM 檔](../assets/sites/qgis_3.44_zh-Hant.qm)  
 
 ---
-## LTR
+## Long Term Release
 ### QGIS 3.40
 - [下載 TS 檔](../assets/sites/qgis_3.40_zh-Hant.ts)  
 - [下載 QM 檔](../assets/sites/qgis_3.40_zh-Hant.qm)  
