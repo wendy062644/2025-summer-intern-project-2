@@ -11,38 +11,38 @@ title: QGIS 翻譯檔下載
 以下提供不同版本的 **`.ts` 原始翻譯檔** 與 **`.qm` 編譯檔** 下載：
 
 ---
-# Latest Release
-## QGIS 3.44
+## Latest Release
+### QGIS 3.44
 - [下載 TS 檔](../assets/sites/qgis_3.40_zh-Hant.ts)  
 - [下載 QM 檔](../assets/sites/qgis_3.40_zh-Hant.qm)  
 
 ---
-# LTR
-## QGIS 3.40
+## LTR
+### QGIS 3.40
 - [下載 TS 檔](../assets/sites/qgis_3.40_zh-Hant.ts)  
 - [下載 QM 檔](../assets/sites/qgis_3.40_zh-Hant.qm)  
 
 ---
 
-## QGIS 3.34 (尚未完成)
+### QGIS 3.34 (尚未完成)
 - [下載 TS 檔](../assets/sites/qgis_3.34_zh-Hant.ts)  
 - [下載 QM 檔](../assets/sites/qgis_3.34_zh-Hant.qm)  
 
 ---
 
-## QGIS 3.28 (尚未完成)
+### QGIS 3.28 (尚未完成)
 - [下載 TS 檔](../assets/sites/qgis_3.28_zh-Hant.ts)  
 - [下載 QM 檔](../assets/sites/qgis_3.28_zh-Hant.qm)  
 
 ---
 
-## QGIS 3.22 (尚未完成)
+### QGIS 3.22 (尚未完成)
 - [下載 TS 檔](../assets/sites/qgis_3.22_zh-Hant.ts)  
 - [下載 QM 檔](../assets/sites/qgis_3.22_zh-Hant.qm)  
 
 ---
 
-## QGIS 3.16 (尚未完成)
+### QGIS 3.16 (尚未完成)
 - [下載 TS 檔](../assets/sites/qgis_3.16_zh-Hant.ts)  
 - [下載 QM 檔](../assets/sites/qgis_3.16_zh-Hant.qm)  
 
