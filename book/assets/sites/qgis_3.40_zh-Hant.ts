@@ -6267,7 +6267,7 @@ Please, check that GRASS is correctly installed and available on your system.</s
     <message>
         <location filename="../src/ui/qgisapp.ui" />
         <source>&amp;Plugins</source>
-        <translation>&amp;外掛</translation>
+        <translation>&amp;外掛程式</translation>
     </message>
     <message>
         <location filename="../src/ui/qgisapp.ui" />
@@ -6485,7 +6485,7 @@ Please, check that GRASS is correctly installed and available on your system.</s
     <message>
         <location filename="../src/ui/qgisapp.ui" />
         <source>Plugins Toolbar</source>
-        <translation>外掛工具列</translation>
+        <translation>外掛程式工具列</translation>
     </message>
     <message>
         <location filename="../src/ui/qgisapp.ui" />
@@ -7747,7 +7747,7 @@ Please, check that GRASS is correctly installed and available on your system.</s
     <message>
         <location filename="../src/ui/qgisapp.ui" />
         <source>Manage and Install Plugins…</source>
-        <translation>管理與安裝外掛…</translation>
+        <translation>管理與安裝外掛程式…</translation>
     </message>
     <message>
         <location filename="../src/ui/qgisapp.ui" />
@@ -7954,7 +7954,7 @@ Acts on all layers.</source>
     <message>
         <location filename="../src/ui/qgisapp.ui" />
         <source>Plugins</source>
-        <translation>外掛</translation>
+        <translation>外掛程式</translation>
     </message>
     <message>
         <location filename="../src/ui/qgisapp.ui" />
@@ -8840,7 +8840,7 @@ Shows placeholders for labels which could not be placed, e.g. due to overlaps wi
     <name>MetaSearch</name>
     <message>
         <source>MetaSearch plugin</source>
-        <translation>MetaSearch 外掛</translation>
+        <translation>MetaSearch 外掛程式</translation>
     </message>
     <message>
         <source>Search Metadata Catalogs</source>
@@ -8848,7 +8848,7 @@ Shows placeholders for labels which could not be placed, e.g. due to overlaps wi
     </message>
     <message>
         <source>MetaSearch plugin help</source>
-        <translation>MetaSearch 外掛說明</translation>
+        <translation>MetaSearch 外掛程式說明</translation>
     </message>
     <message>
         <source>Get Help on MetaSearch</source>
@@ -9335,7 +9335,7 @@ Shows placeholders for labels which could not be placed, e.g. due to overlaps wi
     </message>
     <message>
         <source>The parameter `{}` is not registered, are you missing a required plugin?</source>
-        <translation>引數 `{}` 尚未註冊，您是否缺少必要的外掛？</translation>
+        <translation>引數 `{}` 尚未註冊，您是否缺少必要的外掛程式？</translation>
     </message>
     <message>
         <source>{} Parameter Definition</source>
@@ -10967,7 +10967,7 @@ This can cause unexpected results.</source>
     </message>
     <message>
         <source>The algorithm "{}" is no longer available. (Perhaps a plugin was uninstalled?)</source>
-        <translation>演算法 "{}" 不再可用。(可能是外掛已被解除安裝？)</translation>
+        <translation>演算法 "{}" 不再可用。(可能是外掛程式已被解除安裝？)</translation>
     </message>
     <message>
         <source>Missing Dependency</source>
@@ -11835,7 +11835,7 @@ This can cause unexpected results.</source>
     </message>
     <message>
         <source>Couldn't load plugin '{0}'</source>
-        <translation>無法載入外掛 '{0}'</translation>
+        <translation>無法載入外掛程式 '{0}'</translation>
     </message>
     <message>
         <source>{0} due to an error when calling its classFactory() method</source>
@@ -11847,11 +11847,11 @@ This can cause unexpected results.</source>
     </message>
     <message>
         <source>Error while unloading plugin {0}</source>
-        <translation>解除安裝外掛 {0} 時發生錯誤</translation>
+        <translation>解除安裝外掛程式 {0} 時發生錯誤</translation>
     </message>
     <message>
         <source>Couldn't load server plugin {0}</source>
-        <translation>無法載入伺服器外掛 {0}</translation>
+        <translation>無法載入伺服器外掛程式 {0}</translation>
     </message>
     <message>
         <source>{0} due to an error when calling its serverClassFactory() method</source>
@@ -11883,7 +11883,7 @@ This can cause unexpected results.</source>
     </message>
     <message>
         <source>{0} - plugin has no initProcessing() method</source>
-        <translation>{0} - 外掛沒有 initProcessing() 方法</translation>
+        <translation>{0} - 外掛程式沒有 initProcessing() 方法</translation>
     </message>
     <message>
         <source>{0} due to an error when calling its initProcessing() method</source>
@@ -13001,13 +13001,13 @@ You are seeing this message most likely because you have no DISPLAY environment 
         <location filename="../src/app/qgspluginregistry.cpp" line="711" />
         <location filename="../src/plugins/grass/qgsgrassplugin.cpp" line="58" />
         <source>Plugins</source>
-        <translation>外掛</translation>
+        <translation>外掛程式</translation>
     </message>
     <message>
         <location filename="../src/app/qgspluginregistry.cpp" line="302" />
         <source>Plugin "%1" is not compatible with this version of QGIS.
 It will be disabled.</source>
-        <translation>外掛 "%1" 與此版本的 QGIS 不相容。將被停用。</translation>
+        <translation>外掛程式 "%1" 與此版本的 QGIS 不相容。將被停用。</translation>
     </message>
     <message>
         <location filename="../src/app/qgspluginregistry.cpp" line="318" />
@@ -13040,13 +13040,13 @@ It will be disabled.</source>
     <message>
         <location filename="../src/app/qgspluginregistry.cpp" line="410" />
         <source>Loading Plugins</source>
-        <translation>正在載入外掛</translation>
+        <translation>正在載入外掛程式</translation>
     </message>
     <message>
         <location filename="../src/app/qgspluginregistry.cpp" line="411" />
         <source>There was an error loading a plugin. The following diagnostic information may help the QGIS developers resolve the issue:
 %1.</source>
-        <translation>載入外掛時發生錯誤。以下診斷資訊可能幫助 QGIS 開發人員解決此問題: %1。</translation>
+        <translation>載入外掛程式時發生錯誤。以下診斷資訊可能幫助 QGIS 開發人員解決此問題: %1。</translation>
     </message>
     <message>
         <location filename="../src/app/qgspluginregistry.cpp" line="420" />
@@ -13056,18 +13056,18 @@ It will be disabled.</source>
     <message>
         <location filename="../src/app/qgspluginregistry.cpp" line="427" />
         <source>Plugin %1 did not return a valid type and cannot be loaded</source>
-        <translation>外掛 %1 未返回有效型別，無法載入</translation>
+        <translation>外掛程式 %1 未返回有效型別，無法載入</translation>
     </message>
     <message>
         <location filename="../src/app/qgspluginregistry.cpp" line="490" />
         <source>Load plugins</source>
-        <translation>載入外掛</translation>
+        <translation>載入外掛程式</translation>
     </message>
     <message>
         <location filename="../src/app/qgspluginregistry.cpp" line="514" />
         <location filename="../src/app/qgspluginregistry.cpp" line="606" />
         <source>Enable Plugin</source>
-        <translation>啟用外掛</translation>
+        <translation>啟用外掛程式</translation>
     </message>
     <message>
         <location filename="../src/app/qgspluginregistry.cpp" line="518" />
@@ -13079,18 +13079,18 @@ It will be disabled.</source>
         <location filename="../src/app/qgspluginregistry.cpp" line="522" />
         <location filename="../src/app/qgspluginregistry.cpp" line="614" />
         <source>Plugin %1</source>
-        <translation>外掛 %1</translation>
+        <translation>外掛程式 %1</translation>
     </message>
     <message>
         <location filename="../src/app/qgspluginregistry.cpp" line="523" />
         <location filename="../src/app/qgspluginregistry.cpp" line="615" />
         <source>This plugin is disabled because it previously crashed QGIS.</source>
-        <translation>此外掛已停用，因為它先前使 QGIS 當機。</translation>
+        <translation>此外掛程式已停用，因為它先前使 QGIS 當機。</translation>
     </message>
     <message>
         <location filename="../src/app/qgspluginregistry.cpp" line="710" />
         <source>Error when reading metadata of plugin %1</source>
-        <translation>讀取外掛 %1 的元資料時出錯</translation>
+        <translation>讀取外掛程式 %1 的元資料時出錯</translation>
     </message>
     <message>
         <location filename="../src/core/proj/qgscoordinatereferencesystem.cpp" line="1220" />
@@ -14772,7 +14772,7 @@ The distance is specified in layer units, and the bearing in degrees clockwise f
     <message>
         <location filename="../src/core/providers/qgsproviderregistry.cpp" line="478" />
         <source>No data provider plugins are available. No vector layers can be loaded</source>
-        <translation>沒有可用的資料提供者外掛。無法載入向量圖層</translation>
+        <translation>沒有可用的資料提供者外掛程式。無法載入向量圖層</translation>
     </message>
     <message>
         <location filename="../src/core/providers/qgsproviderregistry.cpp" line="536" />
@@ -14784,7 +14784,7 @@ The distance is specified in layer units, and the bearing in degrees clockwise f
         <source>No QGIS auth method plugins found in:
 %1
 </source>
-        <translation>在以下位置未找到 QGIS 認證方法外掛: %1</translation>
+        <translation>在以下位置未找到 QGIS 認證方法外掛程式: %1</translation>
     </message>
     <message>
         <location filename="../src/core/auth/qgsauthmethodregistry.cpp" line="126" />
@@ -14799,7 +14799,7 @@ The distance is specified in layer units, and the bearing in degrees clockwise f
     <message>
         <location filename="../src/core/auth/qgsauthmethodregistry.cpp" line="243" />
         <source>No authentication method plugins are available.</source>
-        <translation>沒有可用的身份驗證方法外掛。</translation>
+        <translation>沒有可用的身份驗證方法外掛程式。</translation>
     </message>
     <message>
         <location filename="../src/core/auth/qgsauthmethodregistry.cpp" line="306" />
@@ -16332,7 +16332,7 @@ Optionally the layers can be appended to an existing spreadsheet as additional s
     <message>
         <location filename="../src/analysis/processing/qgsalgorithmpackage.cpp" line="364" />
         <source>Packaging plugin layers is not supported.</source>
-        <translation>不支援封裝外掛圖層。</translation>
+        <translation>不支援封裝外掛程式圖層。</translation>
     </message>
     <message>
         <location filename="../src/analysis/processing/qgsalgorithmpackage.cpp" line="60" />
@@ -17689,7 +17689,7 @@ SQL: %1</source>
     <message>
         <location filename="../src/python/qgspythonutilsimpl.cpp" line="84" />
         <source>The extra plugin path '%1' does not exist!</source>
-        <translation>額外的外掛路徑 '%1' 不存在！</translation>
+        <translation>額外的外掛程式路徑 '%1' 不存在！</translation>
     </message>
     <message>
         <location filename="../src/python/qgspythonutilsimpl.cpp" line="108" />
@@ -17927,7 +17927,7 @@ Both the weight field and unique class field cannot be specified. If they are, t
     <message>
         <location filename="../src/plugins/topology/topol.cpp" line="35" />
         <source>A Plugin for finding topological errors in vector layers</source>
-        <translation>一個用於在向量圖層中查詢拓撲錯誤的外掛</translation>
+        <translation>一個用於在向量圖層中查詢拓撲錯誤的外掛程式</translation>
     </message>
     <message>
         <location filename="../src/plugins/topology/topolError.cpp" line="26" />
@@ -17937,7 +17937,7 @@ Both the weight field and unique class field cannot be specified. If they are, t
     <message>
         <location filename="../src/plugins/topology/topolError.cpp" line="26" />
         <source>Topology plugin</source>
-        <translation>拓撲外掛</translation>
+        <translation>拓撲外掛程式</translation>
     </message>
     <message>
         <location filename="../src/plugins/topology/topolError.cpp" line="135" />
@@ -39909,7 +39909,7 @@ For more details, please see the following papers:
     <message>
         <location filename="../src/app/qgisapp.cpp" line="1491" />
         <source>Checking provider plugins</source>
-        <translation>檢查提供者外掛</translation>
+        <translation>檢查提供者外掛程式</translation>
     </message>
     <message>
         <location filename="../src/app/qgisapp.cpp" line="1522" />
@@ -39919,7 +39919,7 @@ For more details, please see the following papers:
     <message>
         <location filename="../src/app/qgisapp.cpp" line="1550" />
         <source>Restoring loaded plugins</source>
-        <translation>還原已載入的外掛</translation>
+        <translation>還原已載入的外掛程式</translation>
     </message>
     <message>
         <location filename="../src/app/qgisapp.cpp" line="1620" />
@@ -40983,7 +40983,7 @@ Please cancel these tasks and retry.</source>
     <message>
         <location filename="../src/app/qgisapp.cpp" line="5370" />
         <source>Active Python plugins</source>
-        <translation>啟用的 Python 外掛</translation>
+        <translation>啟用的 Python 外掛程式</translation>
     </message>
     <message>
         <location filename="../src/app/qgisapp.cpp" line="5443" />
@@ -41656,7 +41656,7 @@ Error: %1</source>
     <message>
         <location filename="../src/app/qgisapp.cpp" line="1242" />
         <source>Plugin manager</source>
-        <translation>外掛管理員</translation>
+        <translation>外掛程式管理員</translation>
     </message>
     <message>
         <location filename="../src/app/qgisapp.cpp" line="1249" />
@@ -41696,7 +41696,7 @@ Error: %1</source>
     <message>
         <location filename="../src/app/qgisapp.cpp" line="1572" />
         <source>Plugin installer</source>
-        <translation>外掛安裝程式</translation>
+        <translation>外掛程式安裝程式</translation>
     </message>
     <message>
         <location filename="../src/app/qgisapp.cpp" line="1592" />
@@ -42128,7 +42128,7 @@ Please cancel these tasks and retry.</source>
     <message>
         <location filename="../src/app/qgisapp.cpp" line="11585" />
         <source>Plugin layer</source>
-        <translation>外掛圖層</translation>
+        <translation>外掛程式圖層</translation>
     </message>
     <message>
         <location filename="../src/app/qgisapp.cpp" line="11589" />
@@ -43513,27 +43513,27 @@ Please cancel these tasks and retry.</source>
     <message>
         <location filename="../src/app/qgsabout.cpp" line="239" />
         <source>Available QGIS Data Provider Plugins</source>
-        <translation>可用的 QGIS 資料提供者外掛</translation>
+        <translation>可用的 QGIS 資料提供者外掛程式</translation>
     </message>
     <message>
         <location filename="../src/app/qgsabout.cpp" line="241" />
         <source>Available QGIS Authentication Method Plugins</source>
-        <translation>可用的 QGIS 認證方法外掛</translation>
+        <translation>可用的 QGIS 認證方法外掛程式</translation>
     </message>
     <message>
         <location filename="../src/app/qgsabout.cpp" line="244" />
         <source>Available Qt Database Plugins</source>
-        <translation>可用的 Qt 資料庫外掛</translation>
+        <translation>可用的 Qt 資料庫外掛程式</translation>
     </message>
     <message>
         <location filename="../src/app/qgsabout.cpp" line="250" />
         <source>Available Qt Image Plugins</source>
-        <translation>可用的 Qt 影像外掛</translation>
+        <translation>可用的 Qt 影像外掛程式</translation>
     </message>
     <message>
         <location filename="../src/app/qgsabout.cpp" line="251" />
         <source>Qt Image Plugin Search Paths &lt;br&gt;</source>
-        <translation>Qt 影像外掛搜尋路徑 &lt;br&gt;</translation>
+        <translation>Qt 影像外掛程式搜尋路徑 &lt;br&gt;</translation>
     </message>
     <message>
         <location filename="../src/ui/qgsabout.ui" />
@@ -46137,7 +46137,7 @@ SVG Search Paths:	%8
 User DB Path:	%9
 Auth DB Path:	%10
 </source>
-        <translation>應用狀態: QGIS_PREFIX_PATH 環境變數: 		%1前置: 		%2外掛路徑: 		%3封裝資料路徑: 	%4活動主題名稱: 	%5活動主題路徑: 	%6預設主題路徑: 	%7SVG 搜尋路徑: 	%8使用者資料庫路徑: 	%9授權資料庫路徑: 	%10</translation>
+        <translation>應用狀態: QGIS_PREFIX_PATH 環境變數: 		%1前置: 		%2外掛程式路徑: 		%3封裝資料路徑: 	%4活動主題名稱: 	%5活動主題路徑: 	%6預設主題路徑: 	%7SVG 搜尋路徑: 	%8使用者資料庫路徑: 	%9授權資料庫路徑: 	%10</translation>
     </message>
     <message>
         <location filename="../src/core/qgsapplication.cpp" line="1184" />
@@ -46326,7 +46326,7 @@ Auth DB Path:	%10
     <message>
         <location filename="../src/core/qgsapplication.cpp" line="2677" />
         <source>Setup plugin layer registry</source>
-        <translation>設定外掛圖層登錄檔</translation>
+        <translation>設定外掛程式圖層登錄檔</translation>
     </message>
     <message>
         <location filename="../src/core/qgsapplication.cpp" line="2682" />
@@ -48352,7 +48352,7 @@ An example is:
 Reference in function name: my_form_open
 
 </source>
-        <translation>函式的程式碼可以從這個對話方塊中輸入的原始碼、外部 Python 檔案或環境中載入(例如: 從外掛或 startup.py)。範例為:           from qgis.PyQt.QtWidgets import QWidget          def my_form_open(dialog, layer, feature):\tgeom = feature.geometry()\tcontrol = dialog.findChild(QWidget,"MyLineEdit")函式名稱參考: my_form_open</translation>
+        <translation>函式的程式碼可以從這個對話方塊中輸入的原始碼、外部 Python 檔案或環境中載入(例如: 從外掛程式或 startup.py)。範例為:           from qgis.PyQt.QtWidgets import QWidget          def my_form_open(dialog, layer, feature):\tgeom = feature.geometry()\tcontrol = dialog.findChild(QWidget,"MyLineEdit")函式名稱參考: my_form_open</translation>
     </message>
     <message>
         <location filename="../src/ui/qgsattributesforminitcode.ui" />
@@ -48376,7 +48376,7 @@ An example is:
 Reference in function name: my_form_open
 
 </source>
-        <translation>函式的程式碼可以從這個對話方塊中輸入的原始碼、外部 Python 檔案或環境中載入(例如: 從外掛或 startup.py)。範例為:           from qgis.PyQt.QtWidgets import QWidget          def my_form_open(dialog, layer, feature):\tgeom = feature.geometry()\tcontrol = dialog.findChild(QWidget,"MyLineEdit")函式名稱參考: my_form_open</translation>
+        <translation>函式的程式碼可以從這個對話方塊中輸入的原始碼、外部 Python 檔案或環境中載入(例如: 從外掛程式或 startup.py)。範例為:           from qgis.PyQt.QtWidgets import QWidget          def my_form_open(dialog, layer, feature):\tgeom = feature.geometry()\tcontrol = dialog.findChild(QWidget,"MyLineEdit")函式名稱參考: my_form_open</translation>
     </message>
     <message>
         <location filename="../src/ui/qgsattributesforminitcode.ui" />
@@ -49570,7 +49570,7 @@ Operation can NOT be undone!</source>
     <message>
         <location filename="../src/ui/auth/qgsautheditorwidgets.ui" />
         <source>Installed Plugins</source>
-        <translation>已安裝外掛</translation>
+        <translation>已安裝外掛程式</translation>
     </message>
     <message>
         <location filename="../src/ui/auth/qgsautheditorwidgets.ui" />
@@ -49998,17 +49998,17 @@ Authorities/Issuers: %1%2</source>
     <message>
         <location filename="../src/core/auth/qgsauthmanager.cpp" line="200" />
         <source>QCA's OpenSSL plugin (qca-ossl) is missing</source>
-        <translation>缺少 QCA 的 OpenSSL 外掛 (qca-ossl)</translation>
+        <translation>缺少 QCA 的 OpenSSL 外掛程式 (qca-ossl)</translation>
     </message>
     <message>
         <location filename="../src/core/auth/qgsauthmanager.cpp" line="230" />
         <source>No authentication method plugins found</source>
-        <translation>未找到身份驗證方法的外掛</translation>
+        <translation>未找到身份驗證方法的外掛程式</translation>
     </message>
     <message>
         <location filename="../src/core/auth/qgsauthmanager.cpp" line="237" />
         <source>No authentication method plugins could be loaded</source>
-        <translation>無法載入身份驗證方法的外掛</translation>
+        <translation>無法載入身份驗證方法的外掛程式</translation>
     </message>
     <message>
         <location filename="../src/core/auth/qgsauthmanager.cpp" line="253" />
@@ -50361,7 +50361,7 @@ Authorities/Issuers: %1%2</source>
     <message>
         <location filename="../src/ui/auth/qgsauthmethodplugins.ui" />
         <source>Installed authentication method plugins</source>
-        <translation>已安裝的身份驗證方法外掛</translation>
+        <translation>已安裝的身份驗證方法外掛程式</translation>
     </message>
     <message>
         <location filename="../src/gui/auth/qgsautheditorwidgets.cpp" line="60" />
@@ -54631,7 +54631,7 @@ You can install the entire cpt-city archive or a selection for QGIS.
 
 This file can be found at [%2]
 and current file is [%3]</source>
-        <translation>錯誤 - 找不到 cpt-city 漸層檔案。您有兩種安裝方式: 1) 安裝「色彩梯度管理器」python 外掛(您必須在外掛管理器中啟用實驗外掛)並使用它下載最新的 cpt-city 封裝。您可以安裝整個 cpt-city 存檔或 QGIS 的選擇。2) 下載完整的存檔(以 svg 格式)並解壓縮到您的 QGIS 設定目錄 [%1] .此檔案可以在 [%2] 找到當前檔案為 [%3]</translation>
+        <translation>錯誤 - 找不到 cpt-city 漸層檔案。您有兩種安裝方式: 1) 安裝「色彩梯度管理器」python 外掛程式(您必須在外掛程式管理器中啟用實驗外掛程式)並使用它下載最新的 cpt-city 封裝。您可以安裝整個 cpt-city 存檔或 QGIS 的選擇。2) 下載完整的存檔(以 svg 格式)並解壓縮到您的 QGIS 設定目錄 [%1] .此檔案可以在 [%2] 找到當前檔案為 [%3]</translation>
     </message>
     <message>
         <location filename="../src/gui/symbology/qgscptcitycolorrampdialog.cpp" line="119" />
@@ -54663,7 +54663,7 @@ and current file is [%3]</source>
         <source>You can download a more complete set of cpt-city gradients by installing the "Color Ramp Manager" plugin (you must enable Experimental plugins in the plugin manager).
 
 </source>
-        <translation>您可以透過安裝「色彩梯度管理器」外掛下載一組更完整的 cpt-city 漸層(您必須在外掛管理器中啟用實驗外掛)。</translation>
+        <translation>您可以透過安裝「色彩梯度管理器」外掛程式下載一組更完整的 cpt-city 漸層(您必須在外掛程式管理器中啟用實驗外掛程式)。</translation>
     </message>
     <message>
         <location filename="../src/gui/symbology/qgscptcitycolorrampdialog.cpp" line="468" />
@@ -54822,17 +54822,17 @@ and current file is [%3]</source>
     <message>
         <location filename="../src/crashhandler/qgscrashdialog.cpp" line="82" />
         <source>Plugin %1 crashed QGIS</source>
-        <translation>外掛 %1 導致 QGIS 崩潰。</translation>
+        <translation>外掛程式 %1 導致 QGIS 崩潰。</translation>
     </message>
     <message>
         <location filename="../src/crashhandler/qgscrashdialog.cpp" line="83" />
         <source>The plugin &lt;b&gt;%1&lt;/b&gt; caused QGIS to crash.</source>
-        <translation>該外掛 &lt;b&gt;%1&lt;/b&gt; 導致 QGIS 崩潰。</translation>
+        <translation>該外掛程式 &lt;b&gt;%1&lt;/b&gt; 導致 QGIS 崩潰。</translation>
     </message>
     <message>
         <location filename="../src/crashhandler/qgscrashdialog.cpp" line="85" />
         <source>Please report this issue to the author of this plugin.</source>
-        <translation>請將此問題報告給該外掛的作者。</translation>
+        <translation>請將此問題報告給該外掛程式的作者。</translation>
     </message>
     <message>
         <location filename="../src/crashhandler/qgscrashdialog.cpp" line="91" />
@@ -80420,7 +80420,7 @@ Press cancel to abort breaks calculation or OK to continue.</source>
     <message>
         <location filename="../src/providers/grass/qgsgrass.cpp" line="366" />
         <source>GRASS was not found in '%1' (GISBASE), provider and plugin will not work.</source>
-        <translation>未在 '%1' (GISBASE) 中找到 GRASS，提供者和外掛將無法工作。</translation>
+        <translation>未在 '%1' (GISBASE) 中找到 GRASS，提供者和外掛程式將無法工作。</translation>
     </message>
     <message>
         <location filename="../src/providers/grass/qgsgrass.cpp" line="370" />
@@ -80481,7 +80481,7 @@ Press cancel to abort breaks calculation or OK to continue.</source>
     <message>
         <location filename="../src/providers/grass/qgsgrass.cpp" line="343" />
         <source>Problem in GRASS initialization, GRASS provider and plugin will not work : %1</source>
-        <translation>GRASS 初始化中出現問題，GRASS 提供者和外掛將無法工作: %1</translation>
+        <translation>GRASS 初始化中出現問題，GRASS 提供者和外掛程式將無法工作: %1</translation>
     </message>
     <message>
         <location filename="../src/providers/grass/qgsgrass.cpp" line="660" />
@@ -81938,7 +81938,7 @@ at line %2 column %3</source>
     <message>
         <location filename="../src/providers/grass/qgsgrassoptionsbase.ui" />
         <source>The version of GRASS which was used to build the GRASS provider and plugin in QGIS. Exactly the same version must be used on runtime.</source>
-        <translation>用於構建 QGIS 中 GRASS 提供者和外掛的 GRASS 版本。執行時必須使用完全相同的版本。</translation>
+        <translation>用於構建 QGIS 中 GRASS 提供者和外掛程式的 GRASS 版本。執行時必須使用完全相同的版本。</translation>
     </message>
     <message>
         <location filename="../src/providers/grass/qgsgrassoptionsbase.ui" />
@@ -106475,7 +106475,7 @@ Always network: always load from network and do not check if the cache has a val
     <message>
         <location filename="../src/core/qgsofflineediting.cpp" line="1189" />
         <source>Offline Editing Plugin</source>
-        <translation>離線編輯外掛</translation>
+        <translation>離線編輯外掛程式</translation>
     </message>
     <message>
         <location filename="../src/core/qgsofflineediting.cpp" line="1203" />
@@ -106596,7 +106596,7 @@ Always network: always load from network and do not check if the cache has a val
     <message>
         <location filename="../src/plugins/offline_editing/offline_editing_plugin_gui.cpp" line="214" />
         <source>Offline Editing Plugin</source>
-        <translation>離線編輯外掛</translation>
+        <translation>離線編輯外掛程式</translation>
     </message>
     <message>
         <location filename="../src/plugins/offline_editing/offline_editing_plugin_gui.cpp" line="215" />
@@ -109165,7 +109165,7 @@ The bigger the number, the faster zooming with the mouse wheel will be.</transla
     <message>
         <location filename="../src/ui/qgsoptionsbase.ui" />
         <source>Plugin Paths</source>
-        <translation>外掛路徑</translation>
+        <translation>外掛程式路徑</translation>
     </message>
     <message>
         <location filename="../src/ui/qgsoptionsbase.ui" />
@@ -111904,31 +111904,31 @@ You need to restart QGIS in order to reload it.</translation>
     </message>
     <message>
         <source>The plugin is not compatible with this version of QGIS. It's designed for QGIS versions:</source>
-        <translation>該外掛與此版本的 QGIS 不相容。它是為以下版本的 QGIS 設計的:</translation>
+        <translation>該外掛程式與此版本的 QGIS 不相容。它是為以下版本的 QGIS 設計的:</translation>
     </message>
     <message>
         <source>The plugin depends on some components missing on your system. You need to install the following Python module in order to enable it:</source>
-        <translation>該外掛依賴於您系統上缺少的一些元件。您需要安裝以下 Python 模組以啟用它:</translation>
+        <translation>該外掛程式依賴於您系統上缺少的一些元件。您需要安裝以下 Python 模組以啟用它:</translation>
     </message>
     <message>
         <source>The plugin is broken. Python said:</source>
-        <translation>該外掛已損壞。Python 說:</translation>
+        <translation>該外掛程式已損壞。Python 說:</translation>
     </message>
     <message>
         <source>Plugin uninstall failed</source>
-        <translation>外掛解除安裝失敗</translation>
+        <translation>外掛程式解除安裝失敗</translation>
     </message>
     <message>
         <source>Are you sure you want to uninstall the following plugin?</source>
-        <translation>您確定要解除安裝以下外掛嗎?</translation>
+        <translation>您確定要解除安裝以下外掛程式嗎?</translation>
     </message>
     <message>
         <source>Warning: this plugin isn't available in any accessible repository!</source>
-        <translation>警告: 此外掛在任何可存取的儲存庫中不可用!</translation>
+        <translation>警告: 此外掛程式在任何可存取的儲存庫中不可用!</translation>
     </message>
     <message>
         <source>Plugin uninstalled successfully</source>
-        <translation>外掛成功解除安裝</translation>
+        <translation>外掛程式成功解除安裝</translation>
     </message>
     <message>
         <source>Unable to add another repository with the same URL!</source>
@@ -111940,7 +111940,7 @@ You need to restart QGIS in order to reload it.</translation>
     </message>
     <message>
         <source>You can't remove the official QGIS Plugin Repository. You can disable it if needed.</source>
-        <translation>您無法移除官方的 QGIS 外掛儲存庫。如果需要，您可以禁用它。</translation>
+        <translation>您無法移除官方的 QGIS 外掛程式儲存庫。如果需要，您可以禁用它。</translation>
     </message>
     <message>
         <source>Are you sure you want to remove the following repository?</source>
@@ -111966,7 +111966,7 @@ You need to restart QGIS in order to reload it.</translation>
         <source>Failed to unzip the plugin package
 {}.
 Probably it is broken</source>
-        <translation>解壓縮外掛包失敗{}。可能已損壞</translation>
+        <translation>解壓縮外掛程式包失敗{}。可能已損壞</translation>
     </message>
     <message>
         <source>Update of network request with authentication credentials FAILED for configuration '{0}'</source>
@@ -111990,11 +111990,11 @@ Probably it is broken</source>
     </message>
     <message>
         <source>QGIS Official Plugin Repository</source>
-        <translation>QGIS 官方外掛儲存庫</translation>
+        <translation>QGIS 官方外掛程式儲存庫</translation>
     </message>
     <message>
         <source>Nothing to remove! Plugin directory doesn't exist:</source>
-        <translation>沒有要移除的專案！外掛目錄不存在:</translation>
+        <translation>沒有要移除的專案！外掛程式目錄不存在:</translation>
     </message>
     <message>
         <source>Failed to remove the directory:</source>
@@ -112006,27 +112006,27 @@ Probably it is broken</source>
     </message>
     <message>
         <source>Plugin dependency &lt;b&gt;%s&lt;/b&gt; successfully installed</source>
-        <translation>外掛依賴 &lt;b&gt;%s&lt;/b&gt; 成功安裝</translation>
+        <translation>外掛程式依賴 &lt;b&gt;%s&lt;/b&gt; 成功安裝</translation>
     </message>
     <message>
         <source>Plugin dependency &lt;b&gt;%s&lt;/b&gt; successfully upgraded</source>
-        <translation>外掛依賴 &lt;b&gt;%s&lt;/b&gt; 成功升級</translation>
+        <translation>外掛程式依賴 &lt;b&gt;%s&lt;/b&gt; 成功升級</translation>
     </message>
     <message>
         <source>Error installing plugin dependency &lt;b&gt;%s&lt;/b&gt;: %s</source>
-        <translation>安裝外掛依賴 &lt;b&gt;%s&lt;/b&gt; 時發生錯誤: %s</translation>
+        <translation>安裝外掛程式依賴 &lt;b&gt;%s&lt;/b&gt; 時發生錯誤: %s</translation>
     </message>
     <message>
         <source>Error upgrading plugin dependency &lt;b&gt;%s&lt;/b&gt;: %s</source>
-        <translation>升級外掛依賴 &lt;b&gt;%s&lt;/b&gt; 時發生錯誤: %s</translation>
+        <translation>升級外掛程式依賴 &lt;b&gt;%s&lt;/b&gt; 時發生錯誤: %s</translation>
     </message>
     <message>
         <source>QGIS Python Install from ZIP Plugin Installer</source>
-        <translation>QGIS Python 從 ZIP 外掛安裝程式</translation>
+        <translation>QGIS Python 從 ZIP 外掛程式安裝程式</translation>
     </message>
     <message>
         <source>The Zip file is not a valid QGIS python plugin. No root folder was found inside.</source>
-        <translation>該壓縮檔案不是有效的 QGIS python 外掛。未找到根資料夾。</translation>
+        <translation>該壓縮檔案不是有效的 QGIS python 外掛程式。未找到根資料夾。</translation>
     </message>
     <message>
         <source>More Information</source>
@@ -112035,15 +112035,15 @@ Probably it is broken</source>
     <message>
         <source>The plugin seems to have been installed but it's not possible to know where. The directory "{}" has not been found. Probably the plugin package contained a wrong named directory.
 Please search the list of installed plugins. You should find the plugin there, but it's not possible to determine which of them it is and it's also not possible to inform you about available updates. Please contact the plugin author and submit this issue.</source>
-        <translation>外掛似乎已安裝，但無法確定位置。未找到目錄 "{}"。可能外掛包中包含錯誤命名的目錄。請搜尋已安裝的外掛列表。您應該能在那裡找到該外掛，但無法確定它是哪一個，也無法通知您有關可用更新的資訊。請聯絡外掛作者並提交此問題。</translation>
+        <translation>外掛程式似乎已安裝，但無法確定位置。未找到目錄 "{}"。可能外掛程式包中包含錯誤命名的目錄。請搜尋已安裝的外掛程式列表。您應該能在那裡找到該外掛程式，但無法確定它是哪一個，也無法通知您有關可用更新的資訊。請聯絡外掛程式作者並提交此問題。</translation>
     </message>
     <message>
         <source>Multiple plugin updates are available</source>
-        <translation>有多個外掛更新可用</translation>
+        <translation>有多個外掛程式更新可用</translation>
     </message>
     <message>
         <source>An update to the {} plugin is available</source>
-        <translation>有可多個外掛更新可用</translation>
+        <translation>有可多個外掛程式更新可用</translation>
     </message>
 </context>
 <context>
@@ -112133,7 +112133,7 @@ Please search the list of installed plugins. You should find the plugin there, b
     </message>
     <message>
         <source>Failed to unzip the plugin package. Probably it's broken or missing from the repository. You may also want to make sure that you have write permission to the plugin directory:</source>
-        <translation>無法解壓外掛包。可能它已損壞或在儲存庫中缺失。您可能還要確保您對外掛目錄擁有寫入許可權:</translation>
+        <translation>無法解壓外掛程式包。可能它已損壞或在儲存庫中缺失。您可能還要確保您對外掛程式目錄擁有寫入許可權:</translation>
     </message>
     <message>
         <source>Aborted by user</source>
@@ -112145,12 +112145,12 @@ Please search the list of installed plugins. You should find the plugin there, b
     <message>
         <location filename="../python/pyplugin_installer/qgsplugininstallerinstallingbase.ui" />
         <source>QGIS Python Plugin Installer</source>
-        <translation>QGIS Python 外掛安裝程式</translation>
+        <translation>QGIS Python 外掛程式安裝程式</translation>
     </message>
     <message>
         <location filename="../python/pyplugin_installer/qgsplugininstallerinstallingbase.ui" />
         <source>Installing plugin:</source>
-        <translation>正在安裝外掛:</translation>
+        <translation>正在安裝外掛程式:</translation>
     </message>
     <message>
         <location filename="../python/pyplugin_installer/qgsplugininstallerinstallingbase.ui" />
@@ -112170,17 +112170,17 @@ Please search the list of installed plugins. You should find the plugin there, b
     <message>
         <location filename="../python/pyplugin_installer/qgsplugininstallerpluginerrorbase.ui" />
         <source>Error loading plugin</source>
-        <translation>載入外掛時出錯</translation>
+        <translation>載入外掛程式時出錯</translation>
     </message>
     <message>
         <location filename="../python/pyplugin_installer/qgsplugininstallerpluginerrorbase.ui" />
         <source>The plugin seems to be invalid or have unfulfilled dependencies. It has been installed, but can't be loaded. If you really need this plugin, you can contact its author or &lt;a href="http://lists.osgeo.org/mailman/listinfo/qgis-user"&gt;QGIS users group&lt;/a&gt; and try to solve the problem. If not, you can just uninstall it. Here is the error message below:</source>
-        <translation>該外掛似乎無效或有未滿足的依賴性。它已安裝，但無法載入。如果您真的需要此外掛，您可以聯絡其作者或 &lt;a href="http://lists.osgeo.org/mailman/listinfo/qgis-user"&gt;QGIS 使用者群組&lt;/a&gt; 嘗試解決問題。如果不需要，您可以直接解除安裝它。以下是錯誤訊息:</translation>
+        <translation>該外掛程式似乎無效或有未滿足的依賴性。它已安裝，但無法載入。如果您真的需要此外掛程式，您可以聯絡其作者或 &lt;a href="http://lists.osgeo.org/mailman/listinfo/qgis-user"&gt;QGIS 使用者群組&lt;/a&gt; 嘗試解決問題。如果不需要，您可以直接解除安裝它。以下是錯誤訊息:</translation>
     </message>
     <message>
         <location filename="../python/pyplugin_installer/qgsplugininstallerpluginerrorbase.ui" />
         <source>Do you want to uninstall this plugin now? If you're unsure, probably you would like to do this.</source>
-        <translation>您現在想要解除安裝此外掛嗎？如果您不確定，您可能會想這樣做。</translation>
+        <translation>您現在想要解除安裝此外掛程式嗎？如果您不確定，您可能會想這樣做。</translation>
     </message>
 </context>
 <context>
@@ -112252,22 +112252,22 @@ Please search the list of installed plugins. You should find the plugin there, b
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="504" />
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="1778" />
         <source>Plugins</source>
-        <translation>外掛</translation>
+        <translation>外掛程式</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="239" />
         <source>Plugin packages (*.zip *.ZIP)</source>
-        <translation>外掛套件 (*.zip *.ZIP)</translation>
+        <translation>外掛程式套件 (*.zip *.ZIP)</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="371" />
         <source>No Plugins</source>
-        <translation>沒有外掛</translation>
+        <translation>沒有外掛程式</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="371" />
         <source>No QGIS plugins found in %1</source>
-        <translation>在 %1 中未找到 QGIS 外掛</translation>
+        <translation>在 %1 中未找到 QGIS 外掛程式</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="627" />
@@ -112302,23 +112302,23 @@ Please search the list of installed plugins. You should find the plugin there, b
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="814" />
         <source>This plugin is incompatible with this version of QGIS</source>
-        <translation>此外掛與此版本的 QGIS 不相容</translation>
+        <translation>此外掛程式與此版本的 QGIS 不相容</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="814" />
         <source>Plugin designed for QGIS %1</source>
         <comment>compatible QGIS version(s)</comment>
-        <translation>此外掛設計用於 QGIS %1</translation>
+        <translation>此外掛程式設計用於 QGIS %1</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="818" />
         <source>This plugin requires a missing module</source>
-        <translation>此外掛需要缺失的模組</translation>
+        <translation>此外掛程式需要缺失的模組</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="822" />
         <source>This plugin is broken</source>
-        <translation>此外掛已損壞</translation>
+        <translation>此外掛程式已損壞</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="833" />
@@ -112328,17 +112328,17 @@ Please search the list of installed plugins. You should find the plugin there, b
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="840" />
         <source>This is a new plugin</source>
-        <translation>這是一個新外掛</translation>
+        <translation>這是一個新外掛程式</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="847" />
         <source>Installed version of this plugin is higher than any version found in repository</source>
-        <translation>此外掛的已安裝版本高於儲存庫中找到的任何版本</translation>
+        <translation>此外掛程式的已安裝版本高於儲存庫中找到的任何版本</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="865" />
         <source>This plugin is deprecated</source>
-        <translation>此外掛已被淘汰</translation>
+        <translation>此外掛程式已被淘汰</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="974" />
@@ -112369,67 +112369,67 @@ Please search the list of installed plugins. You should find the plugin there, b
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="1075" />
         <source>Plugin dependencies</source>
-        <translation>外掛依賴性</translation>
+        <translation>外掛程式依賴性</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="1088" />
         <source>Upgrade Plugin</source>
-        <translation>升級外掛</translation>
+        <translation>升級外掛程式</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="1089" />
         <source>Upgrades selected plugin to latest stable version</source>
-        <translation>將選定的外掛升級至最新穩定版本</translation>
+        <translation>將選定的外掛程式升級至最新穩定版本</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="1094" />
         <source>Downgrade Plugin</source>
-        <translation>降級外掛</translation>
+        <translation>降級外掛程式</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="1095" />
         <source>Downgrades selected plugin to latest stable version</source>
-        <translation>將選定的外掛降級至最新穩定版本</translation>
+        <translation>將選定的外掛程式降級至最新穩定版本</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="1099" />
         <source>Install Plugin</source>
-        <translation>安裝外掛</translation>
+        <translation>安裝外掛程式</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="1100" />
         <source>Installs latest stable version of the selected plugin</source>
-        <translation>安裝選定外掛的最新穩定版本</translation>
+        <translation>安裝選定外掛程式的最新穩定版本</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="1105" />
         <source>Reinstall Plugin</source>
-        <translation>重新安裝外掛</translation>
+        <translation>重新安裝外掛程式</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="1106" />
         <source>Reinstalls latest stable version of the selected plugin</source>
-        <translation>重新安裝選定外掛的最新穩定版本</translation>
+        <translation>重新安裝選定外掛程式的最新穩定版本</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="1114" />
         <source>Upgrades selected plugin to the experimental version</source>
-        <translation>將選定的外掛升級至實驗版本</translation>
+        <translation>將選定的外掛程式升級至實驗版本</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="1119" />
         <source>Downgrades selected plugin to the experimental version</source>
-        <translation>將選定的外掛降級至實驗版本</translation>
+        <translation>將選定的外掛程式降級至實驗版本</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="1124" />
         <source>Installs experimental version of the selected plugin</source>
-        <translation>安裝選定外掛的實驗版本</translation>
+        <translation>安裝選定外掛程式的實驗版本</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="1130" />
         <source>Reinstalls experimental version of the selected plugin</source>
-        <translation>重新安裝選定外掛的實驗版本</translation>
+        <translation>重新安裝選定外掛程式的實驗版本</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="1219" />
@@ -112439,7 +112439,7 @@ Please search the list of installed plugins. You should find the plugin there, b
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="1220" />
         <source>Only Show Plugins from Selected Repository</source>
-        <translation>僅顯示來自選定儲存庫的外掛</translation>
+        <translation>僅顯示來自選定儲存庫的外掛程式</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="1224" />
@@ -112515,12 +112515,12 @@ Please search the list of installed plugins. You should find the plugin there, b
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="856" />
         <source>This plugin has an experimental version available</source>
-        <translation>此外掛有可用的實驗版本</translation>
+        <translation>此外掛程式有可用的實驗版本</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="872" />
         <source>This is a core plugin, so you can't uninstall it</source>
-        <translation>這是一個核心外掛，因此您無法解除安裝它</translation>
+        <translation>這是一個核心外掛程式，因此您無法解除安裝它</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="926" />
@@ -112550,22 +112550,22 @@ Please search the list of installed plugins. You should find the plugin there, b
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="1113" />
         <source>Upgrade Experimental Plugin</source>
-        <translation>升級實驗性外掛</translation>
+        <translation>升級實驗性外掛程式</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="1118" />
         <source>Downgrade Experimental Plugin</source>
-        <translation>降級實驗性外掛</translation>
+        <translation>降級實驗性外掛程式</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="1123" />
         <source>Install Experimental Plugin</source>
-        <translation>安裝實驗性外掛</translation>
+        <translation>安裝實驗性外掛程式</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="1129" />
         <source>Reinstall Experimental Plugin</source>
-        <translation>重新安裝實驗性外掛</translation>
+        <translation>重新安裝實驗性外掛程式</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="1240" />
@@ -112610,7 +112610,7 @@ Please search the list of installed plugins. You should find the plugin there, b
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="1435" />
         <source>Sending vote to the plugin repository failed.</source>
-        <translation>將投票傳送到外掛資料庫失敗。</translation>
+        <translation>將投票傳送到外掛程式資料庫失敗。</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="1520" />
@@ -112620,37 +112620,37 @@ Please search the list of installed plugins. You should find the plugin there, b
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager.cpp" line="1521" />
         <source>Installing a plugin from an untrusted source can harm your computer. Only continue if you received the plugin from a source you trust. Continue?</source>
-        <translation>從不受信任的來源安裝外掛可能會損害您的電腦。只有在您從信任的來源獲得外掛時才繼續。繼續嗎？</translation>
+        <translation>從不受信任的來源安裝外掛程式可能會損害您的電腦。只有在您從信任的來源獲得外掛程式時才繼續。繼續嗎？</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager_texts.cpp" line="49" />
         <source>&lt;h3&gt;Upgradable plugins&lt;/h3&gt;&lt;p&gt;Here are &lt;b&gt;upgradeable plugins&lt;/b&gt;. It means more recent versions of installed plugins are available in the repositories.&lt;/p&gt;</source>
-        <translation>&lt;h3&gt;可升級的外掛&lt;/h3&gt;&lt;p&gt;這裡有 &lt;b&gt;可升級的外掛&lt;/b&gt;。這意味著在資料庫中有更近期的已安裝外掛版本可用。&lt;/p&gt;</translation>
+        <translation>&lt;h3&gt;可升級的外掛程式&lt;/h3&gt;&lt;p&gt;這裡有 &lt;b&gt;可升級的外掛程式&lt;/b&gt;。這意味著在資料庫中有更近期的已安裝外掛程式版本可用。&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager_texts.cpp" line="11" />
         <source>&lt;h3&gt;All Plugins&lt;/h3&gt;&lt;p&gt;On the left you see the list of all plugins available for your QGIS, both installed and available for download. Some plugins come with your QGIS installation while most of them are made available via the plugin repositories.&lt;/p&gt;&lt;p&gt;You can temporarily enable or disable a plugin. To &lt;i&gt;enable&lt;/i&gt; or &lt;i&gt;disable&lt;/i&gt; a plugin, click its checkbox or double-click its name…&lt;/p&gt;&lt;p&gt;Plugins showing in &lt;span style='color:red'&gt;red&lt;/span&gt; are not loaded because there is a problem. They are also listed on the 'Invalid' tab. Click on the plugin name to see more details, or to reinstall or uninstall this plugin.&lt;/p&gt;</source>
-        <translation>&lt;h3&gt;所有外掛&lt;/h3&gt;&lt;p&gt;左側顯示您 QGIS 可用的所有外掛列表，包括已安裝和可下載的外掛。有些外掛隨您的 QGIS 安裝而來，而大多數則透過外掛資料庫提供。&lt;/p&gt;&lt;p&gt;您可以暫時啟用或停用外掛。要 &lt;i&gt;啟用&lt;/i&gt; 或 &lt;i&gt;停用&lt;/i&gt; 外掛，請點選其核取方塊或雙擊其名稱…&lt;/p&gt;&lt;p&gt;顯示在 &lt;span style='color:red'&gt;紅色&lt;/span&gt;的外掛未載入，因為存在問題。它們也列在 '無效' 標籤上。點選外掛名稱以檢視更多詳細資訊，或重新安裝或解除安裝此外掛。&lt;/p&gt;</translation>
+        <translation>&lt;h3&gt;所有外掛程式&lt;/h3&gt;&lt;p&gt;左側顯示您 QGIS 可用的所有外掛程式列表，包括已安裝和可下載的外掛程式。有些外掛程式隨您的 QGIS 安裝而來，而大多數則透過外掛程式資料庫提供。&lt;/p&gt;&lt;p&gt;您可以暫時啟用或停用外掛程式。要 &lt;i&gt;啟用&lt;/i&gt; 或 &lt;i&gt;停用&lt;/i&gt; 外掛程式，請點選其核取方塊或雙擊其名稱…&lt;/p&gt;&lt;p&gt;顯示在 &lt;span style='color:red'&gt;紅色&lt;/span&gt;的外掛程式未載入，因為存在問題。它們也列在 '無效' 標籤上。點選外掛程式名稱以檢視更多詳細資訊，或重新安裝或解除安裝此外掛程式。&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager_texts.cpp" line="31" />
         <source>&lt;h3&gt;Installed Plugins&lt;/h3&gt;&lt;p&gt;Here you only see plugins &lt;b&gt;installed on your QGIS&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;Click on the name to see details. &lt;/p&gt;&lt;p&gt;Click the checkbox or double-click the name to &lt;i&gt;activate&lt;/i&gt; or &lt;i&gt;deactivate&lt;/i&gt; the plugin.&lt;/p&gt;&lt;p&gt;You can change the sorting via the context menu (right click).&lt;/p&gt;</source>
-        <translation>&lt;h3&gt;已安裝的外掛&lt;/h3&gt;&lt;p&gt;這裡您僅看到 &lt;b&gt;已安裝在您的 QGIS 上的外掛&lt;/b&gt;。&lt;/p&gt;&lt;p&gt;點選名稱以檢視詳細資訊。&lt;/p&gt;&lt;p&gt;點選核取方塊或雙擊名稱以 &lt;i&gt;啟用&lt;/i&gt; 或 &lt;i&gt;停用&lt;/i&gt; 外掛。&lt;/p&gt;&lt;p&gt;您可以透過上下文選單(右鍵單擊)更改排序。&lt;/p&gt;</translation>
+        <translation>&lt;h3&gt;已安裝的外掛程式&lt;/h3&gt;&lt;p&gt;這裡您僅看到 &lt;b&gt;已安裝在您的 QGIS 上的外掛程式&lt;/b&gt;。&lt;/p&gt;&lt;p&gt;點選名稱以檢視詳細資訊。&lt;/p&gt;&lt;p&gt;點選核取方塊或雙擊名稱以 &lt;i&gt;啟用&lt;/i&gt; 或 &lt;i&gt;停用&lt;/i&gt; 外掛程式。&lt;/p&gt;&lt;p&gt;您可以透過上下文選單(右鍵單擊)更改排序。&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager_texts.cpp" line="60" />
         <source>&lt;h3&gt;Not installed plugins&lt;/h3&gt;&lt;p&gt;Here you see the list of all plugins available in the repositories, but which are &lt;b&gt;not yet installed&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;Click on the name to see details.&lt;/p&gt;&lt;p&gt;You can change the sorting via the context menu (right click).&lt;/p&gt;&lt;p&gt;A plugin can be downloaded and installed by clicking on it's name, and then click the 'Install plugin' button.&lt;/p&gt;</source>
-        <translation>&lt;h3&gt;未安裝的外掛&lt;/h3&gt;&lt;p&gt;這裡您看到所有可用於資料庫的外掛列表，但這些外掛 &lt;b&gt;尚未安裝&lt;/b&gt;。&lt;/p&gt;&lt;p&gt;點選名稱以檢視詳細資訊。&lt;/p&gt;&lt;p&gt;您可以透過上下文選單(右鍵單擊)更改排序。&lt;/p&gt;&lt;p&gt;可以透過點選其名稱下載並安裝外掛，然後點選 '安裝外掛' 按鈕。&lt;/p&gt;</translation>
+        <translation>&lt;h3&gt;未安裝的外掛程式&lt;/h3&gt;&lt;p&gt;這裡您看到所有可用於資料庫的外掛程式列表，但這些外掛程式 &lt;b&gt;尚未安裝&lt;/b&gt;。&lt;/p&gt;&lt;p&gt;點選名稱以檢視詳細資訊。&lt;/p&gt;&lt;p&gt;您可以透過上下文選單(右鍵單擊)更改排序。&lt;/p&gt;&lt;p&gt;可以透過點選其名稱下載並安裝外掛程式，然後點選 '安裝外掛程式' 按鈕。&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager_texts.cpp" line="81" />
         <source>&lt;h3&gt;New plugins&lt;/h3&gt;&lt;p&gt;Here you see brand &lt;b&gt;new&lt;/b&gt; plugins which can be installed.&lt;/p&gt;</source>
-        <translation>&lt;h3&gt;新外掛&lt;/h3&gt;&lt;p&gt;這裡您看到可以安裝的全新 &lt;b&gt;外掛&lt;/b&gt;。&lt;/p&gt;</translation>
+        <translation>&lt;h3&gt;新外掛程式&lt;/h3&gt;&lt;p&gt;這裡您看到可以安裝的全新 &lt;b&gt;外掛程式&lt;/b&gt;。&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../src/app/pluginmanager/qgspluginmanager_texts.cpp" line="92" />
         <source>&lt;h3&gt;Invalid plugins&lt;/h3&gt;&lt;p&gt;Plugins in this list here are &lt;b&gt;broken or incompatible&lt;/b&gt; with your version of QGIS.&lt;/p&gt;&lt;p&gt;Click on an individual plugin; if possible QGIS shows you more information.&lt;/p&gt;&lt;p&gt;The main reasons to have invalid plugins is that this plugin is not build for this version of QGIS. Maybe you can download another version from &lt;a href="http://plugins.qgis.org"&gt;plugins.qgis.org&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;Another common reason is that a python plugin needs some external python libraries (dependencies). You can install them yourself, depending on your operating system. After a correct install the plugin should work.&lt;/p&gt;</source>
-        <translation>&lt;h3&gt;無效的外掛&lt;/h3&gt;&lt;p&gt;此列表中的外掛是 &lt;b&gt;損壞或與您的 QGIS 版本不相容&lt;/b&gt;。&lt;/p&gt;&lt;p&gt;點選單個外掛；如果可能，QGIS 將顯示更多資訊。&lt;/p&gt;&lt;p&gt;無效外掛的主要原因是該外掛未為此版本的 QGIS 構建。也許您可以從 &lt;a href="http://plugins.qgis.org"&gt;plugins.qgis.org&lt;/a&gt; 下載另一個版本。&lt;/p&gt;&lt;p&gt;另一個常見原因是 Python 外掛需要一些外部 Python 函式庫(依賴項)。您可以根據您的作業系統自行安裝它們。正確安裝後，外掛應該可以正常運作。&lt;/p&gt;</translation>
+        <translation>&lt;h3&gt;無效的外掛程式&lt;/h3&gt;&lt;p&gt;此列表中的外掛程式是 &lt;b&gt;損壞或與您的 QGIS 版本不相容&lt;/b&gt;。&lt;/p&gt;&lt;p&gt;點選單個外掛程式；如果可能，QGIS 將顯示更多資訊。&lt;/p&gt;&lt;p&gt;無效外掛程式的主要原因是該外掛程式未為此版本的 QGIS 構建。也許您可以從 &lt;a href="http://plugins.qgis.org"&gt;plugins.qgis.org&lt;/a&gt; 下載另一個版本。&lt;/p&gt;&lt;p&gt;另一個常見原因是 Python 外掛程式需要一些外部 Python 函式庫(依賴項)。您可以根據您的作業系統自行安裝它們。正確安裝後，外掛程式應該可以正常運作。&lt;/p&gt;</translation>
     </message>
 </context>
 <context>
@@ -112658,7 +112658,7 @@ Please search the list of installed plugins. You should find the plugin there, b
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
         <source>Plugin Manager</source>
-        <translation>外掛管理器</translation>
+        <translation>外掛程式管理器</translation>
     </message>
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
@@ -112673,12 +112673,12 @@ Please search the list of installed plugins. You should find the plugin there, b
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
         <source>Installed plugins</source>
-        <translation>已安裝的外掛</translation>
+        <translation>已安裝的外掛程式</translation>
     </message>
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
         <source>Not installed plugins available for download</source>
-        <translation>可下載的未安裝外掛</translation>
+        <translation>可下載的未安裝外掛程式</translation>
     </message>
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
@@ -112688,7 +112688,7 @@ Please search the list of installed plugins. You should find the plugin there, b
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
         <source>Installed plugins with more recent version available for download</source>
-        <translation>提供更新版本可下載的已安裝外掛</translation>
+        <translation>提供更新版本可下載的已安裝外掛程式</translation>
     </message>
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
@@ -112698,7 +112698,7 @@ Please search the list of installed plugins. You should find the plugin there, b
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
         <source>Not installed plugins seen for the first time</source>
-        <translation>首次看到未安裝的外掛</translation>
+        <translation>首次看到未安裝的外掛程式</translation>
     </message>
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
@@ -112708,7 +112708,7 @@ Please search the list of installed plugins. You should find the plugin there, b
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
         <source>Broken and incompatible installed plugins</source>
-        <translation>已安裝的外掛損壞且不相容</translation>
+        <translation>已安裝的外掛程式損壞且不相容</translation>
     </message>
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
@@ -112743,17 +112743,17 @@ Please search the list of installed plugins. You should find the plugin there, b
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
         <source>Upgrade all upgradeable plugins</source>
-        <translation>升級所有可升級的外掛</translation>
+        <translation>升級所有可升級的外掛程式</translation>
     </message>
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
         <source>Uninstall the selected plugin</source>
-        <translation>解除安裝所選外掛</translation>
+        <translation>解除安裝所選外掛程式</translation>
     </message>
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
         <source>Install, reinstall or upgrade the selected plugin</source>
-        <translation>安裝、重新安裝或升級所選外掛</translation>
+        <translation>安裝、重新安裝或升級所選外掛程式</translation>
     </message>
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
@@ -112763,27 +112763,27 @@ Please search the list of installed plugins. You should find the plugin there, b
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
         <source>Uninstall Plugin</source>
-        <translation>解除安裝外掛</translation>
+        <translation>解除安裝外掛程式</translation>
     </message>
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
         <source>Reinstall Plugin</source>
-        <translation>重新安裝外掛</translation>
+        <translation>重新安裝外掛程式</translation>
     </message>
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If you are provided with a zip package containing a plugin to install, please select the file below and click the &lt;span style=" font-style:italic;"&gt;Install plugin&lt;/span&gt; button.&lt;/p&gt;&lt;p&gt;Please note for most users this function is not applicable, as the preferable way is to install plugins from a repository.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;如果您獲得了一個包含要安裝的外掛的 zip 包，請選擇下面的檔案並點選 &lt;span style=" font-style:italic;"&gt;安裝外掛&lt;/span&gt; 按鈕。&lt;/p&gt;&lt;p&gt;請注意，對於大多數使用者來說，此功能不適用，因為首選的方式是從儲存庫安裝外掛。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;如果您獲得了一個包含要安裝的外掛程式的 zip 包，請選擇下面的檔案並點選 &lt;span style=" font-style:italic;"&gt;安裝外掛程式&lt;/span&gt; 按鈕。&lt;/p&gt;&lt;p&gt;請注意，對於大多數使用者來說，此功能不適用，因為首選的方式是從儲存庫安裝外掛程式。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
         <source>Install Plugin</source>
-        <translation>安裝外掛</translation>
+        <translation>安裝外掛程式</translation>
     </message>
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
         <source>The settings on this tab are only applicable for Python Plugins. No Python support detected, thus no settings available.</source>
-        <translation>此標籤上的設定僅適用於 Python 外掛。未檢測到 Python 支援，因此沒有可用的設定。</translation>
+        <translation>此標籤上的設定僅適用於 Python 外掛程式。未檢測到 Python 支援，因此沒有可用的設定。</translation>
     </message>
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
@@ -112804,7 +112804,7 @@ Please search the list of installed plugins. You should find the plugin there, b
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
         <source>Reload repository contents
 (useful when you uploaded a plugin there)</source>
-        <translation>重新載入儲存庫內容(在您上傳了一個外掛時很有用)</translation>
+        <translation>重新載入儲存庫內容(在您上傳了一個外掛程式時很有用)</translation>
     </message>
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
@@ -112814,12 +112814,12 @@ Please search the list of installed plugins. You should find the plugin there, b
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
         <source>Configure an additional plugin repository</source>
-        <translation>配置額外的外掛儲存庫</translation>
+        <translation>配置額外的外掛程式儲存庫</translation>
     </message>
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
         <source>Add a new plugin repository</source>
-        <translation>新增一個新的外掛儲存庫</translation>
+        <translation>新增一個新的外掛程式儲存庫</translation>
     </message>
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
@@ -112849,7 +112849,7 @@ Please search the list of installed plugins. You should find the plugin there, b
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
         <source>Install, reinstall or upgrade the experimental version of selected plugin</source>
-        <translation>安裝、重新安裝或升級所選外掛的實驗版本</translation>
+        <translation>安裝、重新安裝或升級所選外掛程式的實驗版本</translation>
     </message>
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
@@ -112859,7 +112859,7 @@ Please search the list of installed plugins. You should find the plugin there, b
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
         <source>Plugin Repositories</source>
-        <translation>外掛庫</translation>
+        <translation>外掛程式庫</translation>
     </message>
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
@@ -112879,27 +112879,27 @@ Please search the list of installed plugins. You should find the plugin there, b
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=" font-weight:600;"&gt;If this function is enabled, QGIS will inform you whenever a plugin update is available.&lt;/span&gt; Otherwise, fetching repositories will be performed during opening of the Plugin Manager window.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=" font-weight:600;"&gt;如果啟用此功能，QGIS 將告知您每當有外掛更新可用時。&lt;/span&gt; 否則，將在開啟外掛管理器視窗時執行檢索庫。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=" font-weight:600;"&gt;如果啟用此功能，QGIS 將告知您每當有外掛程式更新可用時。&lt;/span&gt; 否則，將在開啟外掛程式管理器視窗時執行檢索庫。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
         <source>Show also Experimental Plugins</source>
-        <translation>也顯示實驗外掛</translation>
+        <translation>也顯示實驗外掛程式</translation>
     </message>
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=" font-weight:600;"&gt;Experimental plugins are generally unsuitable for production use.&lt;/span&gt; These plugins are in early stages of development, and should be considered 'incomplete' or 'proof of concept' tools. QGIS does not recommend installing these plugins unless you intend to use them for testing purposes.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=" font-weight:600;"&gt;實驗外掛通常不適合生產使用。&lt;/span&gt;這些外掛仍在開發的早期階段，應視為「不完整」或「概念驗證」工具。QGIS 不建議安裝這些外掛，除非您打算將它們用於測試目的。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=" font-weight:600;"&gt;實驗外掛程式通常不適合生產使用。&lt;/span&gt;這些外掛程式仍在開發的早期階段，應視為「不完整」或「概念驗證」工具。QGIS 不建議安裝這些外掛程式，除非您打算將它們用於測試目的。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
         <source>Show also Deprecated Plugins</source>
-        <translation>也顯示已淘汰的外掛</translation>
+        <translation>也顯示已淘汰的外掛程式</translation>
     </message>
     <message>
         <location filename="../src/ui/qgspluginmanagerbase.ui" />
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=" font-weight:600;"&gt;Deprecated plugins are generally unsuitable for production use.&lt;/span&gt; These plugins are unmaintained, and should be considered 'obsolete' tools. QGIS does not recommend installing these plugins unless you still need it and there are no other alternatives available.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=" font-weight:600;"&gt;已淘汰的外掛通常不適合生產使用。&lt;/span&gt;這些外掛未被維護，應視為「過時」的工具。QGIS 不建議安裝這些外掛，除非您仍需要它且沒有其他可用的替代方案。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=" font-weight:600;"&gt;已淘汰的外掛程式通常不適合生產使用。&lt;/span&gt;這些外掛程式未被維護，應視為「過時」的工具。QGIS 不建議安裝這些外掛程式，除非您仍需要它且沒有其他可用的替代方案。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 <context>
@@ -117700,7 +117700,7 @@ SQL: %3</translation>
     <message>
         <location filename="../src/gui/processing/qgsprocessingwidgetwrapperimpl.cpp" line="5907" />
         <source>Plugin</source>
-        <translation>外掛</translation>
+        <translation>外掛程式</translation>
     </message>
     <message>
         <location filename="../src/gui/processing/qgsprocessingwidgetwrapperimpl.cpp" line="5908" />
@@ -118072,7 +118072,7 @@ SQL: %3</translation>
     <message>
         <location filename="../src/gui/processing/qgsprocessingwidgetwrapperimpl.cpp" line="7068" />
         <source>Plugin</source>
-        <translation>外掛</translation>
+        <translation>外掛程式</translation>
     </message>
     <message>
         <location filename="../src/gui/processing/qgsprocessingwidgetwrapperimpl.cpp" line="7069" />
@@ -144925,7 +144925,7 @@ Multiband layers are not supported by SAGA</source>
         <location filename="../src/plugins/topology/checkDock.cpp" line="284" />
         <location filename="../src/plugins/topology/checkDock.cpp" line="343" />
         <source>Topology plugin</source>
-        <translation>拓撲外掛</translation>
+        <translation>拓撲外掛程式</translation>
     </message>
     <message>
         <location filename="../src/plugins/topology/checkDock.cpp" line="232" />
@@ -145185,7 +145185,7 @@ Check the processing framework log to look for errors.</source>
     <message>
         <location filename="../src/core/expression/qgsexpressionfunction.cpp" line="5904" />
         <source>Plugin</source>
-        <translation>外掛</translation>
+        <translation>外掛程式</translation>
     </message>
     <message>
         <location filename="../src/core/expression/qgsexpressionfunction.cpp" line="5906" />
@@ -148987,7 +148987,7 @@ The algorithm also makes it possible to reorder the bands for the newly-created 
         <location filename="../src/plugins/topology/topolTest.cpp" line="1376" />
         <location filename="../src/plugins/topology/topolTest.cpp" line="1382" />
         <source>Topology plugin</source>
-        <translation>拓撲外掛</translation>
+        <translation>拓撲外掛程式</translation>
     </message>
     <message>
         <location filename="../src/plugins/topology/topolTest.cpp" line="174" />
