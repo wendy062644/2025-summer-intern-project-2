@@ -413,7 +413,7 @@ title: API
         </div>
       </div>
       <div class="ts-hint right-col" style="margin-top:26px;">
-        同 <code>&lt;source&gt;</code> 且舊檔翻譯非 unfinished → 直接套用，不打 API
+        同 <code>&lt;source&gt;</code> 且舊檔翻譯非 unfinished → 直接套用，不呼叫 API
       </div>
     </div>
 
