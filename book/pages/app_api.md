@@ -286,6 +286,7 @@ title: API
         <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
       </div>
     </div>
+
     <div class="ts-row-2 ts-6-4" style="margin-top:10px;">
       <div class="ts-field">
         <label class="ts-label" for="baseUrl">Base URL</label>
@@ -294,7 +295,7 @@ title: API
         </div>
       </div>
       <div class="ts-field">
-        <label class="ts-label" for="modelSel">Model-1（翻譯）</label>
+        <label class="ts-label" for="modelSel">Model-1（翻譯，會產生 3 版）</label>
         <div class="ts-input">
           <div class="ts-inline" style="width:100%;">
             <select id="modelSel" style="flex:1;min-width:220px;">
@@ -329,18 +330,19 @@ title: API
         </div>
       </div>
     </div>
+
     <div class="ts-row-2 ts-6-4" style="margin-top:10px;">
       <div class="ts-field">
         <div class="ts-input ts-inline">
           <label for="useModel2" class="ts-inline" style="gap:8px; align-items:center; white-space:nowrap;">
             <input type="checkbox" id="useModel2" checked>
-            <span class="ts-label" style="margin:0;">第二模型（校對 / 對齊）</span>
+            <span class="ts-label" style="margin:0;">第二模型（挑選 + 格式校正）</span>
           </label>
-          <span class="ts-hint" style="margin-left:8px; font-size: 12px">產生兩版譯文，擇優校正</span>
+          <span class="ts-hint" style="margin-left:8px; font-size: 12px">會對 3 版譯文擇優修正</span>
         </div>
       </div>
       <div class="ts-field">
-        <label class="ts-label" for="modelSel2">Model-2（校對）</label>
+        <label class="ts-label" for="modelSel2">Model-2（校對/擇優）</label>
         <div class="ts-input">
           <div class="ts-inline" style="width:100%;">
             <select id="modelSel2" style="flex:1;min-width:220px;">
@@ -375,6 +377,7 @@ title: API
         </div>
       </div>
     </div>
+
     <hr class="ts-divider">
     <div class="ts-title">處理參數</div>
     <div class="ts-row-3 ts-3-4-3">
@@ -398,6 +401,16 @@ title: API
         </div>
       </div>
     </div>
+
+    <!-- ✅ 新增：舊版 TS -->
+    <div class="ts-field" style="margin-top:10px;">
+      <label class="ts-label" for="oldTsFile">舊版 .ts（可選）</label>
+      <div class="ts-input">
+        <input type="file" id="oldTsFile" accept=".ts">
+      </div>
+      <div class="ts-hint">若舊檔已有完成翻譯，會直接套用到本次輸出並跳過 API。</div>
+    </div>
+
     <hr class="ts-divider">
     <div class="ts-title">輸入檔案</div>
     <div class="ts-row-2" style="--ts-col1: 7fr; --ts-col2: 3fr;">
@@ -418,12 +431,14 @@ title: API
         欄位：<code>en, zh</code> 或 <code>英文名稱, 中文名稱</code>
       </div>
     </div>
+
     <div id="ts-progress-wrap" style="display:none;">
       <div class="ts-inline">
         <progress id="ts-progress" value="0" max="100" style="width:100%;"></progress>
         <span id="ts-progress-label" style="font-variant-numeric: tabular-nums;">0 / 0</span>
       </div>
     </div>
+
     <div id="compare-box" style="display:none;">
       <div style="font-size:0.95rem;color:var(--ts-text);margin-bottom:4px;">翻譯對照（即時刷新）</div>
       <div style="max-height: 360px; overflow:auto;">
@@ -438,6 +453,7 @@ title: API
         </table>
       </div>
     </div>
+
     <div id="ts-ui-msg"></div>
   </div>
 </div>
@@ -445,8 +461,9 @@ title: API
 <script type="module">
 import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.mjs";
 
-// 1. 【優先執行】UI 設定區塊
-// 將這段移到最上面，確保一開網頁就能計算行數、切換選項
+/* =========================
+ * 1) UI 先綁定（不等待 pyodide）
+ * ========================= */
 (function setupTsCounter(){
   const tsFile    = document.getElementById('tsFile');
   const limitN    = document.getElementById('limitN');
@@ -457,7 +474,6 @@ import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodi
     if (!text) return false;
     const t = String(text).trim();
     if (!t) return false;
-    // 嚴格排除純數字符號
     if (/^[\s\d\W%{}]+$/u.test(t)) return false;
     return true;
   }
@@ -479,7 +495,6 @@ import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodi
           if (needsTranslationJS(s)) total++;
         }
       } else {
-        // XML 解析失敗時的備案 Regex
         const matches = txt.match(/<source>([\s\S]*?)<\/source>/g) || [];
         for (const m of matches){
           const inner = m.replace(/^<source>|<\/source>$/g, '');
@@ -534,40 +549,40 @@ import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodi
   sync();
 })();
 
-// 暫停邏輯
+// 暫停
 window._TS_PAUSED = false;
 const pauseBtn = document.getElementById("pause-btn");
 pauseBtn.addEventListener("click", function(){
   window._TS_PAUSED = !window._TS_PAUSED;
   if(window._TS_PAUSED){
     pauseBtn.textContent = "繼續";
-    pauseBtn.style.background = "#059669"; 
+    pauseBtn.style.background = "#059669";
   } else {
     pauseBtn.textContent = "暫停";
-    pauseBtn.style.background = "#d97706"; 
+    pauseBtn.style.background = "#d97706";
   }
 });
 
-// 2. 【後續執行】載入 Pyodide
+/* =========================
+ * 2) 載入 Pyodide
+ * ========================= */
 const $msg = document.getElementById("ts-ui-msg");
-let pyodide; // 統一在這裡宣告
+let pyodide;
 
-// 初始化按鈕狀態，避免使用者在 Python 沒載好前就按
 const runBtn = document.getElementById("run-btn");
 runBtn.disabled = true;
 runBtn.textContent = "環境載入中...";
 
 try {
-  // 這裡才開始跑 await，不會卡住上面的 UI 事件綁定
   pyodide = await loadPyodide();
   await pyodide.loadPackage("micropip");
-  
+
   runBtn.disabled = false;
   runBtn.textContent = "執行翻譯";
 
-  // 載入 Python 核心邏輯
   await pyodide.runPythonAsync(String.raw`
-import asyncio, json, re, io, base64, traceback, html, csv, zipfile
+import asyncio, json, re, io, base64, traceback, html, csv, zipfile, copy
+from collections import defaultdict
 from typing import List, Tuple, Dict, Optional
 from xml.etree import ElementTree as ET
 from js import document, window
@@ -580,15 +595,46 @@ await micropip.install("opencc-python-reimplemented==0.1.7")
 from opencc import OpenCC
 
 _OPENCC = OpenCC("s2twp")
-_TW_PROTECT_TERMS = ["演算法", "專案", "圖層", "外掛", "巨集", "快取", "佈局", "拓撲", "向量", "網格", "波段"]
+
+# 常見台灣用語保護（避免 OpenCC 亂換）
+_TW_PROTECT_TERMS = ["演算法", "專案", "圖層", "外掛", "外掛程式", "巨集", "快取", "佈局", "拓撲", "向量", "網格", "波段"]
 
 _COORD_RE = re.compile(r"坐標")
+
+# 遮罩：HTML tag / entity
 _MASK_PAT = re.compile(
     r'(</?[A-Za-z][^>]*>|&lt;/?[A-Za-z][^&]*?&gt;|&(?!\s)[A-Za-z#x0-9]+;)',
     re.IGNORECASE
 )
-_SEP_RE = re.compile(r"[-\s/_.\\]+")
-_TOKEN_RE = re.compile(r"[A-Za-z0-9]+(?:[\\/_.-][A-Za-z0-9]+)*")
+_SEP_RE = re.compile(r"[-\s/_.\\\\]+")
+_TOKEN_RE = re.compile(r"[A-Za-z0-9]+(?:[\\\\/_.-][A-Za-z0-9]+)*")
+
+# === 你的「硬提示/術語」 ===
+HARD_GLOSSARY = {
+    "plugin": "外掛程式",
+    "plugins": "外掛程式",
+    "Convex hull": "凸包",
+    "convex hull": "凸包",
+    "LineString": "線串",
+    "Base level": "基準值",
+    "Arrow head": "箭頭端",
+    "Line alignment": "線條對齊",
+    "Model scale": "模型縮放比例",
+    "Row": "列",
+    "rows": "列",
+    "pixels": "像素",
+    "pixel": "像素",
+}
+
+# 你的「常見錯譯」矯正（中文→中文）
+POST_ZH_REPLACE = {
+    "插件": "外掛程式",
+    "凸殼": "凸包",
+    "處理中": "處理",
+}
+
+# 快捷鍵：source 內含 &x（排除 &&）
+_ACCEL_RE = re.compile(r"(?<!&)&([A-Za-z0-9])")
 
 # ====== 基本工具 ======
 
@@ -621,7 +667,52 @@ def fix_zh_punct(s: Optional[str]) -> str:
 
 def strip_all_newlines(s: Optional[str]) -> str:
     if not s: return ""
-    return s.replace("\\n", "").replace("\\r", "").replace("\n", "").replace("\r", "")
+    return s.replace("\\n", "").replace("\\r", "").replace("\\n", "").replace("\\r", "").replace("\n", "").replace("\r", "")
+
+def apply_zh_post_replace(s: str) -> str:
+    out = s or ""
+    for k, v in POST_ZH_REPLACE.items():
+        out = out.replace(k, v)
+    return out
+
+def extract_accel_key(src: str) -> Optional[str]:
+    if not src:
+        return None
+    m = _ACCEL_RE.search(src)
+    if not m:
+        return None
+    return m.group(1)
+
+def enforce_accel_suffix(src: str, zh: str) -> str:
+    """
+    規則：若 source 含 &x（且非 &&），翻譯結尾必須有 (&x)
+    """
+    if not zh:
+        return zh
+    key = extract_accel_key(src)
+    if not key:
+        return zh
+
+    # 若譯文中有 &x（可能誤保留），先去掉 &（避免重複）
+    zh2 = re.sub(r"(?<!&)&([A-Za-z0-9])", r"\\1", zh)
+
+    suffix = f"(&{key})"
+    # 已經正確結尾
+    if zh2.endswith(suffix):
+        return zh2
+
+    # 若已經有 (&.) 結尾但不同，替換
+    zh2 = re.sub(r"\\(&[A-Za-z0-9]\\)$", suffix, zh2)
+
+    if zh2.endswith(suffix):
+        return zh2
+
+    # 若中間已經包含同樣 suffix，就不再加（但你要的是「後面加上」—這裡仍優先保證結尾）
+    if suffix in zh2 and not zh2.endswith(suffix):
+        zh2 = zh2.replace(suffix, "")
+        zh2 = zh2.rstrip()
+
+    return zh2.rstrip() + suffix
 
 # ====== 翻譯後修正：避免把 Context 當成翻譯，以及保護 enum 名稱 ======
 def fix_context_leak(src: str, zh: str, context: str) -> str:
@@ -635,43 +726,31 @@ def fix_context_leak(src: str, zh: str, context: str) -> str:
         return src
     if zhs.startswith("介面:"):
         return src
-    if re.fullmatch(r"[A-Za-z0-9_]+", src) and not re.search(r"[\u4e00-\u9fff]", zhs):
+    if re.fullmatch(r"[A-Za-z0-9_]+", src) and not re.search(r"[\\u4e00-\\u9fff]", zhs):
         return src
     return zh
 
 def repair_placeholders(src: str, trans: str) -> tuple[str, bool]:
-    pat = re.compile(r"(%L\d+|%\d+|%[sdn]|\{\d+\})")
+    pat = re.compile(r"(%L\\d+|%\\d+|%[sdn]|\\{\\d+\\})")
 
     src_list = pat.findall(src)
     tr_list  = pat.findall(trans)
 
-    # 完全沒有 placeholder，當作 OK
     if not src_list and not tr_list:
         return trans, True
 
-    # 數量不一樣，基本上修不了，只能回報錯誤
     if len(src_list) != len(tr_list):
         return trans, False
 
     fixed = trans
-    # 依照出現順序，把翻譯裡的 placeholder 換成原始的形式
     for s_ph, t_ph in zip(src_list, tr_list):
         if s_ph != t_ph:
             fixed = fixed.replace(t_ph, s_ph, 1)
 
-    # 再檢查一次
     return fixed, (pat.findall(fixed) == src_list)
 
-# ====== 強制變數檢查 ======
-def validate_placeholders(src: str, trans: str) -> bool:
-    pat = re.compile(r"(%\d|%[sdn]|\{\d+\})")
-    src_set = sorted(pat.findall(src))
-    trans_set = sorted(pat.findall(trans))
-    return src_set == trans_set
-
-# ====== 結構符號強制修復 ======
 def restore_leading_symbols(src: str, trans: str) -> str:
-    m = re.match(r"^([)\]};:,.|]+)", src)
+    m = re.match(r"^([)\\]};:,.|]+)", src)
     if not m:
         return trans
     head = m.group(1)
@@ -684,7 +763,6 @@ def restore_leading_symbols(src: str, trans: str) -> str:
     return head + trans
 
 # ====== UI Functions ======
-
 def _set_ui_msg(msg_html: str):
     document.getElementById("ts-ui-msg").innerHTML = msg_html
 
@@ -740,8 +818,7 @@ def _compare_add(src_text:str, zh_text:str, context_info:str=""):
     tr.appendChild(_td(zh_text))
     tbody.appendChild(tr)
 
-# ====== 遮罩與 LCS ======
-
+# ====== 遮罩 ======
 def _mask_text(s:str):
     idx = 0
     mapping = {}
@@ -782,7 +859,7 @@ class LCSMatcher:
             zh = (zh or "").strip()
             if en and zh:
                 en_norm = en.lower()
-                charset = set(re.sub(r"\s+", "", en_norm))
+                charset = set(re.sub(r"\\s+", "", en_norm))
                 rows.append({"en":en, "zh":zh, "en_norm":en_norm, "charset":charset})
         self.rows = rows
         self.min_token_len = min_token_len
@@ -802,9 +879,11 @@ class LCSMatcher:
         n = len(toks_lc)
         covered = [False]*n
         glossary = {}
+
         def _mark(i,j):
             for k in range(i,j):
                 covered[k] = True
+
         win_max = min(n, self.max_soft_len)
         for w in range(win_max, 0, -1):
             if len(glossary) >= limit:
@@ -821,6 +900,7 @@ class LCSMatcher:
                         _mark(i,i+w)
                         if len(glossary) >= limit:
                             break
+
         for idx, tok in enumerate(tokens):
             if len(glossary) >= limit:
                 break
@@ -860,7 +940,6 @@ class LCSMatcher:
         return res[:k]
 
 # ===== 讀 CSV / ODS =====
-
 def load_glossary_csv_text(csv_text: Optional[str]) -> List[Tuple[str,str]]:
     if not csv_text:
         return []
@@ -932,8 +1011,20 @@ def load_glossary_ods_bytes(ods_bytes: bytes) -> List[Tuple[str,str]]:
             seen.add(en)
     return pairs
 
-# ===== OpenAI API 呼叫 (整合版) =====
+def merge_hard_glossary(pairs: List[Tuple[str,str]]) -> List[Tuple[str,str]]:
+    out = []
+    seen = set()
+    for en, zh in pairs or []:
+        if en and zh and en not in seen:
+            out.append((en, zh))
+            seen.add(en)
+    for en, zh in HARD_GLOSSARY.items():
+        if en not in seen:
+            out.append((en, zh))
+            seen.add(en)
+    return out
 
+# ===== OpenAI API 呼叫 (整合版) =====
 async def call_api(api_key, base_url, model, payload, retries=1):
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     url = base_url.rstrip("/") + "/chat/completions"
@@ -942,15 +1033,17 @@ async def call_api(api_key, base_url, model, payload, retries=1):
     is_o1_o3   = mname.startswith("o1") or mname.startswith("o3")
     is_gpt5    = mname.startswith("gpt-5")
 
+    # o1/o3 不接受 system → 轉 user
     if is_o1_o3:
         new_msgs = []
         for m in payload.get("messages", []):
             if m["role"] == "system":
-                new_msgs.append({"role": "user", "content": f"[System Instruction]\n{m['content']}"})
+                new_msgs.append({"role": "user", "content": f"[System Instruction]\\n{m['content']}"})
             else:
                 new_msgs.append(m)
         payload["messages"] = new_msgs
 
+    # gpt-5 / o1/o3 某些參數不收
     if is_o1_o3 or is_gpt5:
         payload.pop("temperature", None)
         payload.pop("top_p", None)
@@ -968,19 +1061,102 @@ async def call_api(api_key, base_url, model, payload, retries=1):
                 raise Exception(f"API Error {resp.status}: {data.get('error', {}).get('message')}")
 
             choice = data["choices"][0]
+            # tool_call → arguments JSON
             if choice["message"].get("tool_calls"):
                 arg_str = choice["message"]["tool_calls"][0]["function"]["arguments"]
                 return json.loads(arg_str)
+            # content JSON
             if choice["message"].get("content"):
                 return json.loads(choice["message"]["content"])
-        except Exception as e:
+        except Exception:
             if _ == retries:
                 return None
             await asyncio.sleep(1)
     return None
 
-# ===== 主流程 =====
+# ===== 舊檔套用邏輯 =====
+def message_has_done_translation(msg: ET.Element) -> bool:
+    trans = msg.find("translation")
+    if trans is None:
+        return False
+    if trans.get("type") == "unfinished":
+        return False
+    if msg.get("numerus") == "yes":
+        forms = trans.findall("numerusform")
+        if not forms:
+            return False
+        return all((f.text or "").strip() for f in forms)
+    return bool((trans.text or "").strip())
 
+def finalize_zh_for_copy(src_text: str, zh: str) -> str:
+    zh = _et_ready(zh or "")
+    zh = strip_all_newlines(zh)
+    zh = fix_zh_punct(zh)
+    zh = apply_zh_post_replace(normalize_zh(to_zh_tw(zh)))
+    zh, _ = repair_placeholders(src_text, zh)
+    zh = fix_context_leak(src_text, zh, "")
+    zh = restore_leading_symbols(src_text, zh)
+    zh = enforce_accel_suffix(src_text, zh)
+    return zh
+
+def apply_translation_element(msg: ET.Element, trans_elem: ET.Element, src_text: str):
+    old = msg.find("translation")
+    if old is not None:
+        msg.remove(old)
+
+    new_trans = copy.deepcopy(trans_elem)
+    new_trans.attrib.pop("type", None)
+
+    if msg.get("numerus") == "yes":
+        forms = new_trans.findall("numerusform")
+        for f in forms:
+            f.text = finalize_zh_for_copy(src_text, f.text or "")
+    else:
+        new_trans.text = finalize_zh_for_copy(src_text, new_trans.text or "")
+
+    msg.append(new_trans)
+
+def extract_old_translation_maps(old_root: ET.Element):
+    ctx_map = {}
+    by_src = defaultdict(list)  # source -> list of (canon, trans_elem)
+
+    for ctx in old_root.findall("context"):
+        ctx_name = (ctx.findtext("name") or "")
+        for m in ctx.findall("message"):
+            src_text = m.findtext("source")
+            if not src_text:
+                continue
+            if not needs_translation(src_text):
+                continue
+            if not message_has_done_translation(m):
+                continue
+            trans = m.find("translation")
+            if trans is None:
+                continue
+
+            elem = copy.deepcopy(trans)
+            ctx_map[(ctx_name, src_text)] = elem
+            canon = ET.tostring(elem, encoding="unicode")
+            by_src[src_text].append((canon, elem))
+
+    src_map = {}
+    for src_text, items in by_src.items():
+        canons = {c for c, _ in items}
+        if len(canons) == 1:
+            src_map[src_text] = copy.deepcopy(items[0][1])
+
+    return ctx_map, src_map
+
+def preview_translation_text(msg: ET.Element) -> str:
+    trans = msg.find("translation")
+    if trans is None:
+        return ""
+    if msg.get("numerus") == "yes":
+        forms = trans.findall("numerusform")
+        return (forms[0].text or "") if forms else ""
+    return trans.text or ""
+
+# ===== 讀檔 =====
 async def read_glossaries_from_file_input(input_id: str) -> List[Tuple[str,str]]:
     files = document.getElementById(input_id).files
     if not files or files.length == 0:
@@ -999,6 +1175,7 @@ async def read_glossaries_from_file_input(input_id: str) -> List[Tuple[str,str]]
                 pairs_all.extend(load_glossary_csv_text(b.decode("utf-8","ignore")))
         except Exception as e:
             print(f"Glossary error: {e}")
+
     seen = set()
     dedup = []
     for en, zh in pairs_all:
@@ -1018,24 +1195,47 @@ def _read_doctype(xml_text: str) -> str:
     m = re.search(r'<!DOCTYPE[^>]+>', xml_text)
     return m.group(0) if m else ""
 
+# ===== 主流程 =====
 async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
                                          ts_text:str, glossary_pairs:List[Tuple[str,str]],
                                          batch_size:int=32, limit_n:int=0,
-                                         use_model2:bool=False, model2:str="") -> bytes:
+                                         use_model2:bool=False, model2:str="",
+                                         old_ts_text: Optional[str]=None) -> bytes:
     doctype = _read_doctype(ts_text)
     root = ET.fromstring(ts_text)
+
+    # 舊檔 map（可選）
+    old_ctx_map, old_src_map = {}, {}
+    if old_ts_text:
+        try:
+            old_root = ET.fromstring(old_ts_text)
+            old_ctx_map, old_src_map = extract_old_translation_maps(old_root)
+        except Exception:
+            old_ctx_map, old_src_map = {}, {}
+
+    glossary_pairs = merge_hard_glossary(glossary_pairs)
     matcher = LCSMatcher(glossary_pairs, min_token_len=4, min_lcs_len=4)
 
     tasks = []
+    prefill = []
+    candidate_count = 0
+
     for ctx in root.findall("context"):
-        ctx_name_node = ctx.find("name")
-        ctx_name = ctx_name_node.text if (ctx_name_node is not None) else ""
-        
+        ctx_name = (ctx.findtext("name") or "")
+
         for m in ctx.findall("message"):
-            src = m.find("source")
-            if src is None or src.text is None:
+            src_text = m.findtext("source")
+            if not src_text:
                 continue
-            
+            if not needs_translation(src_text):
+                continue
+
+            # 本檔已完成翻譯 → 跳過
+            if message_has_done_translation(m):
+                continue
+
+            candidate_count += 1
+
             extras = []
             if ctx_name:
                 extras.append(f"介面: {ctx_name}")
@@ -1045,29 +1245,40 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
             ext = m.find("extracomment")
             if ext is not None and ext.text:
                 extras.append(f"說明: {ext.text}")
-            
             ctx_str = " | ".join(extras)
-            
-            if needs_translation(src.text):
-                tasks.append({
-                    "node": m,
-                    "src": src.text,
-                    "context": ctx_str, 
-                    "numerus": m.get("numerus")=="yes"
-                })
-            if limit_n > 0 and len(tasks) >= limit_n:
+
+            numerus = (m.get("numerus") == "yes")
+
+            # 先 (context, source) 命中，再 source-only（僅限舊檔同 source 翻譯一致）
+            old_trans = old_ctx_map.get((ctx_name, src_text)) or old_src_map.get(src_text)
+
+            if old_trans is not None:
+                prefill.append({"node": m, "src": src_text, "context": ctx_str, "numerus": numerus, "old_trans": old_trans})
+            else:
+                tasks.append({"node": m, "src": src_text, "context": ctx_str, "numerus": numerus})
+
+            if limit_n > 0 and candidate_count >= limit_n:
                 break
-        if limit_n > 0 and len(tasks) >= limit_n:
+        if limit_n > 0 and candidate_count >= limit_n:
             break
 
-    finished = 0
-    total = len(tasks)
-    if total == 0:
+    total_work = len(prefill) + len(tasks)
+    if total_work == 0:
         return ET.tostring(root, encoding="utf-8")
 
     _compare_reset()
-    _progress_setup(total)
-    
+    _progress_setup(total_work)
+    finished = 0
+
+    # 先套用舊檔翻譯（跳過 API）
+    for item in prefill:
+        apply_translation_element(item["node"], item["old_trans"], item["src"])
+        _compare_add(item["src"], preview_translation_text(item["node"]), item["context"])
+        finished += 1
+        _progress_tick(finished, total_work)
+
+    _set_ui_msg(f"已從舊檔套用 {len(prefill)} 筆；需 API 翻譯 {len(tasks)} 筆")
+
     tools_schema = [{
         "type": "function",
         "function": {
@@ -1076,95 +1287,105 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "results": {
-                        "type": "array",
-                        "items": {"type": "string"}
-                    }
+                    "results": {"type": "array", "items": {"type": "string"}}
                 },
                 "required": ["results"]
             }
         }
     }]
 
-    for start in range(0, total, batch_size):
+    # ===== 翻譯批次 =====
+    for start in range(0, len(tasks), batch_size):
         while window._TS_PAUSED:
             await asyncio.sleep(0.2)
 
         batch = tasks[start:start+batch_size]
+
         masked_inputs = []
         maps = []
         context_list = []
         gls_list = []
-        
+
         for item in batch:
             src_text = item["src"]
             g = matcher.build_glossary_sentence_first(src_text)
             gls_list.append([f"{k}->{v}" for k, v in g.items()])
-            
+
             m_txt, mp = _mask_text(src_text)
             masked_inputs.append(m_txt)
             maps.append(mp)
             context_list.append(item["context"])
-            
+
         items_json = json.dumps([
-            {"id": k, "text": txt, "context": ctx, "glossary": gls} 
+            {"id": k, "text": txt, "context": ctx, "glossary": gls}
             for k, (txt, ctx, gls) in enumerate(zip(masked_inputs, context_list, gls_list))
         ], ensure_ascii=False)
 
-        sys_prompt = (
-            "你是台灣 GIS 在地化譯者。"
-            " 對於每一個項目，只翻譯 \`text\` 欄位中的英文內容成繁體中文（台灣用語）"
-            " 可以參考 \`context\` 與 \`glossary\` 來判斷，但不要把 context 的文字（例如「介面: ...」「註釋: ...」）當成輸出的一部分"
-            " 請呼叫工具 set_results，並只在 results 陣列中依序填入翻譯後的字串"
-            " 保留所有 ASCII 半形符號（例如 ()[]{};:,.?+/\\*& 等），數量與順序都必須與原文完全一致，即使只有右括號"
-            " 務必保留所有 ⟦M數字⟧ 變數與 %1、{0} 這類 placeholder，不可遺失或改變順序"
-            " 若字串看起來是程式碼變數、常數、enum 名稱、函式名稱、人名或英文縮寫，優先保留原文不翻，例如: InCirC、shepard 則保持原文"
-            " 若沒有合適或確定的中文翻譯，寧可保留英文原文，不要亂造詞"
+        sys_prompt_base = (
+            "你是台灣 GIS 軟體在地化譯者。"
+            " 對於每一個項目，只翻譯 text 欄位中的英文內容成繁體中文（台灣用語）。"
+            " 可以參考 context 與 glossary，但不要把 context 的文字（例如「介面: ...」「註釋: ...」）當成輸出的一部分。"
+            " 請呼叫工具 set_results，並只在 results 陣列中依序填入翻譯後的字串。"
+            " 必須保留所有 ⟦M數字⟧ 變數與 %1、{0} 這類 placeholder，不可遺失或改變順序。"
+            " 保留所有 ASCII 半形符號（例如 ()[]{};:,.?+/\\\\*& 等）。"
+            " 若字串看起來是程式碼變數、常數、enum 名稱、函式名稱、人名或英文縮寫，優先保留原文不翻。"
+            " 若沒有合適或確定的中文翻譯，寧可保留英文原文，不要亂造詞。"
+            " 【快捷鍵規則】若原文包含 &x（x 為英數，且不是 &&），表示快捷鍵。翻譯請把快捷鍵移到最後，形式為 (&x)。"
+            " 【術語優先】plugin->外掛程式；Convex hull->凸包；LineString->線串；Base level->基準值；Arrow head->箭頭端；Line alignment->線條對齊；Model scale->模型縮放比例；Row->列；pixels->像素。"
         )
-        user_prompt = f"請逐一翻譯下列項目，僅翻譯 text 欄位內容，輸出陣列 results：\n{items_json}"
-        
+
+        user_prompt = f"請逐一翻譯下列項目（只翻譯 text），輸出 results：\\n{items_json}"
+
+        def _mk_payload(variant_tag: str, temp: float):
+            return {
+                "model": model1,
+                "temperature": temp,
+                "tools": tools_schema,
+                "tool_choice": {"type":"function", "function":{"name":"set_results"}},
+                "messages": [
+                    {"role":"system", "content": sys_prompt_base + f"\\n【版本】{variant_tag}：請用不同措辭與風格提出候選譯文，但仍必須符合格式規則。"},
+                    {"role":"user", "content": user_prompt + f"\\n(variant={variant_tag})"}
+                ]
+            }
+
         zh_list = []
-        
+
         try:
             if use_model2 and model2:
-                payload_a = {
-                    "model": model1,
-                    "temperature": 0.2,
-                    "tools": tools_schema,
-                    "tool_choice": {"type":"function", "function":{"name":"set_results"}},
-                    "messages": [
-                        {"role":"system", "content": sys_prompt},
-                        {"role":"user", "content": user_prompt}
-                    ]
-                }
-                payload_b = {
-                    "model": model1,
-                    "temperature": 0.8,
-                    "tools": tools_schema,
-                    "tool_choice": {"type":"function", "function":{"name":"set_results"}},
-                    "messages": [
-                        {"role":"system", "content": sys_prompt},
-                        {"role":"user", "content": user_prompt}
-                    ]
-                }
-                
-                res_a, res_b = await asyncio.gather(
+                # === Model-1 生成 3 版（3 次 API）===
+                payload_a = _mk_payload("A", 0.2)
+                payload_b = _mk_payload("B", 0.8)
+                payload_c = _mk_payload("C", 1.2)
+
+                res_a, res_b, res_c = await asyncio.gather(
                     call_api(api_key, base_url, model1, payload_a),
-                    call_api(api_key, base_url, model1, payload_b)
+                    call_api(api_key, base_url, model1, payload_b),
+                    call_api(api_key, base_url, model1, payload_c),
                 )
-                
+
                 list_a = res_a.get("results", []) if res_a else [""] * len(batch)
                 list_b = res_b.get("results", []) if res_b else [""] * len(batch)
-                
-                if len(list_a) < len(batch):
-                    list_a += [""] * (len(batch) - len(list_a))
-                if len(list_b) < len(batch):
-                    list_b += [""] * (len(batch) - len(list_b))
-                
+                list_c = res_c.get("results", []) if res_c else [""] * len(batch)
+
+                # 補齊長度
+                if len(list_a) < len(batch): list_a += [""] * (len(batch) - len(list_a))
+                if len(list_b) < len(batch): list_b += [""] * (len(batch) - len(list_b))
+                if len(list_c) < len(batch): list_c += [""] * (len(batch) - len(list_c))
+
+                # === Model-2：擇優 + 校正（1 次 API）===
                 sel_items = [
-                    {"src": t["src"], "ctx": t["context"], "A": a, "B": b}
-                    for t, a, b in zip(batch, list_a, list_b)
+                    {
+                        "id": k,
+                        "src": t["src"],
+                        "context": t["context"],
+                        "glossary": gls_list[k],
+                        "A": list_a[k],
+                        "B": list_b[k],
+                        "C": list_c[k],
+                    }
+                    for k, t in enumerate(batch)
                 ]
+
                 sel_payload = {
                     "model": model2,
                     "temperature": 0.1,
@@ -1174,24 +1395,32 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
                         {
                             "role":"system",
                             "content": (
-                                "你是嚴格的校對員。比較並參考 A 與 B 版譯文，並檢查格式是否與原文正確"
-                                "若有漏翻、特殊符號缺漏、全形符號或格式錯誤，則修正或補上後再輸出，即使只有一個右括號"
-                                "並檢查其翻譯是否正確，若非 GIS 軟體用法，則輸出原文"
+                                "你是嚴格的校對員與審稿者。"
+                                " 對每筆資料，從 A/B/C 中選最好的，必要時融合修改，輸出最終譯文。"
+                                " 必須檢查：1) placeholder 完整且順序一致（%1、{0}、⟦M⟧）；"
+                                " 2) ASCII 半形符號完整（括號、分號等）；"
+                                " 3) 不可把 context/註釋文字帶入譯文；"
+                                " 4) 若原文含 &x（非 &&），最終譯文結尾必須有 (&x)；"
+                                " 5) 术语优先：plugin->外掛程式、Convex hull->凸包、LineString->線串、Base level->基準值、Arrow head->箭頭端、Line alignment->線條對齊、Model scale->模型縮放比例、Row->列、pixels->像素。"
+                                " 6) 若不確定翻譯，保留英文原文。"
+                                " 只呼叫 set_results 並輸出 results 陣列。"
                             )
                         },
                         {"role":"user", "content": json.dumps(sel_items, ensure_ascii=False)}
                     ]
                 }
+
                 res_final = await call_api(api_key, base_url, model2, sel_payload)
                 zh_list = res_final.get("results", []) if res_final else list_a
             else:
+                # 沒開 Model-2：只跑 1 次（省 API）
                 payload = {
                     "model": model1,
                     "temperature": 0.2,
                     "tools": tools_schema,
                     "tool_choice": {"type":"function", "function":{"name":"set_results"}},
                     "messages": [
-                        {"role":"system", "content": sys_prompt},
+                        {"role":"system", "content": sys_prompt_base},
                         {"role":"user", "content": user_prompt}
                     ]
                 }
@@ -1202,23 +1431,25 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
             print(f"Batch failed: {e}")
             zh_list = [""] * len(batch)
 
+        # 寫回 XML
         for k, zh_raw in enumerate(zh_list):
             if k >= len(batch):
                 break
             item = batch[k]
-            
             if not zh_raw:
                 continue
-            
+
             zh = _unmask_text(zh_raw, maps[k])
             zh = _et_ready(zh)
             zh = strip_all_newlines(zh)
             zh = fix_zh_punct(zh)
-            zh = normalize_zh(to_zh_tw(zh))
+            zh = apply_zh_post_replace(normalize_zh(to_zh_tw(zh)))
+
             zh, ok_ph = repair_placeholders(item["src"], zh)
             zh = fix_context_leak(item["src"], zh, item["context"])
             zh = restore_leading_symbols(item["src"], zh)
-            
+            zh = enforce_accel_suffix(item["src"], zh)
+
             if not ok_ph:
                 zh = f"[變數錯誤] {zh}"
 
@@ -1235,21 +1466,22 @@ async def run_translation_pipeline_async(api_key:str, base_url:str, model1:str,
                     f.text = zh
             else:
                 trans.text = zh
+
             if "type" in trans.attrib:
                 trans.attrib.pop("type", None)
 
             _compare_add(item["src"], zh, item["context"])
             finished += 1
-            _progress_tick(finished, total)
+            _progress_tick(finished, total_work)
 
-        _set_ui_msg(f"處理進度：{finished}/{total}")
+        _set_ui_msg(f"處理進度：{finished}/{total_work}")
 
     xml_bytes = ET.tostring(root, encoding="utf-8")
     head = b'<?xml version="1.0" encoding="utf-8"?>'
     if doctype:
         xml_bytes = head + doctype.encode("utf-8") + xml_bytes
     else:
-        xml_bytes = head + b"\n" + xml_bytes
+        xml_bytes = head + b"\\n" + xml_bytes
     return xml_bytes
 
 # ===== 事件入口 =====
@@ -1263,21 +1495,24 @@ async def _on_click(evt=None):
     _BUSY = True
     _set_ui_msg("")
     document.getElementById("pause-btn").style.display = "block"
-    
+
     try:
         api = document.getElementById("apiKey").value.strip()
         base_url = document.getElementById("baseUrl").value.strip() or "https://api.openai.com/v1"
+
         sel1 = document.getElementById("modelSel")
         model1 = sel1.value
         if model1 == "__custom__":
             model1 = document.getElementById("modelCustom").value.strip()
+
         use2 = bool(document.getElementById("useModel2").checked)
         sel2 = document.getElementById("modelSel2")
         model2 = sel2.value
         if model2 == "__custom__":
             model2 = document.getElementById("modelCustom2").value.strip()
+
         batch = int(document.getElementById("batch").value or "32")
-        limitN = int(document.getElementById("limitN").value or "200")
+        limitN = int(document.getElementById("limitN").value or "0")
 
         if not api:
             _set_ui_msg("<span style='color:#b00'>請輸入 API Key</span>")
@@ -1294,6 +1529,8 @@ async def _on_click(evt=None):
             _set_ui_msg("<span style='color:#b00'>請上傳 .ts 檔</span>")
             return
 
+        old_ts_text = await _read_file_text("oldTsFile")  # ✅ 新增
+
         pairs = await read_glossaries_from_file_input("glsFile")
 
         _set_ui_msg("連線中...")
@@ -1306,7 +1543,8 @@ async def _on_click(evt=None):
             batch_size=batch,
             limit_n=limitN,
             use_model2=use2,
-            model2=model2
+            model2=model2,
+            old_ts_text=old_ts_text
         )
 
         out_name = "qgis_zh-Hant.ts"
@@ -1314,6 +1552,7 @@ async def _on_click(evt=None):
         link = f'<a download="{out_name}" href="data:application/octet-stream;base64,{b64}">下載 {out_name}</a>'
         _set_ui_msg(link + "　<span style='color:#0a0'>完成！</span>")
         document.getElementById("pause-btn").style.display = "none"
+
     except Exception as e:
         _set_ui_msg(f"<span style='color:#b00'>發生錯誤：{html.escape(str(e))}</span>")
         traceback.print_exc()
@@ -1324,6 +1563,7 @@ async def _on_click(evt=None):
 _BTN_PROXY = create_proxy(lambda evt: asyncio.ensure_future(_on_click(evt)))
 document.getElementById("run-btn").addEventListener("click", _BTN_PROXY)
   `);
+
 } catch (e) {
   console.error(e);
   $msg.innerHTML = `<span style="color:#b00">Python 載入失敗：${String(e)}</span>`;
