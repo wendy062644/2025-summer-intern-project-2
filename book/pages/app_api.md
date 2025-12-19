@@ -297,7 +297,7 @@ title: API
         </div>
       </div>
       <div class="ts-field">
-        <label class="ts-label" for="modelSel">Model-1（翻譯，A/B/C 三版）</label>
+        <label class="ts-label" for="modelSel">Model-1（翻譯）</label>
         <div class="ts-input">
           <div class="ts-inline" style="width:100%;">
             <select id="modelSel" style="flex:1;min-width:220px;">
@@ -340,7 +340,7 @@ title: API
             <input type="checkbox" id="useModel2" checked>
             <span class="ts-label" style="margin:0;">第二模型（挑選 + 格式校正）</span>
           </label>
-          <span class="ts-hint" style="margin-left:8px; font-size: 12px">A/B/C 三版後再挑最佳並修格式</span>
+          <span class="ts-hint" style="margin-left:8px; font-size: 12px">挑最佳版本並進行格式校正</span>
         </div>
       </div>
       <div class="ts-field">
@@ -437,11 +437,6 @@ title: API
       <div class="ts-hint right-col" style="margin-top:6px;">
         欄位：<code>en, zh</code> 或 <code>英文名稱, 中文名稱</code>
       </div>
-    </div>
-
-    <div class="ts-hint" style="margin-top:10px;">
-      用語偏好：插件→外掛程式、凸殼→凸包、處理中→處理、LineString→線串、Base level→基準值、Arrow head→箭頭端、
-      Line alignment→線條對齊、Model scale→模型縮放比例、Row→列、pixels→像素
     </div>
 
     <div id="ts-progress-wrap" style="display:none;">
