@@ -492,12 +492,8 @@ async function __tsui_init(){
 
   // ---------- 1) 先綁定 UI 事件（不等 pyodide） ----------
   function needsTranslationJS(text){
-    if (!text) return false;
-    const t = String(text).trim();
-    if (!t) return false;
-    // 嚴格排除純數字符號
-    if (/^[\s\d\W%{}]+$/u.test(t)) return false;
-    return true;
+    const t = (text ?? "").toString().trim();
+    return t.length > 0;
   }
 
   // 計算「需翻譯」數量：source 可翻 + translation 缺/unfinished
@@ -523,16 +519,8 @@ async function __tsui_init(){
             const src = m.getElementsByTagName("source")[0];
             if (!src) continue;
             const s = src.textContent || "";
-            if (!needsTranslationJS(s)) continue;
-
-            const tr = m.getElementsByTagName("translation")[0];
-            let need = true;
-            if (tr){
-              const ttype = tr.getAttribute("type") || "";
-              const ttext = (tr.textContent || "").trim();
-              if (ttype !== "unfinished" && ttext) need = false;
-            }
-            if (need) total++;
+            if (!hasSource(s)) continue;
+            total++;
           }
         }
       } else {
@@ -542,16 +530,8 @@ async function __tsui_init(){
           const msrc = block.match(/<source>([\s\S]*?)<\/source>/);
           if (!msrc) continue;
           const s = msrc[1].replace(/<[^>]+>/g, "");
-          if (!needsTranslationJS(s)) continue;
-
-          const tr = block.match(/<translation([^>]*)>([\s\S]*?)<\/translation>/);
-          let need = true;
-          if (tr){
-            const attrs = tr[1] || "";
-            const inner = (tr[2] || "").replace(/<[^>]+>/g, "").trim();
-            if (!/type\s*=\s*["']unfinished["']/.test(attrs) && inner) need = false;
-          }
-          if (need) total++;
+          if (!hasSource(s)) continue;
+          total++;
         }
       }
 
@@ -1181,7 +1161,7 @@ def build_old_index(old_ts_text: str) -> Dict[str, Dict[str, Any]]:
     idx: Dict[str, Dict[str, Any]] = {}
     if not old_ts_text:
         return idx
-    dt = _read_doctype(old_ts_text)
+
     s = _strip_doctype(old_ts_text)
     try:
         root = ET.fromstring(s)
@@ -1197,50 +1177,34 @@ def build_old_index(old_ts_text: str) -> Dict[str, Dict[str, Any]]:
             if src_node is None or src_node.text is None:
                 continue
             src_text = src_node.text
-
-            if not needs_translation(src_text):
+            if not (src_text and src_text.strip()):
                 continue
 
-            # ✅ 全都要翻譯：不要因為「原本已經有翻譯」就跳過
-            # （把原本的 is_translation_filled(m) continue 移除）
-
-            # 舊檔套用（source 一樣才直接替換，免 API）
-            old_val = pick_old_translation(old_map, src_text, ctx_name)
-            if old_val is not None:
-                set_translation(m, old_val)
-                reused += 1
-                _compare_add(
-                    src_text,
-                    str(old_val[0] if isinstance(old_val, list) and old_val else old_val),
-                    f"介面: {ctx_name}",
-                    tag="沿用舊版"
-                )
+            tr = m.find("translation")
+            if tr is None:
+                continue
+            if tr.get("type") == "unfinished":
                 continue
 
-            # 需要翻譯者（會呼叫 API）
-            extras = []
-            if ctx_name:
-                extras.append(f"介面: {ctx_name}")
-            cmt = m.find("comment")
-            if cmt is not None and cmt.text:
-                extras.append(f"註釋: {cmt.text}")
-            ext = m.find("extracomment")
-            if ext is not None and ext.text:
-                extras.append(f"說明: {ext.text}")
-            ctx_str = " | ".join(extras)
+            numerus = (m.get("numerus") == "yes")
+            if numerus:
+                forms = tr.findall("numerusform")
+                if forms:
+                    vals = [(f.text or "").strip() for f in forms]
+                    if not all(vals):
+                        continue
+                    val: Any = vals
+                else:
+                    val = (tr.text or "").strip()
+                    if not val:
+                        continue
+            else:
+                val = (tr.text or "").strip()
+                if not val:
+                    continue
 
-            tasks.append({
-                "node": m,
-                "src": src_text,
-                "context": ctx_str,
-                "ctx_name": ctx_name,
-                "numerus": (m.get("numerus") == "yes"),
-            })
+            idx.setdefault(src_text, {})[ctx_name] = val
 
-            if limit_n > 0 and len(tasks) >= limit_n:
-                break
-        if limit_n > 0 and len(tasks) >= limit_n:
-            break
     return idx
 
 def pick_old_translation(old_map: Dict[str, Dict[str, Any]], src: str, ctx_name: str) -> Optional[Any]:
