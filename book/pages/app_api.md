@@ -519,7 +519,7 @@ async function __tsui_init(){
             const src = m.getElementsByTagName("source")[0];
             if (!src) continue;
             const s = src.textContent || "";
-            if (!hasSource(s)) continue;
+            if (!needsTranslationJS(s)) continue;
             total++;
           }
         }
@@ -530,7 +530,7 @@ async function __tsui_init(){
           const msrc = block.match(/<source>([\s\S]*?)<\/source>/);
           if (!msrc) continue;
           const s = msrc[1].replace(/<[^>]+>/g, "");
-          if (!hasSource(s)) continue;
+          if (!needsTranslationJS(s)) continue;
           total++;
         }
       }
