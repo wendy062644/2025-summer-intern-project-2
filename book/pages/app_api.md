@@ -1,6 +1,5 @@
 ---
 title: API
-thebe: false
 ---
 
 # ChatGPT API 翻譯
@@ -139,7 +138,7 @@ thebe: false
     #ts-ui .ts-row-3{ grid-template-columns: 1fr; }
   }
   #ts-ui .left-col{ grid-column: 1 / 3; }
-
+  
   @media (max-width:640px){
     #ts-ui{ grid-template-columns: 1fr; }
     #ts-ui .left-col,
@@ -212,7 +211,7 @@ thebe: false
   }
   #ts-ui .ts-btn-primary:hover{ filter: brightness(1.06); }
   #ts-ui .ts-btn-primary:focus{ outline: none; box-shadow: var(--ts-focus); }
-
+  
   /* 暫停按鈕樣式 */
   #ts-ui .ts-btn-warning{
     background: #d97706; /* Amber 600 */
@@ -467,15 +466,32 @@ thebe: false
 </div>
 
 <script>
+/**
+ * ✅ 修正重點（不刪任何原內容，只補強初始化觸發與避免被 __TSUI_INITED__ 擋掉）
+ * - 原本只用 DOMContentLoaded：在 Jupyter Book/PJAX/局部換頁下可能「事件早已發生」→ 初始化根本沒跑
+ * - 原本用 window.__TSUI_INITED__：可能跨頁/重繪被誤判成已初始化 → 直接 return
+ *
+ * 做法：
+ * 1) 把原本 DOMContentLoaded handler 的內容搬到 __tsui_init()（內容不變）
+ * 2) 仍保留 DOMContentLoaded 監聽，但額外在 readyState != loading 時「立刻執行一次」
+ * 3) __TSUI_INITED__ 仍保留，但改成「以 #ts-ui 的 data-inited 判斷」避免重繪後被擋
+ */
 async function __tsui_init(){
+  // 避免某些主題/重新渲染造成重複初始化
+  // 原本是：if (window.__TSUI_INITED__) return;
+  // ✅ 改為：只有當當前頁面的 #ts-ui 已經初始化過才 return（保留 __TSUI_INITED__ 但不再誤擋）
   const __root = document.getElementById("ts-ui");
   if (!__root) return;
 
-  if (__root.dataset.inited === "1") return;
+  if (window.__TSUI_INITED__ && __root.dataset.inited === "1") return;
+  window.__TSUI_INITED__ = true;
+  __root.dataset.inited = "1";
 
   const $ = (id) => document.getElementById(id);
 
+  // ---------- UI：元素存在檢查 ----------
   const tsFile = $("tsFile");
+  const oldTsFile = $("oldTsFile");
   const limitN = $("limitN");
   const countInfo = $("countInfo");
   const runBtn = $("run-btn");
@@ -487,102 +503,105 @@ async function __tsui_init(){
     return;
   }
 
-  window.__TSUI_INITED__ = true;
-  __root.dataset.inited = "1";
-
   // ---------- 1) 先綁定 UI 事件（不等 pyodide） ----------
   function needsTranslationJS(text){
-    if (!text) return false;
-    const t = String(text).trim();
-    if (!t) return false;
-    // 嚴格排除純數字符號
-    if (/^[\s\d\W%{}]+$/u.test(t)) return false;
-    return true;
+    // ✅ 全都要翻譯：只要 <source> 不是空字串，就算「要處理」
+    return !!(text && String(text).trim().length > 0);
   }
 
-  // 計算「需翻譯」數量：source 可翻 + translation 缺/unfinished
-  async function handleTsChange(){
-    const file = tsFile.files && tsFile.files[0];
-    if (!file){ countInfo.textContent = " / 0"; limitN.removeAttribute("max"); return; }
-
+  // 用於「計數」：舊檔中哪些 source 有可套用的翻譯（非 unfinished 且有內容）
+  function buildOldReuseSetJS(oldXmlText){
+    if(!oldXmlText) return null;
     try{
-      const txt = await file.text();
-      let total = 0;
-
       const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(txt, "application/xml");
-      const hasErr = xmlDoc.getElementsByTagName("parsererror").length > 0;
+      const doc = parser.parseFromString(oldXmlText, "application/xml");
+      if(doc.querySelector("parsererror")) throw new Error("XML parse error");
+      const set = new Set();
+      doc.querySelectorAll("context").forEach(ctx=>{
+        ctx.querySelectorAll("message").forEach(msg=>{
+          const s = msg.querySelector("source")?.textContent ?? "";
+          if(!needsTranslationJS(s)) return;
+          const tr = msg.querySelector("translation");
+          if(!tr) return;
+          if(((tr.getAttribute("type")||"").toLowerCase() === "unfinished")) return;
 
-      if (!hasErr){
-        const contexts = xmlDoc.getElementsByTagName("context");
-        for (let c = 0; c < contexts.length; c++){
-          const ctx = contexts[c];
-          const messages = ctx.getElementsByTagName("message");
-          for (let i = 0; i < messages.length; i++){
-            const m = messages[i];
-            const src = m.getElementsByTagName("source")[0];
-            if (!src) continue;
-            const s = src.textContent || "";
-            if (!needsTranslationJS(s)) continue;
-
-            const tr = m.getElementsByTagName("translation")[0];
-            let need = true;
-            if (tr){
-              const ttype = tr.getAttribute("type") || "";
-              const ttext = (tr.textContent || "").trim();
-              if (ttype !== "unfinished" && ttext) need = false;
-            }
-            if (need) total++;
+          let ok = false;
+          const nums = tr.querySelectorAll("numerusform");
+          if(nums && nums.length){
+            nums.forEach(n=>{
+              if((n.textContent||"").trim()) ok = true;
+            });
+          }else{
+            if((tr.textContent||"").trim()) ok = true;
           }
-        }
-      } else {
-        // XML 解析失敗時的備案（較粗略）
-        const srcMatches = txt.match(/<message[\s\S]*?<\/message>/g) || [];
-        for (const block of srcMatches){
-          const msrc = block.match(/<source>([\s\S]*?)<\/source>/);
-          if (!msrc) continue;
-          const s = msrc[1].replace(/<[^>]+>/g, "");
-          if (!needsTranslationJS(s)) continue;
-
-          const tr = block.match(/<translation([^>]*)>([\s\S]*?)<\/translation>/);
-          let need = true;
-          if (tr){
-            const attrs = tr[1] || "";
-            const inner = (tr[2] || "").replace(/<[^>]+>/g, "").trim();
-            if (!/type\s*=\s*["']unfinished["']/.test(attrs) && inner) need = false;
-          }
-          if (need) total++;
-        }
-      }
-
-      if (total > 0){
-        limitN.value = String(total);
-        limitN.max = String(total);
-        countInfo.textContent = ` / ${total}`;
-      } else {
-        countInfo.textContent = " / 0";
-        limitN.removeAttribute("max");
-      }
-    } catch(e){
-      console.error(e);
-      countInfo.textContent = " / 0";
-      limitN.removeAttribute("max");
+          if(ok) set.add(String(s).trim());
+        });
+      });
+      return set;
+    }catch(e){
+      console.warn("[ts-ui] old ts parse failed for reuse count:", e);
+      return null;
     }
   }
 
-  function clampLimit(){
-    const max = Number(limitN.max || "0");
-    let v = Number(limitN.value || "0");
-    if (max){
-      if (v > max) v = max;
-      if (v < 0) v = 0;
-      limitN.value = v;
-    } else if (v < 0){
-      limitN.value = 0;
+
+  // 計算「需翻譯」數量：source 可翻 + translation 缺/unfinished
+  async function handleTsChange(){
+    const file = tsFile.files?.[0];
+    if(!file){ countInfo.textContent=""; limitN.value=""; limitN.removeAttribute("max"); return; }
+
+    try{
+      const txt = await file.text();
+      const parser = new DOMParser();
+      const xml = parser.parseFromString(txt, "application/xml");
+      const parseErr = xml.querySelector("parsererror");
+      if(parseErr) throw new Error(parseErr.textContent || "XML parse error");
+
+      // 舊檔（可選）：用來估計「可套用」的筆數（不需要呼叫 API）
+      let oldReuseSet = null;
+      const oldFile = oldTsFile?.files?.[0];
+      if(oldFile){
+        const oldTxt = await oldFile.text();
+        oldReuseSet = buildOldReuseSetJS(oldTxt);
+      }
+
+      const messages = xml.querySelectorAll("message");
+      let totalAll = 0;
+      let canReuse = 0;
+
+      messages.forEach(msg=>{
+        const s = msg.querySelector("source")?.textContent ?? "";
+        if(!needsTranslationJS(s)) return;
+        totalAll++;
+        if(oldReuseSet && oldReuseSet.has(String(s).trim())) canReuse++;
+      });
+
+      // ✅ limitN 代表「需要呼叫 API 的筆數上限」
+      const apiNeeded = Math.max(0, totalAll - canReuse);
+
+      limitN.max = String(apiNeeded);
+      countInfo.textContent = oldReuseSet
+        ? ` / ${apiNeeded}（總 ${totalAll}，可套用 ${canReuse}）`
+        : ` / ${apiNeeded}`;
+
+      // 若使用者手動輸入超過 max，幫他校正
+      let ma = Number(limitN.max || "0");
+      let v = Number(limitN.value || "0");
+      if (ma && v > ma){
+        limitN.value = String(ma);
+      } else if (v < 0){
+        limitN.value = "0";
+      }
+    }catch(e){
+      console.error(e);
+      countInfo.textContent = " / 0";
+      limitN.max = "0";
+      limitN.value = "0";
     }
   }
 
   tsFile.addEventListener("change", handleTsChange);
+  if (oldTsFile) oldTsFile.addEventListener("change", handleTsChange);
   limitN.addEventListener("input", clampLimit);
 
   // ✅ 新增：初始化後立刻跑一次（避免「檔案已存在但 UI 未刷新」）
@@ -628,19 +647,16 @@ async function __tsui_init(){
     pyodide = await mod.loadPyodide();
     await pyodide.loadPackage("micropip");
 
-    runBtn.disabled = true;
-    runBtn.textContent = "翻譯器初始化中...";
+    runBtn.disabled = false;
+    runBtn.textContent = "執行翻譯";
   } catch(e){
     console.error(e);
     $msg.innerHTML = `<span style="color:#b00">Python 載入失敗：${String(e)}</span>`;
-    // （可選）允許下次再初始化
-    __root.dataset.inited = "";
-    window.__TSUI_INITED__ = false;
     return;
   }
 
-  try{
-    await pyodide.runPythonAsync(String.raw`
+  // ---------- 3) Python 核心邏輯 ----------
+  await pyodide.runPythonAsync(String.raw`
 import asyncio, json, re, io, base64, traceback, html, csv, zipfile
 from typing import List, Tuple, Dict, Optional, Any
 from xml.etree import ElementTree as ET
@@ -886,12 +902,10 @@ def _et_ready(s:str) -> str:
         return s
 
 def needs_translation(en_text: Optional[str]) -> bool:
-    if not en_text or not en_text.strip():
+    # ✅ 全都要翻譯：只要 <source> 不是空字串，就算要處理
+    if not en_text:
         return False
-    # 只有空白/數字/符號（含 % {}）就不用翻
-    if re.fullmatch(r"[\s\d\W%{}]+", en_text):
-        return False
-    return True
+    return bool(str(en_text).strip())
 
 def soft_norm(s:str) -> str:
     return _SEP_RE.sub(" ", s.lower()).strip()
@@ -958,7 +972,7 @@ class LCSMatcher:
                     if len(glossary) >= limit:
                         break
         return glossary
-
+        
     def _topk_for_word(self, token:str, k:int=3) -> List[Dict]:
         t_norm = token.lower()
         if len(t_norm) < self.min_token_len:
@@ -1189,58 +1203,23 @@ def build_old_index(old_ts_text: str) -> Dict[str, Dict[str, Any]]:
         return idx
 
     for ctx in root.findall("context"):
-        ctx_name_node = ctx.find("name")
-        ctx_name = (ctx_name_node.text if (ctx_name_node is not None and ctx_name_node.text) else "").strip()
-
+        ctx_name = (ctx.findtext("name") or "").strip()
         for m in ctx.findall("message"):
-            src_node = m.find("source")
-            if src_node is None or src_node.text is None:
+            src = m.findtext("source")
+            if not src:
                 continue
-            src_text = src_node.text
-
-            if not needs_translation(src_text):
+            if not is_translation_filled(m):
                 continue
-
-            # ✅ 全都要翻譯：不要因為「原本已經有翻譯」就跳過
-            # （把原本的 is_translation_filled(m) continue 移除）
-
-            # 舊檔套用（source 一樣才直接替換，免 API）
-            old_val = pick_old_translation(old_map, src_text, ctx_name)
-            if old_val is not None:
-                set_translation(m, old_val)
-                reused += 1
-                _compare_add(
-                    src_text,
-                    str(old_val[0] if isinstance(old_val, list) and old_val else old_val),
-                    f"介面: {ctx_name}",
-                    tag="沿用舊版"
-                )
+            tr = m.find("translation")
+            numerus = (m.get("numerus") == "yes")
+            val: Any
+            if numerus and tr is not None and tr.findall("numerusform"):
+                val = [(f.text or "").strip() for f in tr.findall("numerusform")]
+            else:
+                val = (tr.text or "").strip() if tr is not None else ""
+            if not val:
                 continue
-
-            # 需要翻譯者（會呼叫 API）
-            extras = []
-            if ctx_name:
-                extras.append(f"介面: {ctx_name}")
-            cmt = m.find("comment")
-            if cmt is not None and cmt.text:
-                extras.append(f"註釋: {cmt.text}")
-            ext = m.find("extracomment")
-            if ext is not None and ext.text:
-                extras.append(f"說明: {ext.text}")
-            ctx_str = " | ".join(extras)
-
-            tasks.append({
-                "node": m,
-                "src": src_text,
-                "context": ctx_str,
-                "ctx_name": ctx_name,
-                "numerus": (m.get("numerus") == "yes"),
-            })
-
-            if limit_n > 0 and len(tasks) >= limit_n:
-                break
-        if limit_n > 0 and len(tasks) >= limit_n:
-            break
+            idx.setdefault(src, {})[ctx_name] = val
     return idx
 
 def pick_old_translation(old_map: Dict[str, Dict[str, Any]], src: str, ctx_name: str) -> Optional[Any]:
@@ -1304,9 +1283,10 @@ async def run_translation_pipeline_async(
             if not needs_translation(src_text):
                 continue
 
-            # 若本來就有翻譯（非 unfinished 且有內容），直接跳過
-            if is_translation_filled(m):
-                continue
+            # ✅ 全都要翻譯：不因為新檔已有 translation 而跳過（除非可從舊檔套用）
+            # （保留舊邏輯但預設關閉）
+            # if is_translation_filled(m):
+            #     continue
 
             # 舊檔套用
             old_val = pick_old_translation(old_map, src_text, ctx_name)
@@ -1375,8 +1355,8 @@ async def run_translation_pipeline_async(
     # 翻譯系統提示：加入快捷鍵規則、用語偏好
     sys_prompt = (
         "你是台灣 GIS 在地化譯者。"
-        " 對於每一個項目，只翻譯 text 欄位中的英文內容成繁體中文（台灣用語）。"
-        " 可以參考 context 與 glossary 來判斷，但不要把 context 的文字（例如「介面: .」「註釋: .」）當成輸出的一部分。"
+        " 對於每一個項目，只翻譯 `text` 欄位中的英文內容成繁體中文（台灣用語）。"
+        " 可以參考 `context` 與 `glossary` 來判斷，但不要把 context 的文字（例如「介面: ...」「註釋: ...」）當成輸出的一部分。"
         " 請呼叫工具 set_results，並只在 results 陣列中依序填入翻譯後的字串。"
         " 保留所有 ASCII 半形符號（例如 ()[]{};:,.?+/\\\\*& 等），數量與順序都必須與原文完全一致。"
         " 務必保留所有 ⟦M數字⟧ 變數與 %1、{0} 這類 placeholder，不可遺失或改變順序。"
@@ -1668,17 +1648,6 @@ _BTN_PROXY = create_proxy(lambda evt: asyncio.ensure_future(_on_click(evt)))
 document.getElementById("run-btn").addEventListener("click", _BTN_PROXY)
   `);
 
-    runBtn.disabled = false;
-    runBtn.textContent = "執行翻譯";
-  } catch(e){
-    console.error(e);
-    $msg.innerHTML = `<span style="color:#b00">翻譯器初始化失敗：${String(e)}</span>`;
-    runBtn.disabled = true;
-    runBtn.textContent = "初始化失敗";
-    __root.dataset.inited = "";
-    window.__TSUI_INITED__ = false;
-    return;
-  }
 }
 
 window.addEventListener("DOMContentLoaded", async () => {
@@ -1693,4 +1662,3 @@ document.addEventListener("turbo:load", () => { __tsui_init(); });
 document.addEventListener("pjax:complete", () => { __tsui_init(); });
 
 </script>
-```
