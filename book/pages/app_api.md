@@ -408,13 +408,13 @@ thebe: false
 
     <div class="ts-row-2" style="--ts-col1: 7fr; --ts-col2: 3fr; margin-top:10px;">
       <div class="ts-field">
-        <label class="ts-label" for="oldTsFile">舊版 .ts（選用：已翻譯則跳過）</label>
+        <label class="ts-label" for="oldTsFile">舊版 .ts</label>
         <div class="ts-input">
           <input type="file" id="oldTsFile" accept=".ts">
         </div>
       </div>
       <div class="ts-hint right-col" style="margin-top:26px;">
-        同 <code>&lt;source&gt;</code> 且舊檔翻譯非 unfinished → 直接套用，不呼叫 API
+        同 <code>&lt;source&gt;</code> → 直接套用，不呼叫 API
       </div>
     </div>
 
