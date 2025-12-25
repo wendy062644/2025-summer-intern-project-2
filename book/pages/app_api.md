@@ -1189,23 +1189,58 @@ def build_old_index(old_ts_text: str) -> Dict[str, Dict[str, Any]]:
         return idx
 
     for ctx in root.findall("context"):
-        ctx_name = (ctx.findtext("name") or "").strip()
+        ctx_name_node = ctx.find("name")
+        ctx_name = (ctx_name_node.text if (ctx_name_node is not None and ctx_name_node.text) else "").strip()
+
         for m in ctx.findall("message"):
-            src = m.findtext("source")
-            if not src:
+            src_node = m.find("source")
+            if src_node is None or src_node.text is None:
                 continue
-            if not is_translation_filled(m):
+            src_text = src_node.text
+
+            if not needs_translation(src_text):
                 continue
-            tr = m.find("translation")
-            numerus = (m.get("numerus") == "yes")
-            val: Any
-            if numerus and tr is not None and tr.findall("numerusform"):
-                val = [(f.text or "").strip() for f in tr.findall("numerusform")]
-            else:
-                val = (tr.text or "").strip() if tr is not None else ""
-            if not val:
+
+            # ✅ 全都要翻譯：不要因為「原本已經有翻譯」就跳過
+            # （把原本的 is_translation_filled(m) continue 移除）
+
+            # 舊檔套用（source 一樣才直接替換，免 API）
+            old_val = pick_old_translation(old_map, src_text, ctx_name)
+            if old_val is not None:
+                set_translation(m, old_val)
+                reused += 1
+                _compare_add(
+                    src_text,
+                    str(old_val[0] if isinstance(old_val, list) and old_val else old_val),
+                    f"介面: {ctx_name}",
+                    tag="沿用舊版"
+                )
                 continue
-            idx.setdefault(src, {})[ctx_name] = val
+
+            # 需要翻譯者（會呼叫 API）
+            extras = []
+            if ctx_name:
+                extras.append(f"介面: {ctx_name}")
+            cmt = m.find("comment")
+            if cmt is not None and cmt.text:
+                extras.append(f"註釋: {cmt.text}")
+            ext = m.find("extracomment")
+            if ext is not None and ext.text:
+                extras.append(f"說明: {ext.text}")
+            ctx_str = " | ".join(extras)
+
+            tasks.append({
+                "node": m,
+                "src": src_text,
+                "context": ctx_str,
+                "ctx_name": ctx_name,
+                "numerus": (m.get("numerus") == "yes"),
+            })
+
+            if limit_n > 0 and len(tasks) >= limit_n:
+                break
+        if limit_n > 0 and len(tasks) >= limit_n:
+            break
     return idx
 
 def pick_old_translation(old_map: Dict[str, Dict[str, Any]], src: str, ctx_name: str) -> Optional[Any]:
