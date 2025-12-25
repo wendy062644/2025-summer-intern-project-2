@@ -1,5 +1,6 @@
 ---
 title: API
+thebe: false
 ---
 
 # ChatGPT API 翻譯
@@ -1339,8 +1340,8 @@ async def run_translation_pipeline_async(
     # 翻譯系統提示：加入快捷鍵規則、用語偏好
     sys_prompt = (
         "你是台灣 GIS 在地化譯者。"
-        " 對於每一個項目，只翻譯 `text` 欄位中的英文內容成繁體中文（台灣用語）。"
-        " 可以參考 `context` 與 `glossary` 來判斷，但不要把 context 的文字（例如「介面: ...」「註釋: ...」）當成輸出的一部分。"
+        " 對於每一個項目，只翻譯 text 欄位中的英文內容成繁體中文（台灣用語）。"
+        " 可以參考 context 與 glossary 來判斷，但不要把 context 的文字（例如「介面: .」「註釋: .」）當成輸出的一部分。"
         " 請呼叫工具 set_results，並只在 results 陣列中依序填入翻譯後的字串。"
         " 保留所有 ASCII 半形符號（例如 ()[]{};:,.?+/\\\\*& 等），數量與順序都必須與原文完全一致。"
         " 務必保留所有 ⟦M數字⟧ 變數與 %1、{0} 這類 placeholder，不可遺失或改變順序。"
