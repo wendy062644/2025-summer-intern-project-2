@@ -466,10 +466,26 @@ title: API
 </div>
 
 <script>
-window.addEventListener("DOMContentLoaded", async () => {
+/**
+ * ✅ 修正重點（不刪任何原內容，只補強初始化觸發與避免被 __TSUI_INITED__ 擋掉）
+ * - 原本只用 DOMContentLoaded：在 Jupyter Book/PJAX/局部換頁下可能「事件早已發生」→ 初始化根本沒跑
+ * - 原本用 window.__TSUI_INITED__：可能跨頁/重繪被誤判成已初始化 → 直接 return
+ *
+ * 做法：
+ * 1) 把原本 DOMContentLoaded handler 的內容搬到 __tsui_init()（內容不變）
+ * 2) 仍保留 DOMContentLoaded 監聽，但額外在 readyState != loading 時「立刻執行一次」
+ * 3) __TSUI_INITED__ 仍保留，但改成「以 #ts-ui 的 data-inited 判斷」避免重繪後被擋
+ */
+async function __tsui_init(){
   // 避免某些主題/重新渲染造成重複初始化
-  if (window.__TSUI_INITED__) return;
+  // 原本是：if (window.__TSUI_INITED__) return;
+  // ✅ 改為：只有當當前頁面的 #ts-ui 已經初始化過才 return（保留 __TSUI_INITED__ 但不再誤擋）
+  const __root = document.getElementById("ts-ui");
+  if (!__root) return;
+
+  if (window.__TSUI_INITED__ && __root.dataset.inited === "1") return;
   window.__TSUI_INITED__ = true;
+  __root.dataset.inited = "1";
 
   const $ = (id) => document.getElementById(id);
 
@@ -580,6 +596,10 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   tsFile.addEventListener("change", handleTsChange);
   limitN.addEventListener("input", clampLimit);
+
+  // ✅ 新增：初始化後立刻跑一次（避免「檔案已存在但 UI 未刷新」）
+  // 不會移除任何功能，只是補強初始化狀態
+  try { await handleTsChange(); } catch(e){ console.warn(e); }
 
   (function setupModelCustom(){
     const sel = $("modelSel");
@@ -1082,7 +1102,7 @@ async def call_api(api_key, base_url, model, payload, retries=1):
         new_msgs = []
         for m in payload.get("messages", []):
             if m["role"] == "system":
-                new_msgs.append({"role": "user", "content": f"[System Instruction]\\n{m['content']}"})
+                new_msgs.append({"role": "user", "content": f"[System Instruction]\\n{m['content']}"} )
             else:
                 new_msgs.append(m)
         payload["messages"] = new_msgs
@@ -1622,6 +1642,20 @@ _BTN_PROXY = create_proxy(lambda evt: asyncio.ensure_future(_on_click(evt)))
 document.getElementById("run-btn").addEventListener("click", _BTN_PROXY)
   `);
 
+}
+
+/* ✅ 仍保留原本 DOMContentLoaded 方式 */
+window.addEventListener("DOMContentLoaded", async () => {
+  await __tsui_init();
 });
+
+/* ✅ 新增：若腳本被注入時 DOMContentLoaded 已經過了，這裡會立刻補跑一次 */
+if (document.readyState !== "loading") {
+  __tsui_init();
+}
+
+/* ✅ 新增：兼容一些主題可能的局部換頁事件（有就觸發、沒有也不會報錯） */
+document.addEventListener("turbo:load", () => { __tsui_init(); });
+document.addEventListener("pjax:complete", () => { __tsui_init(); });
+
 </script>
-``` 
