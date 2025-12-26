@@ -392,7 +392,7 @@ thebe: false
         </div>
       </div>
       <div class="ts-field">
-        <label class="ts-label" for="limitN">處理筆數上限（僅計「需翻譯」）</label>
+        <label class="ts-label" for="limitN">處理筆數上限</label>
         <div class="ts-input ts-inline">
           <input type="number" id="limitN" value="0" style="max-width:220px;">
           <span id="countInfo" class="ts-hint"> / 0</span>
@@ -493,7 +493,8 @@ async function __tsui_init(){
   // ---------- 1) 先綁定 UI 事件（不等 pyodide） ----------
   function needsTranslationJS(text){
     const t = (text ?? "").toString().trim();
-    return t.length > 0;
+    if (t.length === 0) return false;
+    return !/^[\s\p{N}\p{P}\p{S}_]+$/u.test(t);
   }
 
   // 計算「需翻譯」數量：source 可翻 + translation 缺/unfinished
@@ -869,7 +870,7 @@ def needs_translation(en_text: Optional[str]) -> bool:
     if not en_text or not en_text.strip():
         return False
     # 只有空白/數字/符號（含 % {}）就不用翻
-    if re.fullmatch(r"[\s\d\W%{}]+", en_text):
+    if re.fullmatch(r"[\s\W\d_]+", en_text):
         return False
     return True
 
@@ -1277,8 +1278,7 @@ async def run_translation_pipeline_async(
             if old_val is not None:
                 set_translation(m, old_val)
                 reused += 1
-                # 顯示一下（可註解掉）
-                _compare_add(src_text, str(old_val[0] if isinstance(old_val, list) and old_val else old_val), f"介面: {ctx_name}", tag="沿用舊版")
+                _compare_add(... tag="沿用舊版")
                 continue
 
             # 需要翻譯者
