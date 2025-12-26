@@ -493,9 +493,134 @@ async function __tsui_init(){
   // ---------- 1) 先綁定 UI 事件（不等 pyodide） ----------
   function needsTranslationJS(text){
     const t = (text ?? "").toString().trim();
-    if (t.length === 0) return false;
-    return !/^[\s\p{N}\p{P}\p{S}_]+$/u.test(t);
+    if (!t) return false;
+    if (/^[\s\p{N}\p{P}\p{S}_]+$/u.test(t)) return false;
+    return true;
   }
+
+  function isTranslationFilledJS(msg){
+    const tr = msg.getElementsByTagName("translation")[0];
+    if (!tr) return false;
+    if (tr.getAttribute("type") === "unfinished") return false;
+
+    const numerus = (msg.getAttribute("numerus") === "yes");
+    if (numerus){
+      const forms = tr.getElementsByTagName("numerusform");
+      if (forms && forms.length){
+        for (const f of forms){
+          if (!((f.textContent || "").trim())) return false;
+        }
+        return true;
+      }
+    }
+    return !!((tr.textContent || "").trim());
+  }
+
+  function buildOldIndexJS(oldDoc){
+    // source -> (ctx_name -> valKey)
+    const idx = new Map();
+    if (!oldDoc) return idx;
+
+    for (const ctx of oldDoc.getElementsByTagName("context")){
+      const nameNode = ctx.getElementsByTagName("name")[0];
+      const ctxName = ((nameNode?.textContent) || "").trim();
+
+      for (const m of ctx.getElementsByTagName("message")){
+        const srcNode = m.getElementsByTagName("source")[0];
+        const srcText = srcNode?.textContent;
+        if (!srcText || !srcText.trim()) continue;
+
+        const tr = m.getElementsByTagName("translation")[0];
+        if (!tr) continue;
+        if (tr.getAttribute("type") === "unfinished") continue;
+
+        const numerus = (m.getAttribute("numerus") === "yes");
+        let val;
+        if (numerus){
+          const forms = tr.getElementsByTagName("numerusform");
+          if (forms && forms.length){
+            const vals = Array.from(forms).map(f => (f.textContent || "").trim());
+            if (!vals.every(v => v)) continue;
+            val = "A:" + vals.join("\u0001");
+          } else {
+            const t = (tr.textContent || "").trim();
+            if (!t) continue;
+            val = "S:" + t;
+          }
+        } else {
+          const t = (tr.textContent || "").trim();
+          if (!t) continue;
+          val = "S:" + t;
+        }
+
+        if (!idx.has(srcText)) idx.set(srcText, new Map());
+        idx.get(srcText).set(ctxName, val);
+      }
+    }
+    return idx;
+  }
+
+  function canReuseOldJS(oldMap, srcText, ctxName){
+    if (!oldMap || !srcText) return false;
+    const perCtx = oldMap.get(srcText);
+    if (!perCtx) return false;
+    if (perCtx.has(ctxName)) return true;
+
+    const uniq = new Set(perCtx.values());
+    return uniq.size === 1;
+  }
+
+  async function readFileTextById(inputId){
+    const el = document.getElementById(inputId);
+    if (!el?.files || el.files.length === 0) return null;
+    const buf = await el.files.item(0).arrayBuffer();
+    return new TextDecoder("utf-8").decode(buf);
+  }
+
+  async function handleTsChange(){
+    const tsText  = await readFileTextById("tsFile");
+    if (!tsText){
+      limitN.max = 0;
+      countInfo.textContent = "/ 0";
+      return;
+    }
+
+    const oldText = await readFileTextById("oldTsFile"); // 沒選就 null
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(tsText, "application/xml");
+    const oldDoc = oldText ? parser.parseFromString(oldText, "application/xml") : null;
+    const oldMap = oldDoc ? buildOldIndexJS(oldDoc) : null;
+
+    let total = 0;
+
+    for (const ctx of xmlDoc.getElementsByTagName("context")){
+      const nameNode = ctx.getElementsByTagName("name")[0];
+      const ctxName = ((nameNode?.textContent) || "").trim();
+
+      for (const msg of ctx.getElementsByTagName("message")){
+        const srcNode = msg.getElementsByTagName("source")[0];
+        const srcText = (srcNode?.textContent) || "";
+        if (!needsTranslationJS(srcText)) continue;
+
+        // 已翻譯 → 不算入「需翻譯」
+        if (isTranslationFilledJS(msg)) continue;
+
+        // 可沿用舊版 → 不算入「需翻譯」
+        if (oldMap && canReuseOldJS(oldMap, srcText, ctxName)) continue;
+
+        total++;
+      }
+    }
+
+    limitN.max = total;
+    // 預設直接跑滿（你也可改成保留使用者原本輸入的值）
+    limitN.value = total;
+    countInfo.textContent = `/ ${total}`;
+  }
+
+  // ✅ 記得 oldTsFile 也要觸發重算，不然換舊檔上限不會變
+  tsFile.addEventListener("change", handleTsChange);
+  oldTsFile.addEventListener("change", handleTsChange);
 
   // 計算「需翻譯」數量：source 可翻 + translation 缺/unfinished
   async function handleTsChange(){
@@ -1278,8 +1403,12 @@ async def run_translation_pipeline_async(
             if old_val is not None:
                 set_translation(m, old_val)
                 reused += 1
-                show_old = " / ".join(old_val) if isinstance(old_val, list) else str(old_val)
-                _compare_add(src_text, show_old, f"介面: {ctx_name}" if ctx_name else "", tag="沿用舊版")
+                _compare_add(
+                    src_text,
+                    str(old_val[0] if isinstance(old_val, list) and old_val else old_val),
+                    f"介面: {ctx_name}",
+                    tag="沿用舊版"
+                )
                 continue
 
             # 需要翻譯者
@@ -1542,7 +1671,12 @@ async def run_translation_pipeline_async(
             finished += 1
             _progress_tick(finished, total)
 
-            _compare_add(src_text, zh_final, f"介面: {ctx_name}" if ctx_name else "", tag="翻譯")
+            _compare_add(
+                src_text,
+                str(old_val[0] if isinstance(old_val, list) and old_val else old_val),
+                f"介面: {ctx_name}",
+                tag="沿用舊版"
+            )
 
         _set_ui_msg(f"處理進度：{finished}/{total}（另已沿用舊版 {reused} 筆）")
 
