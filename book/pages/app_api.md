@@ -1394,10 +1394,6 @@ async def run_translation_pipeline_async(
             if not needs_translation(src_text):
                 continue
 
-            # 若本來就有翻譯（非 unfinished 且有內容），直接跳過
-            if is_translation_filled(m):
-                continue
-
             # 舊檔套用
             old_val = pick_old_translation(old_map, src_text, ctx_name)
             if old_val is not None:
