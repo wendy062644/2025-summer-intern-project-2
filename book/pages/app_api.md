@@ -1278,7 +1278,8 @@ async def run_translation_pipeline_async(
             if old_val is not None:
                 set_translation(m, old_val)
                 reused += 1
-                _compare_add(... tag="沿用舊版")
+                show_old = " / ".join(old_val) if isinstance(old_val, list) else str(old_val)
+                _compare_add(src_text, show_old, f"介面: {ctx_name}" if ctx_name else "", tag="沿用舊版")
                 continue
 
             # 需要翻譯者
