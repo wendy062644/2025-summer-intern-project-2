@@ -1399,14 +1399,11 @@ async def run_translation_pipeline_async(
             if old_val is not None:
                 set_translation(m, old_val)
                 reused += 1
-                show_zh = " / ".join(zh_final) if isinstance(zh_final, list) else (zh_final or "")
-                tag = "Model-2" if use_model2 else "Model-1"
-
                 _compare_add(
                     src_text,
-                    show_zh,
-                    ctx_str,          # 你前面組好的 context 字串
-                    tag=tag
+                    str(old_val[0] if isinstance(old_val, list) and old_val else old_val),
+                    f"介面: {ctx_name}",
+                    tag="沿用舊版"
                 )
                 continue
 
@@ -1670,11 +1667,14 @@ async def run_translation_pipeline_async(
             finished += 1
             _progress_tick(finished, total)
 
+            show_zh = " / ".join(zh_final) if isinstance(zh_final, list) else (zh_final or "")
+            tag = "Model-2" if use_model2 else "Model-1"
+
             _compare_add(
                 src_text,
-                str(old_val[0] if isinstance(old_val, list) and old_val else old_val),
-                f"介面: {ctx_name}",
-                tag="沿用舊版"
+                show_zh,
+                ctx_str,          # 你前面組好的 context 字串
+                tag=tag
             )
 
         _set_ui_msg(f"處理進度：{finished}/{total}（另已沿用舊版 {reused} 筆）")
