@@ -577,48 +577,60 @@ async function __tsui_init(){
     return new TextDecoder("utf-8").decode(buf);
   }
 
-  async function handleTsChange(){
-    const tsText  = await readFileTextById("tsFile");
-    if (!tsText){
-      limitN.max = 0;
-      countInfo.textContent = "/ 0";
-      return;
-    }
-
-    const oldText = await readFileTextById("oldTsFile"); // 沒選就 null
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(tsText, "application/xml");
-    const oldDoc = oldText ? parser.parseFromString(oldText, "application/xml") : null;
-    const oldMap = oldDoc ? buildOldIndexJS(oldDoc) : null;
-
-    let total = 0;
-
-    for (const ctx of xmlDoc.getElementsByTagName("context")){
-      const nameNode = ctx.getElementsByTagName("name")[0];
-      const ctxName = ((nameNode?.textContent) || "").trim();
-
-      for (const msg of ctx.getElementsByTagName("message")){
-        const srcNode = msg.getElementsByTagName("source")[0];
-        const srcText = (srcNode?.textContent) || "";
-        if (!needsTranslationJS(srcText)) continue;
-
-        // 已翻譯 → 不算入「需翻譯」
-        if (isTranslationFilledJS(msg)) continue;
-
-        // 可沿用舊版 → 不算入「需翻譯」
-        if (oldMap && canReuseOldJS(oldMap, srcText, ctxName)) continue;
-
-        total++;
-      }
-    }
-
-    limitN.max = total;
-    limitN.value = total;
-    countInfo.textContent = `/ ${total}`;
-  }
-
   tsFile.addEventListener("change", handleTsChange);
   oldTsFile.addEventListener("change", handleTsChange);
+
+  async function handleTsChange(){
+    const file = tsFile.files && tsFile.files[0];
+    if (!file){ countInfo.textContent = " / 0"; limitN.removeAttribute("max"); return; }
+
+    try{
+      const txt = await file.text();
+      let total = 0;
+
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(txt, "application/xml");
+      const hasErr = xmlDoc.getElementsByTagName("parsererror").length > 0;
+
+      if (!hasErr){
+        const contexts = xmlDoc.getElementsByTagName("context");
+        for (let c = 0; c < contexts.length; c++){
+          const ctx = contexts[c];
+          const messages = ctx.getElementsByTagName("message");
+          for (let i = 0; i < messages.length; i++){
+            const m = messages[i];
+            const src = m.getElementsByTagName("source")[0];
+            if (!src) continue;
+            const s = src.textContent || "";
+            if (!needsTranslationJS(s)) continue;
+            total++;
+          }
+        }
+      } else {
+        const srcMatches = txt.match(/<message[\s\S]*?<\/message>/g) || [];
+        for (const block of srcMatches){
+          const msrc = block.match(/<source>([\s\S]*?)<\/source>/);
+          if (!msrc) continue;
+          const s = msrc[1].replace(/<[^>]+>/g, "");
+          if (!needsTranslationJS(s)) continue;
+          total++;
+        }
+      }
+
+      if (total > 0){
+        limitN.value = String(total);
+        limitN.max = String(total);
+        countInfo.textContent = ` / ${total}`;
+      } else {
+        countInfo.textContent = " / 0";
+        limitN.removeAttribute("max");
+      }
+    } catch(e){
+      console.error(e);
+      countInfo.textContent = " / 0";
+      limitN.removeAttribute("max");
+    }
+  }
 
   function clampLimit(){
     const max = Number(limitN.max || "0");
@@ -1635,17 +1647,11 @@ _BUSY = False
 async def _on_click(evt=None):
     global _BUSY
     if _BUSY:
-        _set_ui_msg("<span style='color:#b00'>正在處理，請稍候.</span>")
+        _set_ui_msg("<span style='color:#b00'>正在處理，請稍候...</span>")
         return
-
     _BUSY = True
-    run_btn = document.getElementById("run-btn")
-    pause_btn = document.getElementById("pause-btn")
-
     _set_ui_msg("")
-    run_btn.disabled = True
-    run_btn.textContent = "翻譯中..."
-    pause_btn.style.display = "block"
+    document.getElementById("pause-btn").style.display = "block"
 
     try:
         api = document.getElementById("apiKey").value.strip()
@@ -1708,20 +1714,9 @@ async def _on_click(evt=None):
         traceback.print_exc()
         document.getElementById("pause-btn").style.display = "none"
     finally:
-        pause_btn.style.display = "none"
-        run_btn.disabled = False
-        run_btn.textContent = "執行翻譯"
         _BUSY = False
 
-try:
-    prev = getattr(window, "__TSUI_BTN_PROXY__", None)
-    if prev:
-        document.getElementById("run-btn").removeEventListener("click", prev)
-except Exception:
-    pass
-
 _BTN_PROXY = create_proxy(lambda evt: asyncio.ensure_future(_on_click(evt)))
-window.__TSUI_BTN_PROXY__ = _BTN_PROXY
 document.getElementById("run-btn").addEventListener("click", _BTN_PROXY)
   `);
 
