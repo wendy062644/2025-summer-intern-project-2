@@ -613,68 +613,12 @@ async function __tsui_init(){
     }
 
     limitN.max = total;
-    // 預設直接跑滿（你也可改成保留使用者原本輸入的值）
     limitN.value = total;
     countInfo.textContent = `/ ${total}`;
   }
 
-  // ✅ 記得 oldTsFile 也要觸發重算，不然換舊檔上限不會變
   tsFile.addEventListener("change", handleTsChange);
   oldTsFile.addEventListener("change", handleTsChange);
-
-  // 計算「需翻譯」數量：source 可翻 + translation 缺/unfinished
-  async function handleTsChange(){
-    const file = tsFile.files && tsFile.files[0];
-    if (!file){ countInfo.textContent = " / 0"; limitN.removeAttribute("max"); return; }
-
-    try{
-      const txt = await file.text();
-      let total = 0;
-
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(txt, "application/xml");
-      const hasErr = xmlDoc.getElementsByTagName("parsererror").length > 0;
-
-      if (!hasErr){
-        const contexts = xmlDoc.getElementsByTagName("context");
-        for (let c = 0; c < contexts.length; c++){
-          const ctx = contexts[c];
-          const messages = ctx.getElementsByTagName("message");
-          for (let i = 0; i < messages.length; i++){
-            const m = messages[i];
-            const src = m.getElementsByTagName("source")[0];
-            if (!src) continue;
-            const s = src.textContent || "";
-            if (!needsTranslationJS(s)) continue;
-            total++;
-          }
-        }
-      } else {
-        // XML 解析失敗時的備案（較粗略）
-        const srcMatches = txt.match(/<message[\s\S]*?<\/message>/g) || [];
-        for (const block of srcMatches){
-          const msrc = block.match(/<source>([\s\S]*?)<\/source>/);
-          if (!msrc) continue;
-          const s = msrc[1].replace(/<[^>]+>/g, "");
-          if (!needsTranslationJS(s)) continue;
-          total++;
-        }
-      }
-
-      if (total > 0){
-        limitN.value = String(total);
-        limitN.max = String(total);
-        countInfo.textContent = ` / ${total}`;
-      } else {
-        countInfo.textContent = " / 0";
-        limitN.removeAttribute("max");
-      }
-    } catch(e){
-      console.error(e);
-      countInfo.textContent = " / 0";
-      limitN.removeAttribute("max");
-    }
-  }
 
   function clampLimit(){
     const max = Number(limitN.max || "0");
@@ -691,8 +635,6 @@ async function __tsui_init(){
   tsFile.addEventListener("change", handleTsChange);
   limitN.addEventListener("input", clampLimit);
 
-  // ✅ 新增：初始化後立刻跑一次（避免「檔案已存在但 UI 未刷新」）
-  // 不會移除任何功能，只是補強初始化狀態
   try { await handleTsChange(); } catch(e){ console.warn(e); }
 
   (function setupModelCustom(){
@@ -1693,11 +1635,17 @@ _BUSY = False
 async def _on_click(evt=None):
     global _BUSY
     if _BUSY:
-        _set_ui_msg("<span style='color:#b00'>正在處理，請稍候...</span>")
+        _set_ui_msg("<span style='color:#b00'>正在處理，請稍候.</span>")
         return
+
     _BUSY = True
+    run_btn = document.getElementById("run-btn")
+    pause_btn = document.getElementById("pause-btn")
+
     _set_ui_msg("")
-    document.getElementById("pause-btn").style.display = "block"
+    run_btn.disabled = True
+    run_btn.textContent = "翻譯中..."
+    pause_btn.style.display = "block"
 
     try:
         api = document.getElementById("apiKey").value.strip()
@@ -1760,9 +1708,20 @@ async def _on_click(evt=None):
         traceback.print_exc()
         document.getElementById("pause-btn").style.display = "none"
     finally:
+        pause_btn.style.display = "none"
+        run_btn.disabled = False
+        run_btn.textContent = "執行翻譯"
         _BUSY = False
 
+try:
+    prev = getattr(window, "__TSUI_BTN_PROXY__", None)
+    if prev:
+        document.getElementById("run-btn").removeEventListener("click", prev)
+except Exception:
+    pass
+
 _BTN_PROXY = create_proxy(lambda evt: asyncio.ensure_future(_on_click(evt)))
+window.__TSUI_BTN_PROXY__ = _BTN_PROXY
 document.getElementById("run-btn").addEventListener("click", _BTN_PROXY)
   `);
 
