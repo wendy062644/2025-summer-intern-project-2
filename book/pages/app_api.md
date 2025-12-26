@@ -1647,11 +1647,17 @@ _BUSY = False
 async def _on_click(evt=None):
     global _BUSY
     if _BUSY:
-        _set_ui_msg("<span style='color:#b00'>正在處理，請稍候...</span>")
+        _set_ui_msg("<span style='color:#b00'>正在處理，請稍候.</span>")
         return
+
     _BUSY = True
+    run_btn = document.getElementById("run-btn")
+    pause_btn = document.getElementById("pause-btn")
+
     _set_ui_msg("")
-    document.getElementById("pause-btn").style.display = "block"
+    run_btn.disabled = True
+    run_btn.textContent = "翻譯中..."
+    pause_btn.style.display = "block"
 
     try:
         api = document.getElementById("apiKey").value.strip()
@@ -1714,9 +1720,20 @@ async def _on_click(evt=None):
         traceback.print_exc()
         document.getElementById("pause-btn").style.display = "none"
     finally:
+        pause_btn.style.display = "none"
+        run_btn.disabled = False
+        run_btn.textContent = "執行翻譯"
         _BUSY = False
 
+try:
+    prev = getattr(window, "__TSUI_BTN_PROXY__", None)
+    if prev:
+        document.getElementById("run-btn").removeEventListener("click", prev)
+except Exception:
+    pass
+
 _BTN_PROXY = create_proxy(lambda evt: asyncio.ensure_future(_on_click(evt)))
+window.__TSUI_BTN_PROXY__ = _BTN_PROXY
 document.getElementById("run-btn").addEventListener("click", _BTN_PROXY)
   `);
 
