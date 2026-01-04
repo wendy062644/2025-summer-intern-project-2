@@ -26,24 +26,24 @@ title: QGIS 翻譯檔下載
 
 ### QGIS 3.34
 - [下載 TS 檔](../assets/sites/qgis_3.34_zh-Hant.ts)  
-- [下載 QM 檔](../assets/sites/qgis_3.34_zh-Hant.qm)  (尚未完成)
+- [下載 QM 檔](../assets/sites/qgis_3.34_zh-Hant.qm)
 
 ---
 
 ### QGIS 3.28
 - [下載 TS 檔](../assets/sites/qgis_3.28_zh-Hant.ts)  
-- [下載 QM 檔](../assets/sites/qgis_3.28_zh-Hant.qm)  (尚未完成)
+- [下載 QM 檔](../assets/sites/qgis_3.28_zh-Hant.qm)
 
 ---
 
 ### QGIS 3.22
 - [下載 TS 檔](../assets/sites/qgis_3.22_zh-Hant.ts)  
-- [下載 QM 檔](../assets/sites/qgis_3.22_zh-Hant.qm)  (尚未完成)
+- [下載 QM 檔](../assets/sites/qgis_3.22_zh-Hant.qm)
 
 ---
 
 ### QGIS 3.16
 - [下載 TS 檔](../assets/sites/qgis_3.16_zh-Hant.ts)  
-- [下載 QM 檔](../assets/sites/qgis_3.16_zh-Hant.qm)  (尚未完成)
+- [下載 QM 檔](../assets/sites/qgis_3.16_zh-Hant.qm)
 
 ---
