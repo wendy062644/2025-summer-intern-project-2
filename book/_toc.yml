@@ -6,7 +6,7 @@ chapters:
   - file: pages/motivation
     title: 研究動機
   - file: pages/guide
-    title: 操作頁面
+    title: 使用說明
   - file: pages/app_api
     title: ChatGPT API 翻譯
   - file: pages/app_local
