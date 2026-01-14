@@ -34,7 +34,6 @@ kernelspec:
 ## 預覽工具
 
 ```{code-cell} ipython3
-:tags: [remove-cell]
 import pandas as pd
 from pathlib import Path
 from IPython.display import display, Markdown
