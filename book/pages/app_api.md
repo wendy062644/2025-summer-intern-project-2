@@ -1573,12 +1573,7 @@ async def run_translation_pipeline_async(
 
     for start in range(0, total, batch_size):
         while window._TS_PAUSED:
-						if getattr(window, "_TS_ABORT", False):
-								raise Exception("已取消任務")
-						await asyncio.sleep(0.2)
-
-				if getattr(window, "_TS_ABORT", False):
-						raise Exception("已取消任務")
+            await asyncio.sleep(0.2)
 
         batch = tasks[start:start + batch_size]
         masked_inputs: List[str] = []
@@ -1746,9 +1741,6 @@ async def _on_click(evt=None):
         _set_ui_msg("<span style='color:#b00'>正在處理，請稍候.</span>")
         return
 
-		window._TS_ABORT = False
-		window._TS_RUNNING = True
-
     _BUSY = True
     run_btn = document.getElementById("run-btn")
     pause_btn = document.getElementById("pause-btn")
@@ -1822,8 +1814,6 @@ async def _on_click(evt=None):
         traceback.print_exc()
         document.getElementById("pause-btn").style.display = "none"
     finally:
-				window._TS_RUNNING = False
-				window._TS_ABORT = False
         pause_btn.style.display = "none"
         run_btn.disabled = False
         run_btn.textContent = "執行翻譯"
