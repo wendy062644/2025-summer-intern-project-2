@@ -49,12 +49,22 @@ thebe: false
   }
   #ts-ui .ts-label{ color:var(--ts-muted); font-size:.95rem; white-space:nowrap; }
   #ts-ui .ts-input input,
-  #ts-ui .ts-input select{
-    width:100%; padding:8px 10px; border:1px solid var(--ts-border);
-    border-radius:10px; background:transparent; font-size:.95rem;
+  #ts-ui .ts-input select,
+  #ts-ui .ts-input textarea{
+    width:100%;
+    padding:8px 10px;
+    border:1px solid var(--ts-border);
+    border-radius:10px;
+    background:transparent;
+    font-size:.95rem;
   }
   #ts-ui .ts-input select{
     appearance:none; -webkit-appearance:none; -moz-appearance:none;
+  }
+  #ts-ui .ts-input textarea{
+    resize: vertical;
+    min-height: 140px;
+    line-height: 1.35;
   }
   #ts-ui .ts-input input[type="file"]{ padding:6px; }
   #ts-ui .ts-inline{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
@@ -193,13 +203,16 @@ thebe: false
   #ts-ui .ts-hint{ color: var(--ts-muted); }
 
   #ts-ui .ts-input input,
-  #ts-ui .ts-input select{
+  #ts-ui .ts-input select,
+  #ts-ui .ts-input textarea{
     background: var(--ts-input-bg);
     color: var(--ts-text);
     border-color: var(--ts-border);
   }
+
   #ts-ui .ts-input input:focus,
-  #ts-ui .ts-input select:focus{
+  #ts-ui .ts-input select:focus,
+  #ts-ui .ts-input textarea:focus{
     outline: none;
     box-shadow: var(--ts-focus);
     border-color: color-mix(in oklab, var(--ts-accent) 60%, var(--ts-border));
@@ -379,6 +392,23 @@ thebe: false
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="ts-field" style="margin-top:10px;">
+			<label class="ts-label" for="sysPrompt">Prompt（System / 翻譯規則）</label>
+				<div class="ts-input">
+						<textarea id="sysPrompt" rows="10">你是台灣 GIS 在地化譯者。
+				對於每一個項目，只翻譯 text 欄位中的英文內容成繁體中文（台灣用語）。
+				可以參考 context 與 glossary 來判斷，但不要把 context 的文字（例如「介面: .」「註釋: .」）當成輸出的一部分。
+				請呼叫工具 set_results，並只在 results 陣列中依序填入翻譯後的字串。
+				保留所有 ASCII 半形符號（例如 ()[]{};:,.?+/\\*& 等），數量與順序都必須與原文完全一致。
+				務必保留所有 ⟦M數字⟧ 變數與 %1、{0} 這類 placeholder，不可遺失或改變順序。
+				若字串看起來是程式碼變數、常數、enum 名稱、函式名稱、人名或英文縮寫，優先保留原文不翻。
+				若原文字串含有快捷鍵標記 &X（X 為字母或數字），譯文中不要出現 &X；請在譯文最後加上(&X)（不含空格），且 X 必須與原文一致。
+				用語偏好（若語意相同，優先使用）：插件→外掛程式、凸殼→凸包、處理中→處理、LineString→線串、Base level→基準值、Arrow head→箭頭端、Line alignment→線條對齊、Model scale→模型縮放比例、Row→列、pixels→像素。
+				若沒有合適或確定的中文翻譯，寧可保留英文原文，不要亂造詞。</textarea>
+				</div>
+			<div class="ts-hint">可自行修改；留空時會回退使用內建預設。</div>
     </div>
 
     <hr class="ts-divider">
@@ -1321,7 +1351,8 @@ async def run_translation_pipeline_async(
     limit_n:int=0,
     use_model2:bool=False,
     model2:str="",
-    old_ts_text: Optional[str]=None
+    old_ts_text: Optional[str]=None,
+    sys_prompt_override: Optional[str]=None
 ) -> bytes:
     doctype = _read_doctype(ts_text)
     ts_no_dt = _strip_doctype(ts_text)
@@ -1417,7 +1448,7 @@ async def run_translation_pipeline_async(
     }]
 
     # 翻譯系統提示：加入快捷鍵規則、用語偏好
-    sys_prompt = (
+    DEFAULT_SYS_PROMPT  = (
         "你是台灣 GIS 在地化譯者。"
         " 對於每一個項目，只翻譯 text 欄位中的英文內容成繁體中文（台灣用語）。"
         " 可以參考 context 與 glossary 來判斷，但不要把 context 的文字（例如「介面: .」「註釋: .」）當成輸出的一部分。"
@@ -1697,6 +1728,8 @@ async def _on_click(evt=None):
         pairs = await read_glossaries_from_file_input("glsFile")
 
         _set_ui_msg("連線中...")
+        sys_prompt_ui = (document.getElementById("sysPrompt").value or "").strip()
+
         xml_bytes = await run_translation_pipeline_async(
             api_key=api,
             base_url=base_url,
@@ -1707,7 +1740,8 @@ async def _on_click(evt=None):
             limit_n=limitN,
             use_model2=use2,
             model2=model2,
-            old_ts_text=old_text
+            old_ts_text=old_text,
+            sys_prompt_override=(sys_prompt_ui or None)
         )
 
         out_name = "qgis_zh-Hant.ts"
