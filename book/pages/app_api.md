@@ -450,15 +450,15 @@ thebe: false
 					<label class="ts-label" for="sysPrompt">內容</label>
 					<div class="ts-input">
 						<textarea id="sysPrompt" rows="10">你是台灣 GIS 在地化譯者。
-		對於每一個項目，只翻譯 text 欄位中的英文內容成繁體中文（台灣用語）。
-		可以參考 context 與 glossary 來判斷，但不要把 context 的文字（例如「介面: .」「註釋: .」）當成輸出的一部分。
-		請呼叫工具 set_results，並只在 results 陣列中依序填入翻譯後的字串。
-		保留所有 ASCII 半形符號（例如 ()[]{};:,.?+/\\*& 等），數量與順序都必須與原文完全一致。
-		務必保留所有 ⟦M數字⟧ 變數與 %1、{0} 這類 placeholder，不可遺失或改變順序。
-		若字串看起來是程式碼變數、常數、enum 名稱、函式名稱、人名或英文縮寫，優先保留原文不翻。
-		若原文字串含有快捷鍵標記 &X（X 為字母或數字），譯文中不要出現 &X；請在譯文最後加上(&X)（不含空格），且 X 必須與原文一致。
-		用語偏好（若語意相同，優先使用）：插件→外掛程式、凸殼→凸包、處理中→處理、LineString→線串、Base level→基準值、Arrow head→箭頭端、Line alignment→線條對齊、Model scale→模型縮放比例、Row→列、pixels→像素。
-		若沒有合適或確定的中文翻譯，寧可保留英文原文，不要亂造詞。</textarea>
+對於每一個項目，只翻譯 text 欄位中的英文內容成繁體中文（台灣用語）。
+可以參考 context 與 glossary 來判斷，但不要把 context 的文字（例如「介面: .」「註釋: .」）當成輸出的一部分。
+請呼叫工具 set_results，並只在 results 陣列中依序填入翻譯後的字串。
+保留所有 ASCII 半形符號（例如 ()[]{};:,.?+/\\*& 等），數量與順序都必須與原文完全一致。
+務必保留所有 ⟦M數字⟧ 變數與 %1、{0} 這類 placeholder，不可遺失或改變順序。
+若字串看起來是程式碼變數、常數、enum 名稱、函式名稱、人名或英文縮寫，優先保留原文不翻。
+若原文字串含有快捷鍵標記 &X（X 為字母或數字），譯文中不要出現 &X；請在譯文最後加上(&X)（不含空格），且 X 必須與原文一致。
+用語偏好（若語意相同，優先使用）：插件→外掛程式、凸殼→凸包、處理中→處理、LineString→線串、Base level→基準值、Arrow head→箭頭端、Line alignment→線條對齊、Model scale→模型縮放比例、Row→列、pixels→像素。
+若沒有合適或確定的中文翻譯，寧可保留英文原文，不要亂造詞。</textarea>
 					</div>
 					<div class="ts-hint">可自行修改；留空時會回退使用內建預設。</div>
 				</div>
@@ -1512,16 +1512,15 @@ async def run_translation_pipeline_async(
     # 翻譯系統提示：加入快捷鍵規則、用語偏好
     DEFAULT_SYS_PROMPT  = (
 "你是台灣 GIS 在地化譯者。"
-" 對於每一個項目，只翻譯 text 欄位中的英文內容成繁體中文（台灣用語）。"
-" 可以參考 context 與 glossary 來判斷，但不要把 context 的文字（例如「介面: .」「註釋: .」）當成輸出的一部分。"
-" 請呼叫工具 set_results，並只在 results 陣列中依序填入翻譯後的字串。"
-" 保留所有 ASCII 半形符號（例如 ()[]{};:,.?+/\\\\*& 等），數量與順序都必須與原文完全一致。"
-" 務必保留所有 ⟦M數字⟧ 變數與 %1、{0} 這類 placeholder，不可遺失或改變順序。"
-" 若字串看起來是程式碼變數、常數、enum 名稱、函式名稱、人名或英文縮寫，優先保留原文不翻。"
-" 若原文字串含有快捷鍵標記 &X（X 為字母或數字），譯文中不要出現 &X；請在譯文最後加上 ( &X )（不含空格），且 X 必須與原文一致。"
-" 若沒有合適或確定的中文翻譯，寧可保留英文原文，不要亂造詞。"
+"對於每一個項目，只翻譯 text 欄位中的英文內容成繁體中文（台灣用語）。"
+"可以參考 context 與 glossary 來判斷，但不要把 context 的文字（例如「介面: .」「註釋: .」）當成輸出的一部分。"
+"請呼叫工具 set_results，並只在 results 陣列中依序填入翻譯後的字串。"
+"保留所有 ASCII 半形符號（例如 ()[]{};:,.?+/\\\\*& 等），數量與順序都必須與原文完全一致。"
+"務必保留所有 ⟦M數字⟧ 變數與 %1、{0} 這類 placeholder，不可遺失或改變順序。"
+"若字串看起來是程式碼變數、常數、enum 名稱、函式名稱、人名或英文縮寫，優先保留原文不翻。"
+"若原文字串含有快捷鍵標記 &X（X 為字母或數字），譯文中不要出現 &X；請在譯文最後加上 ( &X )（不含空格），且 X 必須與原文一致。"
+"若沒有合適或確定的中文翻譯，寧可保留英文原文，不要亂造詞。"
     )
-		sys_prompt = (sys_prompt_override or "").strip() or DEFAULT_SYS_PROMPT
 
     # 若沒勾 Model-2：本地挑選 A/B/C（以 placeholder 完整度與格式一致為主）
     def local_pick_best(src: str, cands: List[str]) -> str:
@@ -1574,7 +1573,12 @@ async def run_translation_pipeline_async(
 
     for start in range(0, total, batch_size):
         while window._TS_PAUSED:
-            await asyncio.sleep(0.2)
+						if getattr(window, "_TS_ABORT", False):
+								raise Exception("已取消任務")
+						await asyncio.sleep(0.2)
+
+				if getattr(window, "_TS_ABORT", False):
+						raise Exception("已取消任務")
 
         batch = tasks[start:start + batch_size]
         masked_inputs: List[str] = []
@@ -1742,6 +1746,9 @@ async def _on_click(evt=None):
         _set_ui_msg("<span style='color:#b00'>正在處理，請稍候.</span>")
         return
 
+		window._TS_ABORT = False
+		window._TS_RUNNING = True
+
     _BUSY = True
     run_btn = document.getElementById("run-btn")
     pause_btn = document.getElementById("pause-btn")
@@ -1815,6 +1822,8 @@ async def _on_click(evt=None):
         traceback.print_exc()
         document.getElementById("pause-btn").style.display = "none"
     finally:
+				window._TS_RUNNING = False
+				window._TS_ABORT = False
         pause_btn.style.display = "none"
         run_btn.disabled = False
         run_btn.textContent = "執行翻譯"
