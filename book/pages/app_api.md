@@ -1516,7 +1516,7 @@ async def run_translation_pipeline_async(
         " Arrow head→箭頭端、Line alignment→線條對齊、Model scale→模型縮放比例、Row→列、pixels→像素。"
         " 若沒有合適或確定的中文翻譯，寧可保留英文原文，不要亂造詞。"
     )
-		sys_prompt = (sys_prompt_override or "").strip() or DEFAULT_SYS_PROMPT
+sys_prompt = (sys_prompt_override or "").strip() or DEFAULT_SYS_PROMPT
 
     # 若沒勾 Model-2：本地挑選 A/B/C（以 placeholder 完整度與格式一致為主）
     def local_pick_best(src: str, cands: List[str]) -> str:
