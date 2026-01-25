@@ -666,6 +666,14 @@ async function __tsui_init(){
   oldTsFile.addEventListener("change", handleTsChange);
 
   async function handleTsChange(){
+		if (window._TS_RUNNING){
+			window._TS_ABORT = true;
+			window._TS_PAUSED = false; // 避免卡在暫停等待
+			pauseBtn.textContent = "暫停";
+			pauseBtn.style.background = "#d97706";
+			$msg.innerHTML = "<span style='color:#b00'>已偵測到檔案變更：正在取消目前任務，請稍後重新執行。</span>";
+		}
+
     const file = tsFile.files && tsFile.files[0];
     if (!file){ countInfo.textContent = " / 0"; limitN.removeAttribute("max"); return; }
 
@@ -729,7 +737,6 @@ async function __tsui_init(){
     }
   }
 
-  tsFile.addEventListener("change", handleTsChange);
   limitN.addEventListener("input", clampLimit);
 
   try { await handleTsChange(); } catch(e){ console.warn(e); }
@@ -1514,7 +1521,7 @@ async def run_translation_pipeline_async(
 " 若原文字串含有快捷鍵標記 &X（X 為字母或數字），譯文中不要出現 &X；請在譯文最後加上 ( &X )（不含空格），且 X 必須與原文一致。"
 " 若沒有合適或確定的中文翻譯，寧可保留英文原文，不要亂造詞。"
     )
-sys_prompt = (sys_prompt_override or "").strip() or DEFAULT_SYS_PROMPT
+		sys_prompt = (sys_prompt_override or "").strip() or DEFAULT_SYS_PROMPT
 
     # 若沒勾 Model-2：本地挑選 A/B/C（以 placeholder 完整度與格式一致為主）
     def local_pick_best(src: str, cands: List[str]) -> str:
