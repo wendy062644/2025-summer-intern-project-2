@@ -13,37 +13,47 @@ title: QGIS 翻譯檔下載
 ---
 ## Latest Release
 ### QGIS 3.44
-- [下載 TS 檔](../assets/sites/qgis_3.44_zh-Hant.ts)  
-- [下載 QM 檔](../assets/sites/qgis_3.44_zh-Hant.qm)  
+- **資料集(depositar / ARK)**  
+  https://data.depositar.io/dataset/qgis_3-44_zh-hant
 
 ---
 ## Long Term Release
 ### QGIS 3.40
-- [下載 TS 檔](../assets/sites/qgis_3.40_zh-Hant.ts)  
-- [下載 QM 檔](../assets/sites/qgis_3.40_zh-Hant.qm)  
+- **資料集(depositar / ARK)**  
+  https://data.depositar.io/dataset/qgis_3-40_zh-hant 
 
 ---
 
 ### QGIS 3.34
-- [下載 TS 檔](../assets/sites/qgis_3.34_zh-Hant.ts)  
-- [下載 QM 檔](../assets/sites/qgis_3.34_zh-Hant.qm)
+- **資料集(depositar / ARK)**  
+  https://data.depositar.io/dataset/qgis_3-34_zh-hant
 
 ---
 
 ### QGIS 3.28
-- [下載 TS 檔](../assets/sites/qgis_3.28_zh-Hant.ts)  
-- [下載 QM 檔](../assets/sites/qgis_3.28_zh-Hant.qm)
+- **資料集(depositar / ARK)**  
+  https://data.depositar.io/dataset/qgis_3-28_zh-hant
 
 ---
 
 ### QGIS 3.22
-- [下載 TS 檔](../assets/sites/qgis_3.22_zh-Hant.ts)  
-- [下載 QM 檔](../assets/sites/qgis_3.22_zh-Hant.qm)
+- **資料集(depositar / ARK)**  
+  https://data.depositar.io/dataset/qgis_3-22_zh-hant
 
 ---
 
 ### QGIS 3.16
-- [下載 TS 檔](../assets/sites/qgis_3.16_zh-Hant.ts)  
-- [下載 QM 檔](../assets/sites/qgis_3.16_zh-Hant.qm)
+- **資料集(depositar / ARK)**  
+  https://data.depositar.io/dataset/qgis_3-16_zh-hant
 
 ---
+
+## 補充說明
+
+各資料集內均包含：
+- `.ts` 原始翻譯檔
+- 已編譯完成之 `.qm` 檔（可直接部署）
+
+翻譯檔係於大型語言模型（LLM）輔助下產製，並經人工檢視與修正。  
+完整翻譯流程與專案說明，請參見：
+https://data.depositar.io/organization/about/qgis-traditional-chinese-translation-files
