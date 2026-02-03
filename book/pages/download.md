@@ -12,39 +12,34 @@ title: QGIS 翻譯檔下載
 
 ---
 ## Latest Release
-### QGIS 3.44
-**資料集(depositar / ARK)**  
-https://data.depositar.io/dataset/qgis_3-44_zh-hant
+### QGIS 3.44 資料集(depositar / ARK)
+**https://data.depositar.io/dataset/qgis_3-44_zh-hant**  
 
 ---
 ## Long Term Release
-### QGIS 3.40
-**資料集(depositar / ARK)**  
-https://data.depositar.io/dataset/qgis_3-40_zh-hant 
+### QGIS 3.40 資料集(depositar / ARK)
+**https://data.depositar.io/dataset/qgis_3-40_zh-hant** 
 
 ---
 
-### QGIS 3.34
-**資料集(depositar / ARK)**  
-https://data.depositar.io/dataset/qgis_3-34_zh-hant
+### QGIS 3.34 資料集(depositar / ARK)
+**https://data.depositar.io/dataset/qgis_3-34_zh-hant**  
 
 ---
 
-### QGIS 3.28
-**資料集(depositar / ARK)**  
-https://data.depositar.io/dataset/qgis_3-28_zh-hant
+### QGIS 3.28 資料集(depositar / ARK)
+**https://data.depositar.io/dataset/qgis_3-28_zh-hant**  
+
 
 ---
 
-### QGIS 3.22
-**資料集(depositar / ARK)**  
-https://data.depositar.io/dataset/qgis_3-22_zh-hant
+### QGIS 3.22 資料集(depositar / ARK)
+**https://data.depositar.io/dataset/qgis_3-22_zh-hant**  
 
 ---
 
-### QGIS 3.16
-**資料集(depositar / ARK)**  
-https://data.depositar.io/dataset/qgis_3-16_zh-hant
+### QGIS 3.16 資料集(depositar / ARK)
+**https://data.depositar.io/dataset/qgis_3-16_zh-hant**  
 
 ---
 
