@@ -1,35 +1,37 @@
 format: jb-book
 root: pages/readme
 chapters:
-  - file: pages/intro
-    title: 軟體介紹
-  - file: pages/motivation
-    title: 研究動機
-  - file: pages/guide
-    title: 使用說明
-  - file: pages/app_api
-    title: ChatGPT API 翻譯
-  - file: pages/app_local
-    title: Local LLM 翻譯
-  - file: pages/edit
-    title: 編輯翻譯檔
-  - file: pages/merge
-    title: 檔案合併
-  - file: pages/ods_view
-    title: 字典詞庫推薦
-  - file: pages/download
-    title: 下載翻譯檔
-  - file: pages/en/readme
-    title: English Version
+  - title: 中文
+    sections:
+      - file: pages/intro
+        title: 軟體介紹
+      - file: pages/motivation
+        title: 研究動機
+      - file: pages/guide
+        title: 使用說明
+      - file: pages/app_api
+        title: ChatGPT API 翻譯
+      - file: pages/app_local
+        title: Local LLM 翻譯
+      - file: pages/edit
+        title: 編輯翻譯檔
+      - file: pages/merge
+        title: 檔案合併
+      - file: pages/ods_view
+        title: 字典詞庫推薦
+      - file: pages/download
+        title: 下載翻譯檔
+      - file: pages/en/readme
+  - title: English
     sections:
       - file: pages/en/intro
-        title: Software Overview
+        title: Overview
       - file: pages/en/motivation
         title: Motivation
       - file: pages/en/guide
         title: User Guide
       - file: pages/en/app_api
-        title: ChatGPT API Translation
+        title: API Translation
       - file: pages/en/app_local
         title: Local LLM Translation
       - file: pages/en/edit
