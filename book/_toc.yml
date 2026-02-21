@@ -1,8 +1,9 @@
 format: jb-book
 root: pages/readme
-chapters:
-  - title: 中文
-    sections:
+
+parts:
+  - caption: 中文
+    chapters:
       - file: pages/intro
         title: 軟體介紹
       - file: pages/motivation
@@ -21,9 +22,11 @@ chapters:
         title: 字典詞庫推薦
       - file: pages/download
         title: 下載翻譯檔
+
+  - caption: English
+    chapters:
       - file: pages/en/readme
-  - title: English
-    sections:
+        title: Welcome
       - file: pages/en/intro
         title: Overview
       - file: pages/en/motivation
