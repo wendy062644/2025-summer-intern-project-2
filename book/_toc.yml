@@ -1,5 +1,5 @@
 format: jb-book
-root: pages/readme
+root: pages/index
 
 chapters:
   - file: pages/readme
