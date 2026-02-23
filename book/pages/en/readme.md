@@ -5,7 +5,7 @@ description: Project Overview & Quick Start
 
 # Quick Guide
 
-> This project was conducted by **Yu-Lin Chen** at **Institute of Information Science, Academia Sinica (2025)**.  
+> This project was conducted by **Yu-Lin Chen** at the **Institute of Information Science, Academia Sinica (2025)**.  
 > Use the sidebar to switch chapters, or click the links below for key sections.  
 > The goal is to build a **scalable, handoff-friendly, controllable, and verifiable** Qt `.ts` translation workflow.
 
