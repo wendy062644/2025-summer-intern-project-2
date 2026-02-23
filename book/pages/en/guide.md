@@ -4,7 +4,7 @@ title: User Guide
 
 # User Guide
 
-## How to Open & Runtime Environment
+## Getting Started & Runtime Environment
 
 1. We recommend using the latest **Chrome / Edge**.
 2. From the sidebar, choose **[Online GPT](app_api)** or **[Local LLM](app_local)**.
@@ -20,7 +20,7 @@ title: User Guide
 
 - **`.ts` (Required)**  
   - Must be a valid, parseable Qt Linguist XML translation file.
-  - The system uses `<context>` and `<source>` as the smallest processing unit.
+  - The system uses `<context>` and `<source>` as the basic processing unit.
 
 - **Glossary (Optional)**  
   - Supports uploading multiple **CSV / ODS** files at the same time.
@@ -97,7 +97,7 @@ The system runs structural checks before writing output. If a check fails, that 
 
 ### 2. Generate Notebook & Review Settings
 
-- Click **Download new .ipynb** to get the full notebook.
+- Click **Download .ipynb** to get the full notebook.
 - The system inserts a **Config cell** at the very top.
 - If you want to check settings first, use **Preview Config cell**.
 
