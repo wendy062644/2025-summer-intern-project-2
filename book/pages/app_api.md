@@ -1521,6 +1521,8 @@ async def run_translation_pipeline_async(
 "若沒有合適或確定的中文翻譯，寧可保留英文原文，不要亂造詞。"
     )
 
+    sys_prompt = (sys_prompt_override or DEFAULT_SYS_PROMPT).strip()
+
     # 若沒勾 Model-2：本地挑選 A/B/C（以 placeholder 完整度與格式一致為主）
     def local_pick_best(src: str, cands: List[str]) -> str:
         if not cands:
