@@ -11,19 +11,25 @@ Downloads for different versions of **`.ts` source translation files** and **com
 
 ---
 ## Latest Release
+### QGIS 4.0
+**Dataset (depositar):** https://data.depositar.io/dataset/qgis_4-0_zh-hant   
+
+**ARK:** `ark:37281/k5f167n46` 
+
+---
+
+## Long Term Release
 ### QGIS 3.44
 **Dataset (depositar):** https://data.depositar.io/dataset/qgis_3-44_zh-hant  
 
 **ARK:** `ark:37281/k5g11462n`
 
 ---
-## Long Term Release
+
 ### QGIS 3.40
 **Dataset (depositar):** https://data.depositar.io/dataset/qgis_3-40_zh-hant  
 
 **ARK:** `ark:37281/k5m448w9r`
-
----
 
 ### QGIS 3.34
 **Dataset (depositar):** https://data.depositar.io/dataset/qgis_3-34_zh-hant  
